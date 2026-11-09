@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="投資ナビAI">
+    <title>クオンツ投資ナビAI - 全銘柄スマート検索＆XAI解説</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f4f8f6;
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: env(safe-area-inset-bottom, 80px);
+        }
+        .app-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.05);
+        }
+        .gauge-track {
+            background: linear-gradient(90deg, #10b981 0%, #38bdf8 30%, #facc15 65%, #f43f5e 100%);
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="max-w-md mx-auto min-h-screen px-3.5 pt-3 pb-24">
+
+    <!-- 1. ヘッダー -->
+    <header class="flex justify-between items-center mb-3">
+        <div>
+            <div class="flex items-center gap-1.5 mb-0.5">
+                <span class="inline-block w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+                <span class="text-[10px] font-bold text-teal-700">CPCV過学習防止・XAI推論エンジン稼働中</span>
+            </div>
+            <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                クオンツ投資ナビ <span class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full">PRO</span>
+            </h1>
+        </div>
+        <div class="flex items-center gap-1.5">
+            <button type="button" onclick="openCatalogModal()" class="text-[11px] font-extrabold text-white bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded-xl shadow-sm">
+                📋 銘柄図鑑
+            </button>
+            <button type="button" onclick="openCustomModal()" class="text-[11px] font-bold text-teal-700 bg-white border border-teal-200 px-2.5 py-2 rounded-xl">
+                ＋手動
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. インライン検索セクション（iOS Safari完全対応） -->
+    <section class="mb-4" id="searchSection">
+        <div class="app-card rounded-2xl p-3 bg-white border-2 border-teal-500/40">
+            <div class="flex items-center gap-1.5">
+                <span class="text-base pl-0.5">🔍</span>
+                <input 
+                    type="search" 
+                    id="quickSearchInput" 
+                    placeholder="銘柄名・かな・コード（例：キオクシア、りそな、285A）" 
+                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                    class="w-full text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2"
+                >
+                <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden text-slate-500 px-2 py-1.5 text-xs font-bold bg-slate-100 rounded-lg shrink-0">✕</button>
+                <button type="button" onclick="renderSearchCandidates(true)" class="bg-teal-600 text-white text-xs font-extrabold px-3 py-2 rounded-xl shrink-0">検索</button>
+            </div>
+
+            <!-- ワンタップ検索チップ -->
+            <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 overflow-x-auto pb-1">
+                <span class="text-[10px] font-bold text-slate-400 shrink-0">即検索:</span>
+                <button type="button" onclick="quickSelect('キオクシア')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2 py-1 rounded-lg border border-teal-200 shrink-0">🔥 キオクシア</button>
+                <button type="button" onclick="quickSelect('りそな')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 りそなHD</button>
+                <button type="button" onclick="quickSelect('4.3倍ブル')" class="text-[10px] font-bold bg-purple-50 text-purple-800 px-2 py-1 rounded-lg border border-purple-200 shrink-0">⚡ 楽天4.3倍ブル</button>
+                <button type="button" onclick="quickSelect('半導体')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2 py-1 rounded-lg border border-sky-200 shrink-0">💎 半導体・AI</button>
+                <button type="button" onclick="quickSelect('電線')" class="text-[10px] font-bold bg-indigo-50 text-indigo-800 px-2 py-1 rounded-lg border border-indigo-200 shrink-0">🔌 電線・防衛</button>
+                <button type="button" onclick="quickSelect('銀行')" class="text-[10px] font-bold bg-amber-50 text-amber-800 px-2 py-1 rounded-lg border border-amber-200 shrink-0">💰 銀行・商社</button>
+                <button type="button" onclick="quickSelect('投信')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2 py-1 rounded-lg border border-teal-200 shrink-0">🌱 投信・NISA</button>
+            </div>
+
+            <!-- 固定インライン検索結果パネル -->
+            <div id="searchResultPanel" class="hidden mt-3 pt-2.5 border-t-2 border-teal-100">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span id="searchResultTitle" class="text-[11px] font-extrabold text-teal-800">検索候補（タップで追加・診断）</span>
+                    <button type="button" onclick="clearSearch()" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">▲ 閉じる</button>
+                </div>
+                <div id="searchResultList" class="max-h-64 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-slate-50/50"></div>
+            </div>
+        </div>
