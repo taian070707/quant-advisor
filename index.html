@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuantPulse Pro - クオンツ投資・売買アドバイザー</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #090a0f; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .glass-card { background: rgba(20, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-purple { box-shadow: 0 0 25px rgba(139, 92, 246, 0.25); }
+    </style>
+</head>
+<body class="p-4 max-w-md mx-auto pb-24">
+
+    <!-- ヘッダー -->
+    <header class="flex justify-between items-center mb-6 pt-2">
+        <div>
+            <span class="text-xs font-semibold text-purple-400 tracking-wider uppercase">QuantPulse Pro</span>
+            <h1 class="text-xl font-bold text-white">クオンツ投資・売買アドバイザー</h1>
+        </div>
+        <button onclick="openSearchModal()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-1 shadow-lg shadow-purple-900/40">
+            🔍 楽天証券銘柄検索
+        </button>
+    </header>
+
+    <!-- 資金配分シミュレーター -->
+    <section class="glass-card rounded-2xl p-4 mb-6 glow-purple">
+        <h2 class="text-sm font-semibold text-purple-300 mb-2 flex items-center gap-1.5">
+            <span>💡</span> 待機資金・分割エントリー配分
+        </h2>
+        <div class="flex gap-2 mb-3">
+            <div class="flex-1">
+                <label class="text-[10px] text-gray-400 block mb-1">投資可能資金 (円)</label>
+                <input type="number" id="capitalInput" value="300000" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500" oninput="calculateAllocation()">
+            </div>
+            <div class="w-32">
+                <label class="text-[10px] text-gray-400 block mb-1">現在の相場状態</label>
+                <select id="marketState" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-purple-500" onchange="calculateAllocation()">
+                    <option value="normal">中立・通常</option>
+                    <option value="panic">📉 パニック急落</option>
+                    <option value="bubble">📈 統計的過熱</option>
+                </select>
+            </div>
+        </div>
+        <div id="allocationResult" class="grid grid-cols-3 gap-2 text-center bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 text-xs">
+            <!-- JSで動的生成 -->
+        </div>
+    </section>
+
+    <!-- 監視銘柄・ファンド一覧 -->
+    <section>
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+                <span>📊</span> 監視銘柄・楽天証券ファンド一覧
+            </h2>
+            <span id="itemCount" class="text-xs text-purple-400 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/50"></span>
+        </div>
+        <div id="watchlistContainer" class="space-y-2.5">
+            <!-- JSで動的生成 -->
+        </div>
+    </section>
+
+    <!-- 楽天証券銘柄検索・カスタム診断モーダル -->
+    <div id="searchModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-5 w-full max-w-sm border border-purple-500/30">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                    <span>🔍</span> 楽天証券商品・銘柄検索 & 診断
+                </h3>
+                <button onclick="closeSearchModal()" class="text-gray-400 hover:text-white text-lg">×</button>
+            </div>
+            <p class="text-[11px] text-gray-400 mb-3">
+                楽天証券の銘柄名を入力するか、下のプリセットから選択すると、自動的に統計アルゴリズム判定が反映されます。
+            </p>
+            
+            <!-- クイックプリセット -->
+            <div class="mb-3">
+                <label class="text-[10px] text-purple-300 block mb-1">人気の楽天・インデックスファンド</label>
+                <div class="flex flex-wrap gap-1.5">
+                    <button onclick="selectPreset('楽天日本株4.3倍ブル', '投資信託', 54773, 58000, 42, -1.2, '+11.9%')" class="bg-slate-800 hover:bg-purple-900 text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition">楽天日本株4.3倍ブル</button>
+                    <button onclick="selectPreset('eMAXIS Slim 全世界株式', '投資信託', 24150, 23800, 56, +0.6, '+0.45%')" class="bg-slate-800 hover:bg-purple-900 text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition">オルカン</button>
+                    <button onclick="selectPreset('eMAXIS Slim 米国株式(S&P500)', '投資信託', 31200, 30500, 61, +1.1, '+0.82%')" class="bg-slate-800 hover:bg-purple-900 text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition">S&P500</button>
+                    <button onclick="selectPreset('ソニーグループ', '個別株式', 4297, 4180, 58, +1.0, '+1.25%')" class="bg-slate-800 hover:bg-purple-900 text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition">ソニーG</button>
+                    <button onclick="selectPreset('トヨタ自動車', '個別株式', 2582, 2700, 28, -1.8, '+0.78%')" class="bg-slate-800 hover:bg-purple-900 text-xs px-2.5 py-1 rounded-lg border border-slate-700 transition">トヨタ</button>
+                </div>
+            </div>
+
+            <div class="space-y-2.5">
+                <div>
+                    <label class="text-[10px] text-gray-400 block mb-1">銘柄名・ファンド名</label>
+                    <input type="text" id="inputName" placeholder="例: 楽天日本株4.3倍ブル" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">種別</label>
+                        <select id="inputType" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                            <option value="投資信託">投資信託</option>
+                            <option value="個別株式">個別株式</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">現在値 / 基準価額 (円)</label>
+                        <input type="number" id="inputPrice" placeholder="54773" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">25日移動平均(円)</label>
+                        <input type="number" id="inputMa" placeholder="58000" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">RSI (0-100)</label>
+                        <input type="number" id="inputRsi" placeholder="42" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-gray-400 block mb-1">BB位置 (-3〜+3)</label>
+                        <input type="number" step="0.1" id="inputBb" placeholder="-1.2" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+                <button onclick="closeSearchModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-gray-300 py-2 rounded-xl text-xs font-medium transition">キャンセル</button>
+                <button onclick="addOrUpdateAsset()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-xs font-medium transition shadow-lg shadow-purple-900/50">リストに追加・診断</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初期監視銘柄データ（楽天日本株4.3倍ブルを含む）
+        let watchlist = [
+            { name: "楽天日本株4.3倍ブル", type: "投資信託", price: 54773, ma25: 58000, rsi: 42, bb: -1.2, change: "+11.9%" },
+            { name: "eMAXIS Slim 全世界株式", type: "投資信託", price: 24150, ma25: 23800, rsi: 56, bb: +0.6, change: "+0.45%" },
+            { name: "eMAXIS Slim 米国株式(S&P500)", type: "投資信託", price: 31200, ma25: 30500, rsi: 61, bb: +1.1, change: "+0.82%" },
+            { name: "ソニーグループ", type: "個別株式", price: 4297, ma25: 4180, rsi: 58, bb: +1.0, change: "+1.25%" },
+            { name: "トヨタ自動車", type: "個別株式", price: 2582, ma25: 2700, rsi: 28, bb: -1.8, change: "+0.78%" },
+            { name: "NVIDIA (エヌビディア)", type: "個別株式", price: 21546, ma25: 22000, rsi: 52, bb: +0.8, change: "-3.29%" }
+        ];
+
+        function getSignal(rsi, bb) {
+            if (rsi <= 30 || bb <= -2.0) return { text: "🔥 強い買い（押し目）", bg: "bg-emerald-950/80 text-emerald-400 border-emerald-800/60" };
+            if (rsi <= 42 || (bb <= -1.0 && rsi < 50)) return { text: "🛒 分割買い検討", bg: "bg-blue-950/80 text-blue-400 border-blue-800/60" };
+            if (rsi >= 70 || bb >= 2.0) return { text: "⚠️ 利確・売り", bg: "bg-rose-950/80 text-rose-400 border-rose-800/60" };
+            return { text: "🛡️ ホールド・積立継続", bg: "bg-amber-950/80 text-amber-400 border-amber-800/60" };
+        }
+
+        function renderWatchlist() {
+            const container = document.getElementById('watchlistContainer');
+            document.getElementById('itemCount').innerText = `${watchlist.length} 銘柄`;
+            container.innerHTML = '';
+
+            watchlist.forEach((item, index) => {
+                const sig = getSignal(item.rsi, item.bb);
+                const isPositive = item.change.startsWith('+');
+                
+                const card = document.createElement('div');
+                card.className = "glass-card rounded-xl p-3 flex justify-between items-center transition hover:border-purple-500/50";
+                card.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="text-[10px] px-1.5 py-0.5 rounded ${item.type === '投資信託' ? 'bg-purple-950 text-purple-300 border border-purple-800/50' : 'bg-slate-800 text-gray-300 border border-slate-700'}">${item.type}</span>
+                            <h3 class="text-xs font-bold text-white">${item.name}</h3>
+                        </div>
+                        <div class="text-[10px] text-gray-400 flex gap-3 mt-1">
+                            <span>RSI: <strong class="text-gray-200">${item.rsi}</strong></span>
+                            <span>BB: <strong class="text-gray-200">${item.bb > 0 ? '+' + item.bb : item.bb}σ</strong></span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-white">¥${item.price.toLocaleString()}</div>
+                        <div class="text-[10px] ${isPositive ? 'text-emerald-400' : 'text-rose-400'} mb-1">${item.change}</div>
+                        <span class="inline-block text-[10px] px-2 py-0.5 rounded-full border ${sig.bg}">${sig.text}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            calculateAllocation();
+        }
+
+        function calculateAllocation() {
+            const capital = parseFloat(document.getElementById('capitalInput').value) || 300000;
+            const state = document.getElementById('marketState').value;
+            const resultDiv = document.getElementById('allocationResult');
+
+            let r1 = 0.3, r2 = 0.5, r3 = 0.2;
+            if (state === 'panic') { r1 = 0.6; r2 = 0.3; r3 = 0.1; }
+            if (state === 'bubble') { r1 = 0.1; r2 = 0.2; r3 = 0.7; }
+
+            resultDiv.innerHTML = `
+                <div>
+                    <span class="text-[10px] text-gray-400 block mb-0.5">第1弾(今すぐ)</span>
+                    <strong class="text-xs text-purple-300">¥${Math.round(capital * r1).toLocaleString()}</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-gray-400 block mb-0.5">第2弾(-2σ時)</span>
+                    <strong class="text-xs text-blue-300">¥${Math.round(capital * r2).toLocaleString()}</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-gray-400 block mb-0.5">予備(暴落時)</span>
+                    <strong class="text-xs text-emerald-300">¥${Math.round(capital * r3).toLocaleString()}</strong>
+                </div>
+            `;
+        }
+
+        function openSearchModal() { document.getElementById('searchModal').classList.remove('hidden'); }
+        function closeSearchModal() { document.getElementById('searchModal').classList.add('hidden'); }
+
+        function selectPreset(name, type, price, ma, rsi, bb, change) {
+            document.getElementById('inputName').value = name;
+            document.getElementById('inputType').value = type;
+            document.getElementById('inputPrice').value = price;
+            document.getElementById('inputMa').value = ma;
+            document.getElementById('inputRsi').value = rsi;
+            document.getElementById('inputBb').value = bb;
+        }
+
+        function addOrUpdateAsset() {
+            const name = document.getElementById('inputName').value.trim();
+            const type = document.getElementById('inputType').value;
+            const price = parseFloat(document.getElementById('inputPrice').value);
+            const ma = parseFloat(document.getElementById('inputMa').value);
+            const rsi = parseFloat(document.getElementById('inputRsi').value);
+            const bb = parseFloat(document.getElementById('inputBb').value);
+
+            if (!name || isNaN(price)) {
+                alert('銘柄名と現在値を正しく入力してください。');
+                return;
+            }
+
+            // 既存にあれば上書き、なければ追加
+            const existingIndex = watchlist.findIndex(item => item.name === name);
+            const newItem = { name, type, price, ma25: ma || price, rsi: isNaN(rsi) ? 50 : rsi, bb: isNaN(bb) ? 0 : bb, change: "+0.0%" };
+
+            if (existingIndex >= 0) {
+                watchlist[existingIndex] = newItem;
+            } else {
+                watchlist.unshift(newItem);
+            }
+
+            renderWatchlist();
+            closeSearchModal();
+        }
+
+        // 初期描画
+        renderWatchlist();
+    </script>
+</body>
+</html>
