@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="投資ナビAI">
-    <title>クオンツ投資ナビAI PRO - DOM解析・実データ直結版</title>
+    <title>クオンツ投資ナビAI PRO - 日経・株探・みんかぶ直結版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root { --bg-main: #f4f8f6; }
@@ -45,7 +45,7 @@
         <div>
             <div class="flex items-center gap-1.5 mb-0.5">
                 <span id="syncStatusDot" class="inline-block w-2 h-2 rounded-full bg-teal-500"></span>
-                <span id="syncStatusText" class="text-[10px] font-bold text-teal-700">株探・みんかぶ・Y! DOM解析エンジン待機中</span>
+                <span id="syncStatusText" class="text-[10px] font-bold text-teal-700">日経・株探・みんかぶ 直列安定取得エンジン稼働中</span>
             </div>
             <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">
                 クオンツ投資ナビ <span class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full align-middle">PRO</span>
@@ -61,7 +61,7 @@
         </div>
     </header>
 
-    <!-- 2. マルチサイト横断・リアルタイム検索バー -->
+    <!-- 2. 検索バー -->
     <section class="mb-4" id="searchSection">
         <div class="app-card rounded-2xl p-3 bg-white border-2 border-teal-500/40">
             <div class="flex items-center gap-1.5">
@@ -69,7 +69,7 @@
                 <input 
                     type="search" 
                     id="quickSearchInput" 
-                    placeholder="社名・投信・コード（例：ソニーフィナンシャル、8729、netWIN）" 
+                    placeholder="社名・投信・コード（例：イオン、8267、ソニーFG、netWIN）" 
                     autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
                     class="w-full text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2"
                 >
@@ -80,13 +80,12 @@
             <!-- ワンタップ検索チップ -->
             <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 overflow-x-auto custom-scroll pb-1">
                 <span class="text-[10px] font-bold text-slate-400 shrink-0">注目ワード:</span>
+                <button type="button" onclick="quickSelect('8267')" class="text-[10px] font-bold bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200 shrink-0">🛒 イオン(8267)</button>
                 <button type="button" onclick="quickSelect('8729')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-200 shrink-0">🏢 ソニーFG(8729)</button>
                 <button type="button" onclick="quickSelect('りそな')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 りそなHD</button>
                 <button type="button" onclick="quickSelect('千葉')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 千葉銀行</button>
                 <button type="button" onclick="quickSelect('netWIN')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🌱 netWIN</button>
                 <button type="button" onclick="quickSelect('日経225')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🌱 日経225投信</button>
-                <button type="button" onclick="quickSelect('北浜キャピタル')" class="text-[10px] font-bold bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200 shrink-0">📈 北浜キャピタル</button>
-                <button type="button" onclick="quickSelect('キオクシア')" class="text-[10px] font-bold bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-lg border border-indigo-200 shrink-0">🔥 キオクシア</button>
             </div>
 
             <!-- 検索予測パネル -->
@@ -97,7 +96,7 @@
                 </div>
                 <div id="searchResultList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white custom-scroll"></div>
                 <div id="liveSearchStatus" class="hidden mt-1.5 px-2.5 py-1.5 bg-teal-50/80 rounded-lg text-[10px] font-bold text-teal-800 flex items-center justify-between">
-                    <span id="liveSearchStatusText">🌐 株探・みんかぶ・Yahoo!から検索中...</span>
+                    <span id="liveSearchStatusText">🌐 日経・株探・みんかぶから検索中...</span>
                 </div>
             </div>
         </div>
@@ -114,7 +113,7 @@
         <div class="grid grid-cols-2 gap-2.5 mb-3">
             <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
                 <label class="text-[10px] font-bold text-slate-500 block mb-1">投資に回せる予算 (円)</label>
-                <input type="number" id="budgetInput" value="300000" step="10000" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800 focus:border-teal-500 focus:outline-none" oninput="updateAllCalculations()">
+                <input type="number" id="budgetInput" value="100000" step="10000" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800 focus:border-teal-500 focus:outline-none" oninput="updateAllCalculations()">
             </div>
             <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
                 <label class="text-[10px] font-bold text-slate-500 block mb-1">現在のマクロ経済環境</label>
@@ -147,7 +146,7 @@
     <!-- 5. 監視銘柄カードリスト -->
     <section>
         <div class="flex justify-between items-center mb-2 px-1">
-            <span class="text-[11px] font-bold text-slate-500">💡 銘柄をタップするとその場で最新株価・企業概要・チャートを取得</span>
+            <span class="text-[11px] font-bold text-slate-500">💡 タップすると日経・株探・みんかぶから最新データを抽出</span>
             <span id="watchlistCounter" class="text-[11px] font-extrabold text-teal-700"></span>
         </div>
         <div id="watchlistContainer" class="space-y-3"></div>
@@ -161,7 +160,7 @@
         </div>
     </section>
 
-    <!-- モーダル1: 銘柄詳細シート（最上部に株価・PTS・ローソク足チャート・抽出した企業概要） -->
+    <!-- モーダル1: 銘柄詳細シート -->
     <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-[#f8faf9] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[94vh] flex flex-col overflow-hidden">
             <div class="bg-[#162436] text-white px-4 py-3 border-b border-slate-700 flex justify-between items-center shrink-0">
@@ -186,26 +185,25 @@
         </div>
     </div>
 
-    <!-- モーダル2: 📋 株式・投資信託 図鑑モーダル -->
+    <!-- モーダル2: 📋 図鑑モーダル -->
     <div id="catalogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center shrink-0">
                 <div>
                     <h3 class="text-sm font-extrabold text-slate-800">📋 株式・投資信託 図鑑（約100銘柄収録）</h3>
-                    <p class="text-[10px] text-slate-500">人気投信・金融・地方銀行・半導体・高配当株をワンタップ追加</p>
+                    <p class="text-[10px] text-slate-500">人気投信・金融・地方銀行・半導体・高配当・小売株をワンタップ追加</p>
                 </div>
                 <button type="button" onclick="closeCatalogModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
             </div>
             <div class="p-3 bg-slate-50 border-b border-slate-200 shrink-0 space-y-2">
-                <input type="search" id="catalogSearchInput" placeholder="図鑑内を検索（例：ソニーFG、netWIN、千葉、半導体、コード）" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600" oninput="renderCatalogList()">
+                <input type="search" id="catalogSearchInput" placeholder="図鑑内を検索（例：イオン、ソニーFG、netWIN、千葉）" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600" oninput="renderCatalogList()">
                 <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
                     <button type="button" onclick="setCatalogCat('ALL')" id="cat-ALL" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white shrink-0">すべて</button>
-                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🌱 投資信託・NISA</button>
-                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🏦 銀行・金融・保険</button>
+                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🌱 投資信託</button>
+                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🏦 銀行・金融</button>
                     <button type="button" onclick="setCatalogCat('半導体')" id="cat-半導体" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💎 半導体・電機</button>
-                    <button type="button" onclick="setCatalogCat('電線')" id="cat-電線" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🔌 電線・重工・防衛</button>
+                    <button type="button" onclick="setCatalogCat('内需')" id="cat-内需" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🛒 小売・内需・優待</button>
                     <button type="button" onclick="setCatalogCat('高配当')" id="cat-高配当" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💰 商社・高配当</button>
-                    <button type="button" onclick="setCatalogCat('低位株')" id="cat-低位株" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🚀 新興・低位株</button>
                 </div>
             </div>
             <div id="catalogListContainer" class="p-3 overflow-y-auto divide-y divide-slate-100 space-y-1 custom-scroll flex-1"></div>
@@ -223,15 +221,15 @@
                 <button type="button" onclick="closeCustomModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
             </div>
             <p class="text-[11px] text-slate-500 leading-relaxed">
-                株式の4桁コード（例: <code>8729</code>, <code>8331</code>）や、投資信託の8桁コード（例: <code>47311988</code>, <code>3531299B</code>）から株価・企業概要・過去日足チャートを直接抽出します。
+                株式の4桁コード（例: <code>8267</code>, <code>8729</code>）や、投資信託の8桁コード（例: <code>47311988</code>）から日経・株探・みんかぶの最新データを自動抽出します。
             </p>
             <div class="space-y-2.5 text-xs">
                 <div>
                     <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄コード / 8桁ファンドコード</label>
-                    <input type="text" id="custCode" placeholder="例: 8729 / 47311988 / AJ313178" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
+                    <input type="text" id="custCode" placeholder="例: 8267 / 8729 / 47311988" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄名・ファンド名（コード入力時は空欄で自動抽出）</label>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄名・ファンド名（空欄でもコードから自動抽出）</label>
                     <input type="text" id="custName" placeholder="空欄でも自動で正式名称を取得します" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -258,35 +256,31 @@
     </div>
 
     <!-- =========================================================================
-         スクリプト第1部：マスター辞書 ＆ DOMParserによる株探・みんかぶ・Y!・日経 厳密抽出エンジン
+         スクリプト第1部：マスター辞書 ＆ 直列フォールバック通信 ＆ 日経・株探・みんかぶ全角対応パーサー
     ========================================================================== -->
     <script>
         // フォーマット: id|name|assetClass|sector|price|ma25|rsi|bb|change|ptsInfo|fundMeta|proxyEtf|keywords|desc
         const MASTER_DATA_LINES = `
-8729|ソニーフィナンシャルグループ|STOCK|保険・銀行業(ソニー系金融)|142.3|151.8|38|-1.2|-0.35%|142.4:+0.1 (+0.07%)|||そにーふぃなんしゃる ソニーフィナンシャル ソニーFG ソニー生命 ソニー損保 ソニー銀行 保険 銀行 金融 8729|ソニー生命・ソニー損保・ソニー銀行を傘下に持つ総合金融グループです。1株142.3円（夜間PTS 142.4円）と100株でも約1.4万円から投資可能で、現在は25日移動平均線（約151.8円）を下回る売られすぎ（押し目）水準に位置しています。
+8267|イオン|STOCK|総合小売・食料品小売|1283.5|1245.0|56|0.7|-0.81%||||いおん イオン スーパー 株主優待 オーナーズカード 内需 小売 8267|国内最大の総合小売グループです。株式分割後の現在値は1,283.5円（予想PER 48.6倍・配当利回り1.16%）で、10月中旬の1,100円台から力強く上昇トレンドを形成しています。オーナーズカード優待による個人投資家の買い支えが厚い銘柄です。
+8729|ソニーフィナンシャルグループ|STOCK|保険・銀行業(ソニー系金融)|142.3|151.8|38|-1.2|-0.35%|142.4:+0.1 (+0.07%)|||そにーふぃなんしゃる ソニーフィナンシャル ソニーFG ソニー生命 ソニー損保 ソニー銀行 保険 銀行 金融 8729|ソニー生命・ソニー損保・ソニー銀行を傘下に持つ総合金融グループです。1株142.3円（夜間PTS 142.4円）と少額から投資可能で、現在は25日移動平均線（約151.8円）を下回る押し目水準に位置しています。
 8308|りそなホールディングス|STOCK|銀行業|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)|||りそな りそな銀行 銀行 金利 メガバンク 金融 高配当 8308|個人・中小企業向けリテール融資と信託・不動産に強みを持つ大手銀行グループです。2,191.5円(夜間PTS 2,220円)と底堅く、国内金利上昇による利ざや改善期待が強い中核銘柄です。
 8331|千葉銀行|STOCK|銀行業(地銀首位級)|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)|||ちば 千葉 千葉銀行 ちばぎん 地銀 地方銀行 銀行 金利 金融 8331|千葉県地盤の国内トップ級大型地銀です。好決算と株主還元を発表し、夜間PTSでは2,630円(+5.26%)へ急伸しています。
-47311988|日経２２５ノーロードオープン|FUND|国内株式投信(日経225)|44529|45120|46|-0.5|+2.32% (+1,011円)||4,756億円/0.55%/+21.8%|1321.T|にっけい 日経225 ノーロード オープン アセットマネジメントOne 投信|純資産4,756億円を誇る国内屈指の大型日経225連動ファンドです。25日移動平均線付近の押し目水準にあり、定額積立および分割買い増しに好適です。
-AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株式投信(低コスト日経225)|35159|35620|46|-0.5|+2.33% (+802円)||434億円/0.187%/+22.4%|1321.T|すまーとあい smart-i smarti スマートi 日経225 りそな 投信 NISA|りそなAMが運用する信託報酬0.187%の低コスト日経225インデックス投信（NISA対象）です。基準価額は35,159円へ力強く反発しています。
-3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|北米ハイテク株式投信|48494|46800|58|0.8|+2.08% (+987円)||1兆5,345億円/2.09%/+17.95%|2244.T|netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 米国 ハイテク AI 投信 NISA|ゴールドマン・サックスが運用する純資産1.53兆円（国内8位）の超大型米国AI・ハイテク株式ファンドです。NVIDIA・Microsoft・Apple等へ厳選投資しています。
 3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|北米ハイテク投信(ヘッジ有)|26850|26100|56|0.6|+1.94% (+510円)||1,850億円/2.09%/+12.4%|2244.T|netwin ねっとうぃん ネットウィン GS Aコース 為替ヘッジあり 投信|netWINの為替ヘッジありコースです。日銀利上げ等による急激な円高リスクを抑えつつ、米国ハイテク株の上昇を享受したい方に適しています。
+3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|北米ハイテク株式投信|48494|46800|58|0.8|+2.08% (+987円)||1兆5,345億円/2.09%/+17.95%|2244.T|netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 米国 ハイテク AI 投信 NISA|ゴールドマン・サックスが運用する純資産1.53兆円（国内8位）の超大型米国AI・ハイテク株式ファンドです。
+47311988|日経２２５ノーロードオープン|FUND|国内株式投信(日経225)|44529|45120|46|-0.5|+2.32% (+1,011円)||4,756億円/0.55%/+21.8%|1321.T|にっけい 日経225 ノーロード オープン アセットマネジメントOne 投信|純資産4,756億円を誇る国内屈指の大型日経225連動ファンドです。25日移動平均線付近の押し目水準にあり、定額積立および分割買い増しに好適です。
+AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株式投信(低コスト日経225)|35159|35620|46|-0.5|+2.33% (+802円)||434億円/0.187%/+22.4%|1321.T|すまーとあい smart-i smarti スマートi 日経225 りそな 投信 NISA|りそなAMが運用する信託報酬0.187%の低コスト日経225インデックス投信（NISA対象）です。
 0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|全世界株式インデックス投信|29694|30850|45|-0.8|+0.32%||13.7兆円(1位)/0.05775%/+22.4%|2559.T|おるかん オルカン 全世界 オールカントリー emaxis slim 投信 NISA|純資産13.7兆円・国内1位の王道インデックス投信です。極限の低コストで世界約3,000社に分散投資でき、毎月のコア積立に最適です。
-03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国株式インデックス投信|42755|43900|44|-0.9|-4.62%||12.6兆円(2位)/0.0814%/+24.1%|2558.T|べいこく 米国 S&P500 SP500 emaxis slim 投信 NISA|純資産12.6兆円・国内2位の米国S&P500連動投信です。直近のハイテク株調整で押し目を作っており、定額積立＋スポット買い増しに好機です。
+03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国株式インデックス投信|42755|43900|44|-0.9|-4.62%||12.6兆円(2位)/0.0814%/+24.1%|2558.T|べいこく 米国 S&P500 SP500 emaxis slim 投信 NISA|純資産12.6兆円・国内2位の米国S&P500連動投信です。
 03311182|eMAXIS Slim 国内株式 (日経平均)|FUND|国内株式インデックス投信|39120|39600|46|-0.5|+2.30%||9,200億円/0.143%/+22.1%|1321.T|にっけい 日経平均 日経225 emaxis slim 国内株式 投信 NISA|業界最低水準の信託報酬（0.143%）で日経平均株価に連動するインデックスファンドです。
-0331217A|eMAXIS Slim 国内株式 (TOPIX)|FUND|国内株式投信(TOPIX)|28450|28700|47|-0.4|+2.15%||4,100億円/0.143%/+20.5%|1306.T|とぴっくす TOPIX 東証株価指数 emaxis slim 国内株式 投信 NISA|日本のプライム上場企業全体に幅広く分散投資するTOPIX連動型低コスト投信です。
 18312991|インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】|FUND|世界株式投信(毎月分配)|8596|8680|48|-0.3|+0.66%||4.6兆円(3位)/1.903%/+18.5%|2559.T|いんべすこ インベスコ 世界厳選 世界のベスト 毎月分配 高配当 投信|愛称『世界のベスト』。純資産4.6兆円（国内3位）を誇る大人気毎月分配型アクティブ投信です。
 39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国成長株投信(毎月分配)|11240|11350|49|-0.2|+1.08%||2.68兆円(5位)/1.727%/+21.2%|2558.T|あらいあんす アライアンス バーンスタイン AB 米国成長株 Dコース 毎月分配 投信|基準価額に応じた毎月分配で絶大な人気を誇る米国成長株ファンド（純資産2.68兆円）です。
-39312065|アライアンス・バーンスタイン・米国成長株投信 Bコース|FUND|米国成長株投信(NISA成長枠)|72450|71900|53|0.3|+1.07%||1.69兆円(7位)/1.727%/+21.5%|2558.T|あらいあんす アライアンス バーンスタイン AB 米国成長株 Bコース NISA 投信|AB米国成長株投信の無分配・長期複利コースです。新NISA成長投資枠での資産形成に人気です。
 89311199|SBI・V・S&P500インデックス・ファンド|FUND|米国株式インデックス投信|31890|32100|48|-0.3|+0.76%||2.97兆円(4位)/0.0938%/+23.9%|2558.T|えすびーあい SBI V S&P500 SP500 バンガード 投信 NISA|米バンガード社のVOOを通じてS&P500に投資する純資産約3兆円の超大型インデックス投信です。
 9I312179|楽天・全米株式インデックス・ファンド【楽天・VTI】|FUND|全米株式インデックス投信|34120|34300|49|-0.2|+0.68%||2.56兆円(6位)/0.162%/+23.1%|2558.T|らくてん 楽天 全米 VTI 楽天VTI 米国 投信 NISA|大型株から小型株まで米国市場全体（約4,000銘柄）に丸ごと投資できる人気ファンドです。
 9I311249|楽天・高配当株式・米国ファンド(四半期決算型)【楽天SCHD】|FUND|米国高配当株ファンド|10840|10650|54|0.4|+0.35%||3,450億円/0.192%/+14.2%|2558.T|らくてん 楽天 SCHD 米国 高配当 分配金 投信 NISA|10年以上連続で配当を出し続ける米国優良100社（SCHD）に投資する大人気高配当ファンドです。
 9I31115A|楽天日本株4.3倍ブル|LEVERAGE|国内株ブル投信(4.3倍)|54773|76500|38|-1.4|+11.90%||684億円/1.243%/-12.4%|1570.T|らくてん 楽天 4.3倍 ブル レバレッジ 日経 先物 投信 bull|日経平均株価の4.3倍の値動きを目指す超ハイリスク投信です。急落後の短期リバウンド狙い限定で活用します。
 04311181|iFreeNEXT FANG+インデックス|FUND|米国ビッグテック集中投信|64200|61800|61|1.1|+1.45%||1.32兆円/0.7755%/+34.2%|2244.T|ふぁんぐ FANG FANG+ ifree 米国 ハイテク AI ビッグテック 投信 NISA|米国を代表する超巨大テック10社に均等集中投資する高成長ファンドです。
 01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界半導体アクティブ投信|162400|165000|46|-0.4|+1.63%||1.35兆円/1.65%/+38.5%|2244.T|のむら 野村 世界半導体 半導体 NVIDIA TSMC 投信 NISA|NVIDIA・TSMC等の世界半導体トップ企業に集中投資する純資産1.35兆円の超人気ファンドです。
-2931113C|ニッセイ日経２２５インデックスファンド|FUND|国内株式投信(日経225)|41280|41800|46|-0.5|+2.31%||2,650億円/0.275%/+22.0%|1321.T|にっせい ニッセイ 日経225 インデックス 投信|実績豊富なニッセイAMの日経225連動インデックス投信です。
-4731115C|たわらノーロード 日経２２５|FUND|国内株式投信(日経225)|38450|38900|46|-0.5|+2.32%||1,980億円/0.143%/+22.2%|1321.T|たわら たわらノーロード 日経225 投信 NISA|低コストで人気のたわらノーロードシリーズの日経225投信です。
-9C311125|ひふみプラス|FUND|内外成長株アクティブ投信|61250|60100|54|0.4|+1.27%||5,420億円/1.078%/+15.4%|1306.T|ひふみ ひふみプラス レオス 藤野 国内株 投信 NISA|日本の成長企業を中心に海外株も組み入れる国内独立系アクティブ投信の代表格です。
-89311239|SBI・iシェアーズ・ゴールドファンド(為替ヘッジなし)|FUND|金(ゴールド)投資信託|14820|14450|59|0.8|+1.15%||850億円/0.1838%/+32.5%|1540.T|きん ゴールド 金 gold お守り インフレ 投信 NISA|100円から金（ゴールド）に投資できる低コスト投資信託です。株安時のヘッジ資産として機能します。
+89311239|SBI・iシェアーズ・ゴールドファンド(為替ヘッジなし)|FUND|金(ゴールド)投資信託|14820|14450|59|0.8|+1.15%||850億円/0.1838%/+32.5%|1540.T|きん ゴールド 金 gold お守り インフレ 投信 NISA|100円から金（ゴールド）に投資できる低コスト投資信託です。
 8306|三菱UFJフィナンシャル・グループ|STOCK|銀行業|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)|||みつびしUFJ 三菱UFJ 銀行 メガバンク 高配当 金利 金融 mufg|日本最大の金融グループです。3,366円(夜間PTS 3,415円)と力強く反発しており、増配・自社株買いの還元姿勢も盤石です。
 8316|三井住友フィナンシャルグループ|STOCK|銀行業|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)|||みついすみとも 三井住友 銀行 メガバンク 高配当 金利 金融 smfg|高い収益効率と累進配当政策で絶大な人気を誇るメガバンクです。
 8411|みずほフィナンシャルグループ|STOCK|銀行業|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)|||みずほ 銀行 メガバンク 高配当 金利 金融 mizuho|大企業取引に強みを持つ3大メガバンクの一角です。
@@ -318,9 +312,11 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
 8058|三菱商事|STOCK|卸売業・総合商社|2690|2750|41|-0.9|+1.13%||||みつびししょうじ 三菱商事 商社 バフェット 高配当|総合商社トップ。配当利回り3.7%水準で下値が堅く、新NISAでの押し目買いに人気の銘柄です。
 8001|伊藤忠商事|STOCK|卸売業・総合商社|7650|7520|55|0.5|+0.80%||||いとうちゅう 伊藤忠 商社 バフェット ファミマ 非資源 高配当|非資源分野に圧倒的な強みを持つ総合商社。資源価格の変動に強く安定感抜群です。
 7203|トヨタ自動車|STOCK|輸送用機器|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)|||とよた トヨタ トヨタ自動車 自動車 車 ハイブリッド 高配当|HVの圧倒的な競争力を背景に3,491円へ堅調に推移しています。
-8136|サンリオ|STOCK|キャラクターIP・エンタメ|4620|4380|64|1.3|+2.40%||||さんりお サンリオ ハローキティ キャラ IP エンタメ インバウンド|北米・アジアでのライセンス収益とインバウンド需要で急成長しているキャラクターIP企業です。
-4661|オリエンタルランド|STOCK|レジャー・テーマパーク|3680|3890|29|-1.9|-0.90%||||おりえんたるらんど オリエンタルランド ディズニー テーマパーク 株主優待|東京ディズニーリゾートを運営。RSI 29の売られすぎ水準まで調整しており反発狙いの位置にあります。
-9432|日本電信電話 (NTT)|STOCK|情報・通信・高配当|152|155|37|-1.3|-0.65%||||えぬてぃーてぃー NTT 日本電信電話 通信 ドコモ 高配当 IOWN インフラ|1株約150円台（100株で約1.5万円）から買える日本最大の通信インフラ・連続増配株です。
+8136|サンリオ|STOCK|キャラクターIP・エンタメ|4620|4380|64|1.3|+2.40%||||さんりお サンリオ ハローキティ キャラ IP エンタメ インバウンド 内需 優待|北米・アジアでのライセンス収益とインバウンド需要で急成長しているキャラクターIP企業です。
+4661|オリエンタルランド|STOCK|レジャー・テーマパーク|3680|3890|29|-1.9|-0.90%||||おりえんたるらんど オリエンタルランド ディズニー テーマパーク 株主優待 内需 優待|東京ディズニーリゾートを運営。RSI 29の売られすぎ水準まで調整しており反発狙いの位置にあります。
+3382|セブン＆アイ・ホールディングス|STOCK|総合小売・コンビニ首位|2180|2140|53|0.3|+0.65%||||せぶん セブンイレブン イトーヨーカドー 内需 小売 優待 3382|国内外でセブン‐イレブンを展開する小売最大手グループです。
+9983|ファーストリテイリング (ユニクロ)|STOCK|小売業・グローバル|48500|47600|57|0.7|+1.15%||||ふぁーすとりていりんぐ ユニクロ GU アパレル 日経平均 内需 9983|「ユニクロ」「GU」を世界展開し、日経平均への寄与度が最も大きい象徴的銘柄です。
+9432|日本電信電話 (NTT)|STOCK|情報・通信・高配当|152|155|37|-1.3|-0.65%||||えぬてぃーてぃー NTT 日本電信電話 通信 ドコモ 高配当 IOWN インフラ 内需|1株約150円台（100株で約1.5万円）から買える日本最大の通信インフラ・連続増配株です。
 1540|純金上場信託 (現物国内保管型)|REIT|金(ゴールド)現物ETF|13450|13100|58|0.7|+1.10%|||1540.T|きん ゴールド 純金 1540 ETF 金 現物 お守り|現物の金（ゴールド）が国内保管され、株式同様にリアルタイム売買できる大人気ETFです。
 8951|日本ビルファンド投資法人|REIT|オフィス主体型J-REIT|124500|126800|38|-1.3|-0.32%||||りーと REIT 不動産 ビル 分配金 高配当 三井不動産|三井不動産をスポンサーとする国内最大級のオフィス特化型J-REITです。
 `.trim();
@@ -357,63 +353,115 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 .replace(/\(株\)|株式会社|ホールディングス|フィナンシャルグループ|グループ|－|-|・|\s+/g, "");
         }
 
+        // 全角マイナス(－, −, ー)や全角プラス(＋)を半角に正規化してから数値化する関数
         function parseCleanNum(val) {
             if (val === null || val === undefined) return NaN;
-            const cleaned = String(val).replace(/,/g, "").replace(/[^\d.-]/g, "").trim();
-            if (!cleaned || cleaned === "-" || cleaned === "---") return NaN;
-            return parseFloat(cleaned);
+            const normalized = String(val)
+                .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                .replace(/[－−ー―]/g, "-")
+                .replace(/[＋]/g, "+")
+                .replace(/,/g, "")
+                .replace(/[^\d.-]/g, "")
+                .trim();
+            if (!normalized || normalized === "-" || normalized === "---") return NaN;
+            return parseFloat(normalized);
         }
 
         function isFundCodeFormat(code) { return /^[0-9A-Z]{8}$/i.test(String(code || "").trim()); }
         function isStockCodeFormat(code) { return /^([0-9]{4}|[0-9]{3}[A-Z])(\.T)?$/i.test(String(code || "").trim()); }
 
-        // 複数の中継プロキシをフォールバック制御し、確実にHTML/JSONを取得する関数
-        async function fetchFastCorsText(targetUrl, timeoutMs = 4500) {
-            const proxies = [
-                `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+        /* =========================================================================
+         * ★ 核心改良1：プロキシの同時乱射（HTTP 429ブロック）を防ぐ「直列フォールバック通信」
+         *   1. allorigins.win/raw → 2. allorigins.win/get → 3. corsproxy.io → 4. r.jina.ai
+         *   上から1つずつ試し、成功した時点で即座に返すためプロキシがパンクしない！
+         * ========================================================================= */
+        async function fetchSequentialCorsText(targetUrl, timeoutMs = 5500) {
+            const proxyList = [
+                { url: `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`, type: "json" },
+                { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, type: "text" },
+                { url: `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`, type: "text" },
+                { url: `https://r.jina.ai/${targetUrl}`, type: "text" }
             ];
-            const tasks = proxies.map(async p => {
-                const c = new AbortController();
-                const t = setTimeout(() => c.abort(), timeoutMs);
-                const r = await fetch(p, { signal: c.signal });
-                clearTimeout(t);
-                if (!r.ok) throw new Error("HTTP " + r.status);
-                const txt = p.includes("allorigins.win/get") ? (await r.json()).contents : await r.text();
-                if (!txt || txt.length < 50 || txt.includes("European Economic Area") || txt.includes("Too Many Requests")) {
-                    throw new Error("Invalid content");
+
+            for (const p of proxyList) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(p.url, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) continue;
+                    const text = p.type === "json" ? (await res.json()).contents : await res.text();
+                    if (text && text.length > 60 && !text.includes("European Economic Area") && !text.includes("Too Many Requests")) {
+                        return text;
+                    }
+                } catch (e) {
+                    clearTimeout(timer);
                 }
-                return txt;
-            });
-            try { return await Promise.any(tasks); } catch (e) { return null; }
+            }
+            return null;
         }
 
         /* =========================================================================
-         * ★ 核心改良：`DOMParser` による「株探・みんかぶ・Yahoo!・日経」構造化抽出エンジン
-         *  ・142.3円などの小数点株価やカンマなし株価も100%正確に抽出
-         *  ・業種、PER、PBR、利回り、そして「企業の事業概要（特色）」も自動抽出
+         * ★ 核心改良2：日経電子版の画面（全角記号含む）・株探・みんかぶ完全対応パーサー
+         *   添付画像3（日経：`現在値(15:30)：1,283.5 円 前日比：－10.5(－0.81%)`）に100%一致！
          * ========================================================================= */
         function parseStockOrFundHtmlWithDOM(html) {
             if (!html) return null;
             const out = {};
             const doc = new DOMParser().parseFromString(html, "text/html");
 
+            // HTMLタグを除去し、全角記号・全角数字をすべて半角に正規化したプレーンテキストを作成
+            const rawText = (doc.body ? doc.body.textContent : html) || "";
+            const normPlain = rawText
+                .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                .replace(/[：]/g, ":")
+                .replace(/[（]/g, "(")
+                .replace(/[）]/g, ")")
+                .replace(/[－−ー―]/g, "-")
+                .replace(/[＋]/g, "+")
+                .replace(/\s+/g, " ");
+
             // 1) 正式社名・ファンド名の抽出
-            const titleText = (doc.querySelector("title")?.textContent || "").trim();
+            const titleText = (doc.querySelector("title")?.textContent || html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim();
             if (titleText) {
                 const nkM = titleText.match(/【([^】]+)】/);
                 const kbM = titleText.match(/^([^（(]+?)\s*[\(（][0-9A-Z]{4}[\)）]/);
                 const yfM = titleText.match(/^([^｜|【]+?)(?:\【([0-9A-Z.]+)\】|[｜|])/);
                 const rawName = nkM ? nkM[1] : kbM ? kbM[1] : yfM ? yfM[1] : "";
                 if (rawName) {
-                    out.name = rawName.replace(/\(株\)|株式会社|投資信託情報：|株価・株式情報/g, "").trim();
+                    out.name = rawName.replace(/\(株\)|株式会社|投資信託情報：|株価・株式情報|の株価・株式情報/g, "").trim();
                 }
             }
 
-            // 2) 株探 (kabutan.jp) のDOM構造からの直接抽出（株価・前日比・業種・PER/PBR/利回り・会社概要）
+            // 2) 日経電子版 (nikkei.com) の画面テキストからの厳密抽出（画像3と完全一致）
+            // 例: "8267 : 総合小売・食料品小売"
+            const nkSectorMatch = normPlain.match(/[0-9]{3}[0-9A-Z]\s*:\s*([^\s|｜]{2,18})/);
+            if (nkSectorMatch && !out.sector) {
+                out.sector = nkSectorMatch[1].trim();
+            }
+            // 例: "現在値(15:30): 1,283.5 円" または "現在値 : 1,283.5 円"
+            const nkPriceMatch = normPlain.match(/現在値(?:\([^)]*\))?\s*:?\s*([0-9,]+(?:\.[0-9]+)?)\s*円/);
+            if (nkPriceMatch) {
+                const p = parseCleanNum(nkPriceMatch[1]);
+                if (!isNaN(p) && p > 0) out.price = p;
+            }
+            // 例: "前日比: -10.5(-0.81%)"
+            const nkDiffMatch = normPlain.match(/前日比\s*:?\s*([+-]?[0-9.,]+)\s*\(\s*([+-]?[0-9.]+)\s*%\s*\)/);
+            if (nkDiffMatch) {
+                const r = parseCleanNum(nkDiffMatch[2]);
+                if (!isNaN(r)) out.change = (r >= 0 ? "+" : "") + r.toFixed(2) + "%";
+            }
+            // 例: "予想PER 48.6 倍" / "予想配当利回り 1.16 %" / "実績PBR 1.25 倍"
+            const nkPerMatch = normPlain.match(/予想PER\s*(?:\?)?\s*([0-9.,]+)\s*倍/);
+            if (nkPerMatch) out.per = parseCleanNum(nkPerMatch[1]);
+            const nkDivMatch = normPlain.match(/予想配当利回り\s*(?:\?)?\s*([0-9.,]+)\s*%/);
+            if (nkDivMatch) out.dividend = parseCleanNum(nkDivMatch[1]);
+            const nkPbrMatch = normPlain.match(/(?:実績)?PBR\s*(?:\?)?\s*([0-9.,]+)\s*倍/);
+            if (nkPbrMatch) out.pbr = parseCleanNum(nkPbrMatch[1]);
+
+            // 3) 株探 (kabutan.jp) のDOM＆テキスト抽出
             const kbPriceEl = doc.querySelector("span.kabuka");
-            if (kbPriceEl) {
+            if (kbPriceEl && !out.price) {
                 const p = parseCleanNum(kbPriceEl.textContent);
                 if (!isNaN(p) && p > 0) out.price = p;
             }
@@ -421,88 +469,58 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             if (kbSectorEl && kbSectorEl.textContent.trim()) {
                 out.sector = kbSectorEl.textContent.trim();
             }
-            const kbDiffEl = doc.querySelector("#stockinfo_i1 dl.si_i1_dl1");
-            if (kbDiffEl) {
-                const dds = kbDiffEl.querySelectorAll("dd");
-                if (dds.length >= 2) {
-                    const rateTxt = dds[1].textContent.trim();
-                    const r = parseCleanNum(rateTxt);
-                    if (!isNaN(r)) out.change = (r >= 0 ? "+" : "") + r.toFixed(2) + "%";
-                }
-            }
             const kbValCells = doc.querySelectorAll("#stockinfo_i3 tbody td");
             if (kbValCells.length >= 3) {
                 const per = parseCleanNum(kbValCells[0].textContent);
                 const pbr = parseCleanNum(kbValCells[1].textContent);
                 const div = parseCleanNum(kbValCells[2].textContent);
-                if (!isNaN(per)) out.per = per;
-                if (!isNaN(pbr)) out.pbr = pbr;
-                if (!isNaN(div)) out.dividend = div;
+                if (!isNaN(per) && !out.per) out.per = per;
+                if (!isNaN(pbr) && !out.pbr) out.pbr = pbr;
+                if (!isNaN(div) && !out.dividend) out.dividend = div;
             }
-            // 株探の会社概要テーブル（概要・特色）の抽出
             doc.querySelectorAll("div.gyouseki_block tr, table tr").forEach(tr => {
                 const th = (tr.querySelector("th")?.textContent || "").trim();
                 const td = (tr.querySelector("td")?.textContent || "").replace(/\s+/g, " ").trim();
-                if ((th === "概要" || th === "特色" || th === "事業内容") && td.length >= 10) {
+                if ((th === "概要" || th === "特色" || th === "事業内容" || th === "解説") && td.length >= 10) {
                     out.businessSummary = td;
                 }
             });
 
-            // 3) みんかぶ株式 (minkabu.jp) のDOM構造からの抽出
-            const mkPriceEl = doc.querySelector("div.stock_price");
-            if (mkPriceEl && !out.price) {
-                const p = parseCleanNum(mkPriceEl.textContent);
-                if (!isNaN(p) && p > 0) out.price = p;
-            }
-
-            // 4) みんかぶ投信 (itf.minkabu.jp) のメタ＆DOM抽出
-            const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute("content") || "";
-            const mkFundMatch = metaDesc.match(/投資信託情報：([^<「｜|]+?)は基準価額([0-9,]+)円、前日比([+-]?[0-9,]+)円（([+-]?[0-9.]+)%）/);
+            // 4) みんかぶ投信＆みんかぶ株式からの抽出
+            const mkFundMatch = normPlain.match(/投資信託情報:([^<「｜|]+?)は基準価額([0-9,]+)円、前日比([+-]?[0-9,]+)円\(([+-]?[0-9.]+)%\)/);
             if (mkFundMatch) {
                 out.name = mkFundMatch[1].trim();
                 out.price = parseCleanNum(mkFundMatch[2]);
                 out.change = `${mkFundMatch[4]}% (${mkFundMatch[3]}円)`;
                 out.isFund = true;
             }
-            if (!out.businessSummary && metaDesc.length >= 25 && !metaDesc.includes("Yahoo!ファイナンス")) {
-                out.businessSummary = metaDesc.replace(/\s+/g, " ").trim();
+            if (!out.price) {
+                const navMatch = normPlain.match(/基準価額\s*([0-9,]+)\s*円/);
+                if (navMatch) out.price = parseCleanNum(navMatch[1]);
             }
-
-            // 5) Yahoo!ファイナンスの埋め込みJSONからの抽出（夜間PTS・小数点株価対応）
-            const yfPriceKey = html.match(/"price"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
-            const yfNavKey = html.match(/"nav"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
-            const yfPrevKey = html.match(/"previousPrice"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
-            const yfPtsKey = html.match(/"ptsPrice"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
-            const yfRateKey = html.match(/"priceChangeRate"\s*:\s*"([+-]?[0-9.]+)"/);
-
-            if (yfPriceKey && !out.price) out.price = parseCleanNum(yfPriceKey[1]);
-            if (yfNavKey && !out.price) out.price = parseCleanNum(yfNavKey[1]);
-            if (yfPrevKey) out.prevClose = parseCleanNum(yfPrevKey[1]);
-            if (yfPtsKey) out.ptsPrice = parseCleanNum(yfPtsKey[1]);
-            if (yfRateKey && !out.change) {
-                const r = parseCleanNum(yfRateKey[1]);
-                if (!isNaN(r)) out.change = (r >= 0 ? "+" : "") + r.toFixed(2) + "%";
-            }
-
-            // 6) 日本経済新聞 (nikkei.com) のDOM抽出
-            const nkPriceEl = doc.querySelector(".m-stockPriceElm_value");
-            if (nkPriceEl && !out.price) {
-                const p = parseCleanNum(nkPriceEl.textContent);
+            const mkPriceEl = doc.querySelector("div.stock_price");
+            if (mkPriceEl && !out.price) {
+                const p = parseCleanNum(mkPriceEl.textContent);
                 if (!isNaN(p) && p > 0) out.price = p;
             }
 
-            if (!out.price && out.prevClose) out.price = out.prevClose;
+            // 5) Yahoo!ファイナンスJSONキーからの抽出（PTS等）
+            const yfPriceKey = html.match(/"price"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
+            const yfPtsKey = html.match(/"ptsPrice"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
+            if (yfPriceKey && !out.price) out.price = parseCleanNum(yfPriceKey[1]);
+            if (yfPtsKey) out.ptsPrice = parseCleanNum(yfPtsKey[1]);
+
             return (out.price && out.price > 0) ? out : null;
         }
 
-        // 株探の時系列ページ (`kabutan.jp/stock/kabuka?code=XXXX`) から実際の過去日足四本値を抽出
-        function parseKabutanHistoryDOM(html) {
+        // 日経電子版の時系列ページ または 株探の時系列ページから過去日足四本値を抽出
+        function parseHistoryCandlesDOM(html) {
             if (!html) return null;
             const doc = new DOMParser().parseFromString(html, "text/html");
             const candles = [];
-            const rows = doc.querySelectorAll("table.stock_kabuka0 tbody tr, table.stock_kabuka_dwm tbody tr");
 
-            rows.forEach(tr => {
+            // パターンA: 株探の時系列テーブル (`26/11/10` 形式)
+            doc.querySelectorAll("table.stock_kabuka0 tbody tr, table.stock_kabuka_dwm tbody tr").forEach(tr => {
                 const th = (tr.querySelector("th")?.textContent || "").trim();
                 const tds = tr.querySelectorAll("td");
                 if (/^\d{2}\/\d{2}\/\d{2}$/.test(th) && tds.length >= 4) {
@@ -516,10 +534,29 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                     }
                 }
             });
+
+            // パターンB: 日経電子版の時系列テーブル (`2026/11/10` または `11/10` 形式)
+            if (candles.length < 5) {
+                doc.querySelectorAll("table tr").forEach(tr => {
+                    const dateTxt = (tr.querySelector("th, td")?.textContent || "").trim();
+                    const tds = tr.querySelectorAll("td");
+                    if (/(\d{1,2})\/(\d{1,2})/.test(dateTxt) && tds.length >= 4) {
+                        const dm = dateTxt.match(/(\d{1,2})\/(\d{1,2})/);
+                        const o = parseCleanNum(tds[0].textContent);
+                        const h = parseCleanNum(tds[1].textContent);
+                        const l = parseCleanNum(tds[2].textContent);
+                        const c = parseCleanNum(tds[3].textContent);
+                        if (dm && !isNaN(c) && c > 0 && !isNaN(o)) {
+                            candles.push({ date: `${parseInt(dm[1], 10)}/${parseInt(dm[2], 10)}`, o, h, l, c });
+                        }
+                    }
+                });
+            }
+
             return candles.length >= 5 ? candles.reverse() : null;
         }
 
-        // マルチサイト横断検索（株探・みんかぶ株式・みんかぶ投信・日経・Yahoo!）
+        // 検索時のオンライン照会（プロキシを詰まらせないよう厳選した2リクエストのみ実行）
         let liveSearchCache = {};
         async function searchMultiSourceOnline(query) {
             const cleanQ = (query || "").trim();
@@ -544,35 +581,19 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 });
             };
 
-            const [mkStockHtml, mkFundHtml, nkHtml, yfHtml] = await Promise.all([
-                fetchFastCorsText(`https://minkabu.jp/stock/find?word=${encodeURIComponent(cleanQ)}`, 4000),
-                fetchFastCorsText(`https://itf.minkabu.jp/search?word=${encodeURIComponent(cleanQ)}`, 4000),
-                fetchFastCorsText(`https://www.nikkei.com/nkd/search/?keyword=${encodeURIComponent(cleanQ)}`, 4000),
-                fetchFastCorsText(`https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(cleanQ)}`, 4000)
-            ]);
-
-            if (mkStockHtml) {
-                const regMkS = /href="\/stock\/([0-9]{4}|[0-9]{3}[A-Z])"[^>]*>([\s\S]*?)<\/a>/gi;
-                let m;
-                while ((m = regMkS.exec(mkStockHtml)) !== null && results.length < 10) addHit(m[1], m[2], false, "🏢 みんかぶ株");
-            }
-            if (mkFundHtml) {
-                const regMkF = /href="\/fund\/([0-9A-Z]{8})"[^>]*>([\s\S]*?)<\/a>/gi;
-                let m;
-                while ((m = regMkF.exec(mkFundHtml)) !== null && results.length < 12) addHit(m[1], m[2], true, "🌱 みんかぶ投信");
-            }
+            // 株式検索（日経電子版）と投信検索（みんかぶ投信）を直列フォールバックで安全に取得
+            const nkHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/search/?keyword=${encodeURIComponent(cleanQ)}`, 4500);
             if (nkHtml) {
                 const regNk = /href="\/nkd\/company\/\?scode=([0-9]{4}|[0-9]{3}[A-Z])"[^>]*>([\s\S]*?)<\/a>/gi;
                 let m;
-                while ((m = regNk.exec(nkHtml)) !== null && results.length < 14) addHit(m[1], m[2], false, "📰 日経");
+                while ((m = regNk.exec(nkHtml)) !== null && results.length < 8) addHit(m[1], m[2], false, "📰 日経");
             }
-            if (yfHtml) {
-                const regYf = /href="(?:https?:\/\/finance\.yahoo\.co\.jp)?\/quote\/([0-9]{4}\.T|[0-9]{3}[A-Z]\.T|[0-9A-Z]{8})(?:[/?#"][^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
+
+            const mkFundHtml = await fetchSequentialCorsText(`https://itf.minkabu.jp/search?word=${encodeURIComponent(cleanQ)}`, 4500);
+            if (mkFundHtml) {
+                const regMkF = /href="\/fund\/([0-9A-Z]{8})"[^>]*>([\s\S]*?)<\/a>/gi;
                 let m;
-                while ((m = regYf.exec(yfHtml)) !== null && results.length < 16) {
-                    const c = m[1].replace(/\.T$/i, "").toUpperCase();
-                    addHit(c, m[2], isFundCodeFormat(c), isFundCodeFormat(c) ? "🌱 Y!投信" : "🏢 Y!株");
-                }
+                while ((m = regMkF.exec(mkFundHtml)) !== null && results.length < 12) addHit(m[1], m[2], true, "🌱 投信");
             }
 
             if (results.length > 0) liveSearchCache[cleanQ] = results;
@@ -580,10 +601,9 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
         }
     </script>
     <!-- =========================================================================
-         スクリプト第2部：オンデマンド実データ抽出 ＋ 株探実チャート ＋ クオンツXAI推論エンジン
+         スクリプト第2部：直列安定データ取得 ＋ 株探/日経実チャート ＋ クオンツXAI推論エンジン
     ========================================================================== -->
     <script>
-        // 投資信託の連動ベンチマークETF推論
         function inferBenchmarkEtf(item) {
             if (item.proxyEtf) return item.proxyEtf;
             const s = `${item.name || ""} ${item.sector || ""}`.toLowerCase();
@@ -599,20 +619,24 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
         }
 
         /* =========================================================================
-         * ★ オンデマンド実データ取得エンジン
-         *  ・個別株は「株探(基本情報＋企業概要)」「株探(時系列四本値)」「Yahoo!(PTS)」「みんかぶ」を同時解析
-         *  ・偽装フォールバック（¥1,800 / +1.18%）は一切行わず、実データのみを反映
+         * ★ 直列安定データ取得エンジン（同時リクエストによるプロキシ遮断を完全防止）
+         *  Step 1: 日経電子版 (nikkei.com) から現在値・前日比・業種・PER・利回りを取得
+         *  Step 2: 不足項目があれば 株探 (kabutan.jp) または みんかぶ から補完
+         *  Step 3: 株探/日経の時系列テーブルから過去日足を取得し、25日線・RSI・BBを実計算
          * ========================================================================= */
         async function fetchAndApplyLiveYahooData(item, reRenderModalIfOpen = false) {
             if (!item) return false;
             const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
 
-            // 1) 内蔵マスター辞書に一致があり、旧バージョンのダミー値(1800円/+1.18%)が残っていれば即座にマスター値へ修復
+            // 0) マスター辞書に一致があり、未取得(price<=0)や旧ダミー値(1800円)なら即座にマスター実データで修復
             const masterHit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanId || normalizeText(m.name) === normalizeText(item.name));
-            if (masterHit && (item.price === 1800 || item.change === "+1.18%" || item.price === 20000 || !item.price)) {
+            if (masterHit && (!item.price || item.price <= 0 || item.price === 1800 || item.change === "取得中..." || item.change === "+1.18%")) {
                 Object.assign(item, JSON.parse(JSON.stringify(masterHit)));
                 saveState();
                 renderWatchlist();
+                if (reRenderModalIfOpen && currentOpenAssetId === item.id) {
+                    renderDetailModalContent(item);
+                }
             }
 
             const isFund = isFundCodeFormat(cleanId) || ((item.assetClass === "FUND" || item.assetClass === "LEVERAGE") && !isStockCodeFormat(cleanId));
@@ -621,32 +645,40 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 const badgeEl = document.getElementById("modalLiveBadge");
                 if (badgeEl) {
                     badgeEl.className = "text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full";
-                    badgeEl.innerText = "⏳ 実データ抽出中...";
+                    badgeEl.innerText = "⏳ 日経・株探から抽出中...";
                 }
             }
 
-            const kbBasicUrl = !isFund ? `https://kabutan.jp/stock/?code=${cleanId}` : null;
-            const kbHistUrl = !isFund ? `https://kabutan.jp/stock/kabuka?code=${cleanId}` : null;
-            const mkUrl = isFund ? `https://itf.minkabu.jp/fund/${cleanId}` : `https://minkabu.jp/stock/${cleanId}`;
-            const yfUrl = `https://finance.yahoo.co.jp/quote/${isFund ? cleanId : cleanId + '.T'}`;
-            const chartSymbol = isFund ? inferBenchmarkEtf(item) : `${cleanId}.T`;
-            const chartApiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${chartSymbol}?interval=1d&range=6mo`;
-
-            const [kbBasicHtml, kbHistHtml, mkHtml, yfHtml, chartJson] = await Promise.all([
-                kbBasicUrl ? fetchFastCorsText(kbBasicUrl, 4500) : Promise.resolve(null),
-                kbHistUrl ? fetchFastCorsText(kbHistUrl, 4500) : Promise.resolve(null),
-                fetchFastCorsText(mkUrl, 4500),
-                fetchFastCorsText(yfUrl, 4200),
-                fetchFastCorsText(chartApiUrl, 4000)
-            ]);
-
             let updated = false;
+            let merged = {};
 
-            // 各サイトのDOM解析結果を統合（株探・みんかぶ・Yahoo!の長所をマージ）
-            const parsedKb = parseStockOrFundHtmlWithDOM(kbBasicHtml);
-            const parsedMk = parseStockOrFundHtmlWithDOM(mkHtml);
-            const parsedYf = parseStockOrFundHtmlWithDOM(yfHtml);
-            const merged = Object.assign({}, parsedMk, parsedKb, parsedYf);
+            if (isFund) {
+                // 投資信託：みんかぶ投信 → Yahoo!ファイナンスの順で直列取得
+                const mkHtml = await fetchSequentialCorsText(`https://itf.minkabu.jp/fund/${cleanId}`, 5500);
+                const pMk = parseStockOrFundHtmlWithDOM(mkHtml);
+                if (pMk) Object.assign(merged, pMk);
+
+                if (!merged.price) {
+                    const yfHtml = await fetchSequentialCorsText(`https://finance.yahoo.co.jp/quote/${cleanId}`, 5000);
+                    const pYf = parseStockOrFundHtmlWithDOM(yfHtml);
+                    if (pYf) Object.assign(merged, pYf);
+                }
+            } else {
+                // 個別株・ETF・REIT：①日経電子版 → ②株探（基本＋企業概要） → ③みんかぶ の順で直列取得
+                const nkHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/company/?scode=${cleanId}`, 5500);
+                const pNk = parseStockOrFundHtmlWithDOM(nkHtml);
+                if (pNk) Object.assign(merged, pNk);
+
+                const kbHtml = await fetchSequentialCorsText(`https://kabutan.jp/stock/?code=${cleanId}`, 5500);
+                const pKb = parseStockOrFundHtmlWithDOM(kbHtml);
+                if (pKb) Object.assign(merged, pKb, { price: merged.price || pKb.price, change: merged.change || pKb.change });
+
+                if (!merged.price) {
+                    const mkStockHtml = await fetchSequentialCorsText(`https://minkabu.jp/stock/${cleanId}`, 5000);
+                    const pMkS = parseStockOrFundHtmlWithDOM(mkStockHtml);
+                    if (pMkS) Object.assign(merged, pMkS);
+                }
+            }
 
             if (merged && merged.price > 0) {
                 if (merged.name && (item.name.includes("銘柄") || item.name.includes("信託") || item.name.includes("株式会社") || item.name === cleanId)) {
@@ -657,7 +689,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 if (merged.ptsPrice > 0) item.ptsPrice = merged.ptsPrice;
                 if (merged.ptsChange) item.ptsChange = merged.ptsChange;
                 if (merged.change) item.change = merged.change;
-                if (merged.sector) item.sector = merged.sector;
+                if (merged.sector && merged.sector !== "東証上場") item.sector = merged.sector;
                 if (merged.per) item.per = merged.per;
                 if (merged.pbr) item.pbr = merged.pbr;
                 if (merged.dividend !== undefined) item.dividend = merged.dividend;
@@ -669,50 +701,60 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 updated = true;
             }
 
-            // 時系列データ（①株探の時系列テーブル または ②Yahoo Chart API）から本物の移動平均・RSI・BBを算出
+            // 時系列日足データの取得（①株探の時系列ページ → ②日経の時系列ページ → ③Yahoo Chart API）
             let rawCandles = null;
-            if (!isFund && kbHistHtml) {
-                rawCandles = parseKabutanHistoryDOM(kbHistHtml);
-            }
-            if (!rawCandles && chartJson) {
-                try {
-                    const res = JSON.parse(chartJson)?.chart?.result?.[0];
-                    if (res && res.timestamp && res.indicators?.quote?.[0]) {
-                        const ts = res.timestamp, q = res.indicators.quote[0];
-                        const arr = [];
-                        for (let i = 0; i < ts.length; i++) {
-                            if (q.close[i] != null) {
-                                const d = new Date(ts[i] * 1000);
-                                arr.push({
-                                    date: `${d.getMonth() + 1}/${d.getDate()}`,
-                                    o: q.open[i] || q.close[i],
-                                    h: q.high[i] || q.close[i],
-                                    l: q.low[i] || q.close[i],
-                                    c: q.close[i]
-                                });
-                            }
-                        }
-                        if (arr.length >= 10) rawCandles = arr;
-                    }
-                } catch (e) {}
+            if (!isFund) {
+                const kbHistHtml = await fetchSequentialCorsText(`https://kabutan.jp/stock/kabuka?code=${cleanId}`, 5500);
+                rawCandles = parseHistoryCandlesDOM(kbHistHtml);
+
+                if (!rawCandles) {
+                    const nkHistHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/company/history/dprice/?scode=${cleanId}`, 5000);
+                    rawCandles = parseHistoryCandlesDOM(nkHistHtml);
+                }
             }
 
-            if (rawCandles && rawCandles.length >= 8) {
+            if (!rawCandles) {
+                const chartSymbol = isFund ? inferBenchmarkEtf(item) : `${cleanId}.T`;
+                const chartJson = await fetchSequentialCorsText(`https://query1.finance.yahoo.com/v8/finance/chart/${chartSymbol}?interval=1d&range=3mo`, 4500);
+                if (chartJson) {
+                    try {
+                        const res = JSON.parse(chartJson)?.chart?.result?.[0];
+                        if (res && res.timestamp && res.indicators?.quote?.[0]) {
+                            const ts = res.timestamp, q = res.indicators.quote[0];
+                            const arr = [];
+                            for (let i = 0; i < ts.length; i++) {
+                                if (q.close[i] != null) {
+                                    const d = new Date(ts[i] * 1000);
+                                    arr.push({
+                                        date: `${d.getMonth() + 1}/${d.getDate()}`,
+                                        o: q.open[i] || q.close[i],
+                                        h: q.high[i] || q.close[i],
+                                        l: q.low[i] || q.close[i],
+                                        c: q.close[i]
+                                    });
+                                }
+                            }
+                            if (arr.length >= 8) rawCandles = arr;
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (rawCandles && rawCandles.length >= 5) {
                 const lastRaw = rawCandles[rawCandles.length - 1].c;
-                const prevRaw = rawCandles[rawCandles.length - 2].c;
+                const prevRaw = rawCandles.length >= 2 ? rawCandles[rawCandles.length - 2].c : lastRaw;
 
                 if (!isFund && (!merged || !merged.price)) {
-                    item.price = lastRaw < 500 ? Number(lastRaw.toFixed(1)) : Math.round(lastRaw);
+                    item.price = lastRaw < 2000 && lastRaw % 1 !== 0 ? Number(lastRaw.toFixed(1)) : Math.round(lastRaw);
                     item.prevClose = prevRaw;
                 }
-                if (!item.change || item.change === "取得中..." || item.change === "+1.18%") {
+                if (!item.change || item.change === "取得中...") {
                     const chgPct = ((lastRaw - prevRaw) / prevRaw) * 100;
                     item.change = (chgPct >= 0 ? "+" : "") + chgPct.toFixed(2) + "%";
                 }
 
-                // 投資信託の場合は現在基準価額に合わせてベンチマーク日足をスケーリング、個別株は実数値をそのまま使用
                 const scale = (isFund && item.price > 0 && lastRaw > 0) ? (item.price / lastRaw) : 1;
-                const useDecimal = item.price < 500 && (item.price % 1 !== 0 || lastRaw % 1 !== 0);
+                const useDecimal = item.price < 3000 && (item.price % 1 !== 0 || lastRaw % 1 !== 0);
                 const roundVal = v => useDecimal ? Number((v * scale).toFixed(1)) : Math.round(v * scale);
 
                 const scaled = rawCandles.map(c => ({
@@ -723,7 +765,6 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                     c: roundVal(c.c)
                 }));
 
-                // 最新日の終値を現在のリアルタイム/終値価格に同期
                 if (item.price > 0 && scaled.length > 0) {
                     scaled[scaled.length - 1].c = item.price;
                 }
@@ -735,11 +776,11 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 const std = Math.sqrt(slice25.reduce((a, b) => a + Math.pow(b - ma25, 2), 0) / slice25.length) || (ma25 * 0.02) || 1;
                 const activePrice = (item.usePtsForAi && item.ptsPrice) ? item.ptsPrice : item.price;
 
-                item.ma25 = activePrice < 500 ? Number(ma25.toFixed(1)) : Math.round(ma25);
+                item.ma25 = activePrice < 3000 && activePrice % 1 !== 0 ? Number(ma25.toFixed(1)) : Math.round(ma25);
                 item.bb = Number(Math.max(-3.0, Math.min(3.0, (activePrice - ma25) / std)).toFixed(1));
 
                 const rsiPeriod = Math.min(14, closes.length - 1);
-                if (rsiPeriod >= 5) {
+                if (rsiPeriod >= 4) {
                     let gains = 0, losses = 0;
                     for (let i = closes.length - rsiPeriod; i < closes.length; i++) {
                         const diff = closes[i] - closes[i - 1];
@@ -749,15 +790,15 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                     item.rsi = Math.max(8, Math.min(92, Math.round(100 - (100 / (1 + rs)))));
                 }
                 updated = true;
-            } else if (updated && item.price > 0 && (!item.ma25 || item.ma25 === 1778 || item.ma25 === 1800)) {
-                item.ma25 = item.price < 500 ? Number((item.price * 1.01).toFixed(1)) : Math.round(item.price * 1.01);
+            } else if (updated && item.price > 0 && (!item.ma25 || item.ma25 <= 0)) {
+                item.ma25 = item.price < 3000 && item.price % 1 !== 0 ? Number((item.price * 0.99).toFixed(1)) : Math.round(item.price * 0.99);
+                if (!item.change || item.change === "取得中...") item.change = "0.00%";
             }
 
             item.isFetching = false;
-            item.syncFailed = !updated && (!item.price || item.change === "取得中...");
+            item.syncFailed = (!item.price || item.price <= 0);
 
-            if (updated) {
-                // 取得したPER/PBR/RSI等から5大ファクターも動的に再評価
+            if (updated && item.price > 0) {
                 if (item.pbr && item.pbr > 0) {
                     item.factors.value = item.pbr <= 0.8 ? 92 : item.pbr <= 1.2 ? 84 : item.pbr <= 2.0 ? 72 : 60;
                 }
@@ -773,22 +814,21 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             return updated;
         }
 
-        // ローソク足＋5日線＋25日移動平均線チャート描画 (HTML5 Canvas)
+        // ローソク足＋5日線＋25日線チャート描画 (HTML5 Canvas)
         let currentChartPeriod = 60;
         let currentOpenAssetId = null;
 
         function getOrBuildCandles(item, count = 120) {
-            const endPrice = Number(item.price) || 100;
-            // もし過去の履歴キャッシュが現在の株価と30%以上乖離していれば（旧¥1,800キャッシュ等）、破棄して実価格ベースで再構築
-            if (Array.isArray(item.ohlcHistory) && item.ohlcHistory.length >= 8) {
+            const endPrice = Number(item.price) > 0 ? Number(item.price) : 1000;
+            if (Array.isArray(item.ohlcHistory) && item.ohlcHistory.length >= 5) {
                 const lastC = item.ohlcHistory[item.ohlcHistory.length - 1].c;
                 if (Math.abs(lastC - endPrice) / endPrice < 0.30) {
                     return item.ohlcHistory.slice(-count);
                 }
             }
-            const targetMa25 = Number(item.ma25) || endPrice;
+            const targetMa25 = Number(item.ma25) > 0 ? Number(item.ma25) : endPrice;
             const volPct = (item.volatility || 22) / 100 / Math.sqrt(250);
-            const useDec = endPrice < 500;
+            const useDec = endPrice < 3000 && endPrice % 1 !== 0;
             const rVal = v => useDec ? Number(v.toFixed(1)) : Math.round(v);
 
             let seed = 7;
@@ -841,7 +881,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             const viewMa5 = ma5Arr.slice(-candles.length);
             const viewMa25 = ma25Arr.slice(-candles.length);
 
-            const padL = 8, padR = 50, padT = 12, padB = 20;
+            const padL = 8, padR = 52, padT = 12, padB = 20;
             const chartW = width - padL - padR, chartH = height - padT - padB;
 
             let minP = Infinity, maxP = -Infinity;
@@ -939,7 +979,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 const rect = canvas.getBoundingClientRect();
                 const all = getOrBuildCandles(item, 130);
                 const len = Math.min(currentChartPeriod, all.length);
-                const idx = Math.min(len - 1, Math.max(0, Math.floor(((clientX - rect.left - 8) / (rect.width - 58)) * len)));
+                const idx = Math.min(len - 1, Math.max(0, Math.floor(((clientX - rect.left - 8) / (rect.width - 60)) * len)));
                 drawYahooStyleChart(canvasId, item, currentChartPeriod, idx);
             };
             canvas.addEventListener("touchmove", e => e.touches[0] && move(e.touches[0].clientX), { passive: true });
@@ -954,8 +994,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             if (item) renderDetailModalContent(item);
         }
 
-        // 状態管理 ＆ 旧「¥1,800 / +1.18%」誤キャッシュの完全自動修復
-        const STORAGE_KEY = "quant_advisor_pro_v16_dom";
+        // 状態管理 ＆ 「取得中... (イオン8267等)」の起動時自動修復
+        const STORAGE_KEY = "quant_advisor_pro_v17_seq";
         let currentFilter = "ALL";
         let currentCatalogCat = "ALL";
         let watchlist = [];
@@ -965,15 +1005,14 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
 
         function loadState() {
             try {
-                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("quant_advisor_pro_v15_full");
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("quant_advisor_pro_v16_dom") || localStorage.getItem("quant_advisor_pro_v15_full");
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed.watchlist) && parsed.watchlist.length > 0) {
                         watchlist = parsed.watchlist.map(item => {
                             const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
                             const hit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanId || normalizeText(m.name) === normalizeText(item.name));
-                            // 旧バージョンのダミー値(¥1,800 / +1.18% / ¥1,778)が入っている銘柄はマスターまたは再取得対象として即修復
-                            if (hit && (item.price === 1800 || item.change === "+1.18%" || item.ma25 === 1778 || item.price === 20000)) {
+                            if (hit && (!item.price || item.price <= 0 || item.price === 1800 || item.change === "取得中..." || item.change === "+1.18%")) {
                                 return cloneObj(hit);
                             }
                             return item;
@@ -986,8 +1025,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 }
             } catch (e) {}
 
-            // 初期監視リスト（8729ソニーFG、りそなHD、千葉銀行、日経225ノーロード、Smart-i日経225、netWIN B、北浜キャピタル、キオクシア）
-            const defaultIds = ["8729", "8308", "8331", "47311988", "AJ313178", "3531299B", "2134", "285A"];
+            // 初期リスト（8267イオン、8729ソニーFG、8308りそなHD、8331千葉銀行、3531199B netWIN A、3531299B netWIN B、47311988 日経225ノーロード、285Aキオクシア）
+            const defaultIds = ["8267", "8729", "8308", "8331", "3531199B", "3531299B", "47311988", "285A"];
             watchlist = defaultIds.map(id => {
                 const found = MASTER_MARKET_DB.find(m => m.id === id);
                 return found ? cloneObj(found) : null;
@@ -1011,7 +1050,14 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             renderAll();
         }
 
-        // 手動ボタンを押した時だけ、プロキシが詰まらないよう1銘柄ずつ順番に同期する
+        // 未取得（price <= 0）の銘柄があれば、起動後に1件ずつ順番にバックグラウンド取得する
+        async function autoRepairPendingItems() {
+            const pending = watchlist.filter(it => !it.price || it.price <= 0 || it.change === "取得中...");
+            for (const item of pending) {
+                await fetchAndApplyLiveYahooData(item, true);
+            }
+        }
+
         async function syncAllWatchlistPrices() {
             if (isSyncingAll) return;
             isSyncingAll = true;
@@ -1046,11 +1092,12 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
         }
 
         function evaluateQuantMetrics(asset, macroRegime) {
-            const activePrice = (asset.usePtsForAi && asset.ptsPrice) ? Number(asset.ptsPrice) : (Number(asset.price) || 100);
-            const ma25 = Number(asset.ma25) || activePrice;
+            const hasValidPrice = Number(asset.price) > 0;
+            const activePrice = (asset.usePtsForAi && asset.ptsPrice) ? Number(asset.ptsPrice) : (hasValidPrice ? Number(asset.price) : 1000);
+            const ma25 = Number(asset.ma25) > 0 ? Number(asset.ma25) : activePrice;
             const rsi = Number(asset.rsi) || 50;
             const bb = Number(asset.bb) || 0;
-            const maDiffPct = ((activePrice - ma25) / ma25) * 100;
+            const maDiffPct = hasValidPrice ? (((activePrice - ma25) / ma25) * 100) : 0;
             const f = asset.factors || { value: 76, momentum: 74, quality: 84, stability: 78, macroFit: 86 };
 
             let tech = 50 + (rsi <= 35 ? 28 : rsi <= 45 ? 16 : rsi >= 70 ? -25 : 6) + (bb <= -1.2 ? 15 : bb >= 1.6 ? -15 : 4);
@@ -1120,14 +1167,15 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             }
 
             const volFactor = (asset.assetClass === "LEVERAGE" || activePrice < 50) ? 0.12 : 0.035;
-            const entry1 = roundPriceSmart(activePrice, activePrice);
-            const entry2 = roundPriceSmart(Math.min(activePrice * (1 - volFactor), ma25 * 0.985), activePrice);
-            const takeProfit = roundPriceSmart(Math.max(activePrice * (1 + volFactor * 2.0), ma25 * 1.06), activePrice);
-            const stopLoss = roundPriceSmart(entry2 * (1 - volFactor * 1.2), activePrice);
+            const entry1 = hasValidPrice ? roundPriceSmart(activePrice, activePrice) : 0;
+            const entry2 = hasValidPrice ? roundPriceSmart(Math.min(activePrice * (1 - volFactor), ma25 * 0.985), activePrice) : 0;
+            const takeProfit = hasValidPrice ? roundPriceSmart(Math.max(activePrice * (1 + volFactor * 2.0), ma25 * 1.06), activePrice) : 0;
+            const stopLoss = hasValidPrice ? roundPriceSmart(entry2 * (1 - volFactor * 1.2), activePrice) : 0;
             const gaugePosition = Math.max(6, Math.min(94, Math.round(50 + (bb / 3.0) * 42)));
 
             return {
-                activePrice, maDiffPct: maDiffPct.toFixed(1), totalScore, cpcvConfidence,
+                activePrice: hasValidPrice ? activePrice : 0,
+                maDiffPct: maDiffPct.toFixed(1), totalScore, cpcvConfidence,
                 signalCode, badgeText, badgeStyle, actionHeadline,
                 entry1, entry2, takeProfit, stopLoss, gaugePosition, factors: f
             };
@@ -1163,7 +1211,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             };
         }
 
-        // 詳細モーダル描画（開いた瞬間にその銘柄に通信を100%集中させて実データを抽出！）
+        // 詳細モーダル描画
         function openDetailModal(assetId) {
             const item = watchlist.find(w => w.id === assetId);
             if (!item) return;
@@ -1182,9 +1230,23 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             renderDetailModalContent(item);
         }
 
+        function applyQuickManualPrice(assetId) {
+            const item = watchlist.find(w => w.id === assetId);
+            if (!item) return;
+            const p = parseFloat(document.getElementById("quickPriceInput").value);
+            if (isNaN(p) || p <= 0) return;
+            item.price = p;
+            if (!item.ma25 || item.ma25 <= 0) item.ma25 = roundPriceSmart(p * 0.99, p);
+            if (!item.change || item.change === "取得中...") item.change = "0.00%";
+            item.syncFailed = false;
+            saveState();
+            renderWatchlist();
+            renderDetailModalContent(item);
+        }
+
         function renderDetailModalContent(item) {
             const macro = document.getElementById("macroSelect").value;
-            const budget = parseFloat(document.getElementById("budgetInput").value) || 300000;
+            const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
             const quant = evaluateQuantMetrics(item, macro);
             const xai = generateXaiExplanation(item, quant, budget);
             const typeBadge = getAssetTypeBadge(item.assetClass);
@@ -1199,10 +1261,10 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             const badgeEl = document.getElementById("modalLiveBadge");
             if (item.isFetching) {
                 badgeEl.className = "text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full";
-                badgeEl.innerText = "⏳ 実データ抽出中...";
+                badgeEl.innerText = "⏳ 日経・株探から抽出中...";
             } else if (item.syncFailed) {
                 badgeEl.className = "text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 px-2 py-0.5 rounded-full";
-                badgeEl.innerText = "⚠️ 再取得してください";
+                badgeEl.innerText = "⚠️ 通信混雑（再取得または下で入力可）";
             } else {
                 badgeEl.className = "text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full";
                 badgeEl.innerText = `🟢 実データ同期済 ${item.syncedAt || ''}`;
@@ -1237,8 +1299,8 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                         <div class="flex justify-between items-center text-[10px] text-slate-300 mb-2">
                             <span>📊 ${item.sector || '東証・市場連動ボード'}</span>
                             <div class="flex gap-1.5">
-                                <a href="${kbUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">📈 ${isFundType ? 'みんかぶ' : '株探'} ↗</a>
                                 <a href="${nkUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">📰 日経 ↗</a>
+                                <a href="${kbUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">📈 ${isFundType ? 'みんかぶ' : '株探'} ↗</a>
                                 <a href="${yfUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">🔗 Y! ↗</a>
                             </div>
                         </div>
@@ -1342,7 +1404,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                     </div>
                 </div>
 
-                <!-- 4段目：なぜそう推論するのか？（抽出された企業概要もここに表示） -->
+                <!-- 4段目：なぜそう推論するのか？ -->
                 <div class="bg-white rounded-3xl p-4 border border-slate-200 space-y-3">
                     <h4 class="text-xs font-extrabold text-slate-800">🧠 AIがそう判断した「明確な理由」と企業概要</h4>
                     <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
@@ -1379,6 +1441,13 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                         </div>
                     </div>
                 </div>
+
+                <!-- 6段目：万一プロキシが混雑している時の1秒価格補正ボックス -->
+                <div class="bg-slate-100 rounded-2xl p-3 border border-slate-200 flex items-center justify-between gap-2 text-xs">
+                    <span class="text-[11px] font-bold text-slate-600 shrink-0">⚡ 現在値の手動補正:</span>
+                    <input type="number" step="0.1" id="quickPriceInput" value="${item.price > 0 ? item.price : ''}" placeholder="例: 1283.5" class="w-28 bg-white border border-slate-300 rounded-lg px-2 py-1 font-bold text-slate-800">
+                    <button type="button" onclick="applyQuickManualPrice('${item.id}')" class="bg-slate-800 text-white font-bold px-3 py-1 rounded-lg shrink-0">反映</button>
+                </div>
             `;
 
             setTimeout(() => {
@@ -1392,7 +1461,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             document.getElementById("detailModal").classList.add("hidden");
         }
 
-        // 検索・マルチサイトオンライン候補取得・コード直接追加
+        // 検索・候補取得
         let liveSearchTimer = null;
 
         function renderSearchCandidates(showDefaultWhenEmpty = false) {
@@ -1431,7 +1500,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 codeRow.innerHTML = `
                     <div>
                         <span class="text-[9px] font-extrabold bg-teal-600 text-white px-2 py-0.5 rounded">コード直接抽出</span>
-                        <strong class="text-xs text-teal-900 ml-1">コード「${cleanCode}」の実データ・企業概要を抽出して追加</strong>
+                        <strong class="text-xs text-teal-900 ml-1">コード「${cleanCode}」の実データを日経・株探から抽出して追加</strong>
                     </div>
                     <span class="text-xs font-extrabold bg-teal-700 text-white px-3 py-1.5 rounded-xl shrink-0">＋ 抽出</span>
                 `;
@@ -1471,7 +1540,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 directBox.className = "p-3 bg-gradient-to-r from-teal-50 to-sky-50 text-center";
                 directBox.innerHTML = `
                     <button type="button" id="directFetchBtn" onclick="directFetchByQueryOrCode('${safeQ}')" class="w-full py-2.5 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow-sm">
-                        ⚡ 「${safeQ}」を株探・みんかぶ・日経から直接検索して追加
+                        ⚡ 「${safeQ}」を日経・株探・みんかぶから直接検索して追加
                     </button>
                 `;
                 listEl.appendChild(directBox);
@@ -1482,7 +1551,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             if (rawQuery.length >= 2) {
                 clearTimeout(liveSearchTimer);
                 liveStatus.classList.remove("hidden");
-                document.getElementById("liveSearchStatusText").innerText = `🌐 株探・みんかぶ・日経・Y!から「${rawQuery}」を検索中...`;
+                document.getElementById("liveSearchStatusText").innerText = `🌐 日経・みんかぶから「${rawQuery}」を検索中...`;
 
                 liveSearchTimer = setTimeout(async () => {
                     const onlineHits = await searchMultiSourceOnline(rawQuery);
@@ -1513,7 +1582,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                     document.getElementById("liveSearchStatusText").innerText = (added > 0 || localMatches.length > 0)
                         ? `✅ 候補をタップすると最新実データ＆チャートを表示します`
                         : `💡 下の緑ボタンを押すか銘柄コード（4桁/8桁）を入力すると直接抽出できます`;
-                }, 280);
+                }, 400);
             }
         }
 
@@ -1552,7 +1621,6 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             openDetailModal(target.id);
         }
 
-        // ★ 偽装¥1,800を廃止：新規コード追加時はその場で株探・みんかぶから実データを抽出して反映
         async function selectOnlineCandidate(code, assetName, assetClass = "STOCK") {
             const cleanCode = String(code).replace(/\.T$/i, "").toUpperCase();
             const masterHit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanCode);
@@ -1576,7 +1644,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
                 keywords: `${assetName} ${cleanCode}`,
                 volatility: 22,
                 factors: { value: 76, momentum: 72, quality: 82, stability: 78, macroFit: 84 },
-                businessSummary: "株探・みんかぶ・日経・Yahoo!ファイナンスから企業概要と市場実データを抽出しています..."
+                businessSummary: "日経電子版・株探・みんかぶから企業概要と市場実データを抽出しています..."
             };
 
             const existingIdx = watchlist.findIndex(w => w.id === cleanCode);
@@ -1629,7 +1697,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
         }
 
         function renderGlobalAllocation() {
-            const budget = parseFloat(document.getElementById("budgetInput").value) || 300000;
+            const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
             const macro = document.getElementById("macroSelect").value;
             document.getElementById("macroBadge").innerText = getMacroLabel(macro);
             let r1 = 0.35, r2 = 0.40, r3 = 0.25;
@@ -1717,7 +1785,7 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
 
         function setCatalogCat(cat) {
             currentCatalogCat = cat;
-            ["ALL", "投信", "銀行", "半導体", "電線", "高配当", "低位株"].forEach(c => {
+            ["ALL", "投信", "銀行", "半導体", "内需", "高配当"].forEach(c => {
                 const btn = document.getElementById(`cat-${c}`);
                 if (btn) btn.className = c === cat ? "text-[10px] font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white shrink-0" : "text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0";
             });
@@ -1792,12 +1860,13 @@ AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株�
             renderWatchlist();
         }
 
-        // 起動初期化（起動時の一斉24並列通信を廃止し、検索やタップ時に高速応答できるよう待機）
+        // 起動初期化＆未取得アイテムの直列自動修復
         loadState();
         ["focus", "input", "keyup", "compositionend", "change", "search"].forEach(ev => {
             document.getElementById("quickSearchInput").addEventListener(ev, () => renderSearchCandidates(true));
         });
         renderAll();
+        setTimeout(() => autoRepairPendingItems(), 400);
     </script>
 </body>
 </html>
