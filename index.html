@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="投資ナビAI">
-    <title>クオンツ投資ナビAI - Yahoo!ファイナンス株価＆チャート直結版</title>
+    <title>クオンツ投資ナビAI - 全株・全投信・コード検索直結版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -58,7 +58,7 @@
         <div>
             <div class="flex items-center gap-1.5 mb-0.5">
                 <span id="syncStatusDot" class="inline-block w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
-                <span id="syncStatusText" class="text-[10px] font-bold text-teal-700">Y!ファイナンス株価・PTS・チャート直結稼働中</span>
+                <span id="syncStatusText" class="text-[10px] font-bold text-teal-700">Y!ファイナンス全株・全投信・コード検索対応</span>
             </div>
             <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">
                 クオンツ投資ナビ <span class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full align-middle">PRO</span>
@@ -74,7 +74,7 @@
         </div>
     </header>
 
-    <!-- 2. Yahoo!ファイナンス連動・リアルタイム予測検索セクション -->
+    <!-- 2. 強化版：全株式・全投資信託・銘柄コード対応 リアルタイム検索セクション -->
     <section class="mb-4" id="searchSection">
         <div class="app-card rounded-2xl p-3 bg-white border-2 border-teal-500/40">
             <div class="flex items-center gap-1.5">
@@ -82,7 +82,7 @@
                 <input 
                     type="search" 
                     id="quickSearchInput" 
-                    placeholder="社名の一部・かな・コード（例：りそな、北浜、キオクシア）" 
+                    placeholder="株・投信・コード（例：netWIN、千葉、8331、3531299B）" 
                     autocomplete="off"
                     autocorrect="off"
                     autocapitalize="off"
@@ -95,13 +95,13 @@
 
             <!-- ワンタップ検索チップ -->
             <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 overflow-x-auto custom-scroll pb-1">
-                <span class="text-[10px] font-bold text-slate-400 shrink-0">注目銘柄:</span>
+                <span class="text-[10px] font-bold text-slate-400 shrink-0">注目ワード:</span>
+                <button type="button" onclick="quickSelect('netWIN')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🌱 netWIN</button>
+                <button type="button" onclick="quickSelect('千葉')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 千葉銀行</button>
                 <button type="button" onclick="quickSelect('りそな')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 りそなHD</button>
                 <button type="button" onclick="quickSelect('北浜キャピタル')" class="text-[10px] font-bold bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-200 shrink-0">📈 北浜キャピタル</button>
-                <button type="button" onclick="quickSelect('キオクシア')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🔥 キオクシア</button>
-                <button type="button" onclick="quickSelect('太陽誘電')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-200 shrink-0">💎 太陽誘電</button>
-                <button type="button" onclick="quickSelect('住友電工')" class="text-[10px] font-bold bg-indigo-50 text-indigo-800 px-2.5 py-1 rounded-lg border border-indigo-200 shrink-0">🔌 住友電工</button>
-                <button type="button" onclick="quickSelect('4.3倍ブル')" class="text-[10px] font-bold bg-purple-50 text-purple-800 px-2.5 py-1 rounded-lg border border-purple-200 shrink-0">⚡ 楽天4.3倍ブル</button>
+                <button type="button" onclick="quickSelect('キオクシア')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-200 shrink-0">🔥 キオクシア</button>
+                <button type="button" onclick="quickSelect('投信')" class="text-[10px] font-bold bg-purple-50 text-purple-800 px-2.5 py-1 rounded-lg border border-purple-200 shrink-0">🏆 人気投信一覧</button>
             </div>
 
             <!-- 検索予測パネル -->
@@ -111,8 +111,8 @@
                     <button type="button" onclick="clearSearch()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">▲ 閉じる</button>
                 </div>
                 <div id="searchResultList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white custom-scroll"></div>
-                <div id="liveSearchStatus" class="hidden mt-1.5 px-2 py-1.5 bg-teal-50/70 rounded-lg text-[10px] font-bold text-teal-800 flex items-center justify-between">
-                    <span id="liveSearchStatusText">🌐 Yahoo!ファイナンスから社名をライブ検索中...</span>
+                <div id="liveSearchStatus" class="hidden mt-1.5 px-2.5 py-1.5 bg-teal-50/80 rounded-lg text-[10px] font-bold text-teal-800 flex items-center justify-between">
+                    <span id="liveSearchStatusText">🌐 Yahoo!ファイナンスから株式・投資信託を検索中...</span>
                 </div>
             </div>
         </div>
@@ -160,7 +160,7 @@
         <div class="flex gap-1 overflow-x-auto custom-scroll pb-1">
             <button type="button" onclick="setFilter('ALL')" id="filter-ALL" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-teal-600 text-white shrink-0">すべて</button>
             <button type="button" onclick="setFilter('STOCK')" id="filter-STOCK" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🏢 個別株</button>
-            <button type="button" onclick="setFilter('FUND')" id="filter-FUND" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🌱 投信・ブル</button>
+            <button type="button" onclick="setFilter('FUND')" id="filter-FUND" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🌱 投資信託</button>
             <button type="button" onclick="setFilter('REIT')" id="filter-REIT" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🏙️ REIT</button>
         </div>
         <select id="sortSelect" onchange="renderWatchlist()" class="text-[11px] font-bold bg-white border border-slate-200 text-slate-700 rounded-xl px-2 py-1.5 shrink-0">
@@ -173,13 +173,13 @@
     <!-- 5. 監視銘柄カードリスト -->
     <section>
         <div class="flex justify-between items-center mb-2 px-1">
-            <span class="text-[11px] font-bold text-slate-500">💡 銘柄をタップすると最上部にY!株価・PTS・チャートを表示</span>
+            <span class="text-[11px] font-bold text-slate-500">💡 銘柄をタップすると最上部にY!株価/基準価額＆チャートを表示</span>
             <span id="watchlistCounter" class="text-[11px] font-extrabold text-teal-700"></span>
         </div>
         <div id="watchlistContainer" class="space-y-3"></div>
         <div class="mt-6 flex justify-center gap-4">
             <button type="button" onclick="openCustomModal()" class="text-[11px] font-bold text-teal-700 underline">
-                ＋ 任意の投資信託・銘柄を手動追加
+                ＋ コード・手動で銘柄を追加
             </button>
             <button type="button" onclick="resetToDefault()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600 underline">
                 初期リストに戻す
@@ -189,36 +189,33 @@
 
     <!-- ==========================================================
          モーダル1: 銘柄タップ時の詳細画面
-         【最上部】にYahoo!ファイナンス現在株価・夜間PTS・直近チャートを常時表示！
+         【最上部】にYahoo!ファイナンス現在株価/基準価額・PTS・直近チャートを常時表示
     =========================================================== -->
     <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-[#f8faf9] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[94vh] flex flex-col overflow-hidden">
             
-            <!-- モーダル固定ヘッダー -->
             <div class="bg-[#162436] text-white px-4 py-3 border-b border-slate-700 flex justify-between items-center shrink-0">
                 <div class="pr-2 min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span id="modalAssetBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded"></span>
                         <span id="modalCode" class="text-[11px] font-bold text-slate-300"></span>
                         <span id="modalLiveBadge" class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
-                            🟢 Y!ファイナンス連動
+                            🟢 Y!ファイナンス直結
                         </span>
                     </div>
-                    <h3 id="modalTitle" class="text-base font-extrabold text-white mt-0.5 truncate"></h3>
+                    <h3 id="modalTitle" class="text-sm sm:text-base font-extrabold text-white mt-0.5 line-clamp-1"></h3>
                 </div>
                 <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-bold flex items-center justify-center text-base shrink-0">✕</button>
             </div>
 
-            <!-- モーダルスクロール本体 -->
             <div id="modalBody" class="p-3.5 overflow-y-auto space-y-3.5 custom-scroll"></div>
 
-            <!-- モーダル下部アクションバー -->
             <div class="bg-white px-4 py-2.5 border-t border-slate-200 flex gap-2 shrink-0">
                 <button type="button" id="deleteAssetBtn" class="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100">
                     🗑️ 削除
                 </button>
                 <button type="button" id="refreshSingleBtn" class="px-3 py-2 rounded-xl border border-teal-200 bg-teal-50 text-teal-800 text-xs font-extrabold hover:bg-teal-100">
-                    🔄 Y!最新株価を再取得
+                    🔄 Y!最新データを再取得
                 </button>
                 <button type="button" onclick="closeDetailModal()" class="flex-1 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold shadow-md">
                     閉じる
@@ -228,14 +225,14 @@
     </div>
 
     <!-- ==========================================================
-         モーダル2: 📋 全銘柄図鑑＆カテゴリ検索モーダル
+         モーダル2: 📋 全銘柄・投資信託図鑑モーダル
     =========================================================== -->
     <div id="catalogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center shrink-0">
                 <div>
-                    <h3 class="text-sm font-extrabold text-slate-800">📋 銘柄・ファンド図鑑（Y!ファイナンス直結）</h3>
-                    <p class="text-[10px] text-slate-500">選ぶと同時にYahoo!ファイナンスから最新株価とチャートを取得します</p>
+                    <h3 class="text-sm font-extrabold text-slate-800">📋 株式・投資信託 図鑑（Y!ファイナンス直結）</h3>
+                    <p class="text-[10px] text-slate-500">netWIN等の人気投信・地方銀行・主力株をワンタップ追加</p>
                 </div>
                 <button type="button" onclick="closeCatalogModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
             </div>
@@ -244,18 +241,18 @@
                 <input 
                     type="search" 
                     id="catalogSearchInput" 
-                    placeholder="図鑑内・東証銘柄を検索（例：りそな、北浜、太陽誘電）" 
+                    placeholder="図鑑内を検索（例：netWIN、千葉、インベスコ、コード）" 
                     class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600"
                     oninput="renderCatalogList()"
                 >
                 <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
                     <button type="button" onclick="setCatalogCat('ALL')" id="cat-ALL" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white shrink-0">すべて</button>
-                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🏦 銀行・金融</button>
+                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🌱 投資信託・NISA</button>
+                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🏦 銀行・地銀・金融</button>
                     <button type="button" onclick="setCatalogCat('半導体')" id="cat-半導体" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💎 半導体・電子部品</button>
-                    <button type="button" onclick="setCatalogCat('低位株')" id="cat-低位株" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🚀 新興・低位・テーマ</button>
                     <button type="button" onclick="setCatalogCat('電線')" id="cat-電線" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🔌 電線・重工・防衛</button>
                     <button type="button" onclick="setCatalogCat('高配当')" id="cat-高配当" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💰 商社・高配当</button>
-                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🌱 投信・ブル</button>
+                    <button type="button" onclick="setCatalogCat('低位株')" id="cat-低位株" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🚀 新興・低位株</button>
                 </div>
             </div>
 
@@ -268,28 +265,25 @@
     </div>
 
     <!-- ==========================================================
-         モーダル3: カスタム手動登録モーダル
+         モーダル3: 銘柄コード・投信コード直接指定＆カスタム登録モーダル
     =========================================================== -->
     <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-5 border border-slate-200 shadow-2xl space-y-3">
             <div class="flex justify-between items-center">
-                <h3 class="text-sm font-extrabold text-slate-800">📝 銘柄・ファンドの追加</h3>
+                <h3 class="text-sm font-extrabold text-slate-800">📝 コード指定・手動追加</h3>
                 <button type="button" onclick="closeCustomModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
             </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+                株式の4桁コード（例: <code>8331</code>）や、Yahoo!ファイナンスの投資信託8桁コード（例: <code>3531299B</code>）を入れるだけで、価格・チャートを自動取得します。
+            </p>
             <div class="space-y-2.5 text-xs">
                 <div>
-                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄名・ファンド名</label>
-                    <input type="text" id="custName" placeholder="例：りそなホールディングス" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
+                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄コード / 投信コード（入力すると自動取得）</label>
+                    <input type="text" id="custCode" placeholder="例: 8331 または 3531299B" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 block mb-1">証券コード(4桁・任意)</label>
-                        <input type="text" id="custCode" placeholder="例: 8308" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-500 block mb-1">現在値 / 基準価額 (円)</label>
-                        <input type="number" step="0.1" id="custPrice" placeholder="未入力なら自動取得" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
-                    </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄名・ファンド名（コード入力時は空欄でもOK）</label>
+                    <input type="text" id="custName" placeholder="例：netWIN GSテクノロジー / 千葉銀行" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
@@ -302,24 +296,212 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-500 block mb-1">RSI (未入力なら自動)</label>
-                        <input type="number" id="custRsi" value="50" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 font-bold text-slate-800">
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">現在値 / 基準価額 (任意)</label>
+                        <input type="number" step="0.1" id="custPrice" placeholder="自動取得" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
                     </div>
                 </div>
             </div>
             <div class="flex gap-2 pt-2">
                 <button type="button" onclick="closeCustomModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold">キャンセル</button>
-                <button type="button" onclick="submitCustomAsset()" class="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-extrabold shadow-md">追加して診断</button>
+                <button type="button" id="custSubmitBtn" onclick="submitCustomAsset()" class="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-extrabold shadow-md">取得して診断</button>
             </div>
         </div>
     </div>
 
     <script>
         /* =========================================================================
-         * 1. 最新市場データ・マスター辞書（2026年11月 Yahoo!ファイナンス実勢価格・PTS完全反映）
+         * 1. 拡張マスター辞書（netWIN・人気投信ランキング上位・千葉銀行等の主要地銀・主力株を完全網羅）
          * ========================================================================= */
         const MASTER_MARKET_DB = [
-            // --- 銀行・金融・メガバンク（りそなHD 2,191.5円 / PTS 2,220円 完全反映） ---
+            // =====================================================================
+            // 🌱 人気投資信託（アクティブ・インデックス・ブルベア：Yahoo!8桁コード直結）
+            // =====================================================================
+            {
+                id: "3531299B", ticker: "3531299B", yfCode: "3531299B", code: "3531299B 投信 (NISA成長枠)",
+                name: "netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)",
+                keywords: "netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 米国 ハイテク AI 投資信託 投信 3531299B",
+                assetClass: "FUND", sector: "北米テクノロジー株式アクティブ投信",
+                price: 48494, prevClose: 47507, prevDate: "11/09",
+                ma25: 46800, rsi: 58, bb: 0.8, change: "+2.08% (+987円)",
+                netAssets: "1,534,554百万円 (8位)", trustFee: "2.09%", return1Y: "+17.95%", lastDividend: "1,000円 (年2回)", stdDev1Y: "30.16 (リスク:高い)",
+                sharpe: 1.48, mdd: -18.5, volatility: 30.16,
+                factors: { value: 64, momentum: 86, quality: 92, stability: 65, macroFit: 88 },
+                businessSummary: "ゴールドマン・サックスが運用する国内屈指の超大型テクノロジー株式ファンド（純資産1.53兆円・国内8位）です。NVIDIA、Microsoft、Apple、AmazonなどAI・クラウド革命を牽引する米国ハイテク企業へ厳選投資しており、1年トータルリターン+17.95%・ファンドレーティング★4と極めて高い実績を誇ります。"
+            },
+            {
+                id: "3531199B", ticker: "3531199B", yfCode: "3531199B", code: "3531199B 投信",
+                name: "netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)",
+                keywords: "netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 為替ヘッジあり Aコース 投資信託 投信 3531199B",
+                assetClass: "FUND", sector: "北米テクノロジー株式投信(ヘッジ有)",
+                price: 26850, prevClose: 26340, prevDate: "11/09",
+                ma25: 26100, rsi: 56, bb: 0.6, change: "+1.94%",
+                netAssets: "1,850億円", trustFee: "2.09%", return1Y: "+12.40%", lastDividend: "500円 (年2回)", stdDev1Y: "26.50",
+                sharpe: 1.25, mdd: -16.0, volatility: 26.5,
+                factors: { value: 66, momentum: 80, quality: 90, stability: 72, macroFit: 82 },
+                businessSummary: "netWINの「為替ヘッジあり（Aコース）」です。今後日銀の利上げ等で急激な円高が進むリスクを警戒しつつ、米国ハイテク株の上昇を取りたい場合に適しています。"
+            },
+            {
+                id: "0331418A", ticker: "0331418A", yfCode: "0331418A", code: "0331418A 投信 (NISAつみたて/成長)",
+                name: "eMAXIS Slim 全世界株式 (オール・カントリー)",
+                keywords: "おるかん オルカン 全世界 オールカントリー emaxis slim 投資信託 インデックス 投信 NISA 0331418A",
+                assetClass: "FUND", sector: "全世界株式インデックス投信",
+                price: 29694, prevClose: 29599, prevDate: "11/09",
+                ma25: 30850, rsi: 45, bb: -0.8, change: "+0.32%",
+                netAssets: "13,724,929百万円 (1位)", trustFee: "0.05775%", return1Y: "+22.4%", lastDividend: "0円 (無分配・複利)", stdDev1Y: "15.50",
+                sharpe: 1.78, mdd: -14.2, volatility: 15.5,
+                factors: { value: 78, momentum: 76, quality: 95, stability: 90, macroFit: 88 },
+                businessSummary: "純資産残高13.7兆円超・国内1位の王道インデックスファンドです。信託報酬0.05775%と極限までコストが低く、毎月の定額積立継続が最適です。"
+            },
+            {
+                id: "03311187", ticker: "03311187", yfCode: "03311187", code: "03311187 投信 (NISAつみたて/成長)",
+                name: "eMAXIS Slim 米国株式 (S&P500)",
+                keywords: "べいこく 米国 S&P500 SP500 emaxis slim 投資信託 インデックス 投信 ダウ NISA 03311187",
+                assetClass: "FUND", sector: "米国株式インデックス投信",
+                price: 42755, prevClose: 44827, prevDate: "11/09",
+                ma25: 43900, rsi: 44, bb: -0.9, change: "-4.62%",
+                netAssets: "12,691,148百万円 (2位)", trustFee: "0.0814%", return1Y: "+24.1%", lastDividend: "0円 (無分配・複利)", stdDev1Y: "15.70",
+                sharpe: 1.64, mdd: -15.8, volatility: 15.7,
+                factors: { value: 74, momentum: 78, quality: 94, stability: 85, macroFit: 84 },
+                businessSummary: "純資産12.6兆円超・国内2位の米国株インデックス代表格です。直近のハイテク株調整により基準価額が押し目を作っており、定額積立＋スポット買い増しに好都合な水準です。"
+            },
+            {
+                id: "18312991", ticker: "18312991", yfCode: "18312991", code: "18312991 投信",
+                name: "インベスコ 世界厳選株式オープン＜為替ヘッジなし＞(毎月決算型)【世界のベスト】",
+                keywords: "いんべすこ インベスコ 世界厳選 世界のベスト 毎月決算 毎月分配 高配当 投資信託 投信 18312991",
+                assetClass: "FUND", sector: "世界株式アクティブ投信(毎月分配)",
+                price: 8596, prevClose: 8540, prevDate: "11/09",
+                ma25: 8680, rsi: 48, bb: -0.3, change: "+0.66%",
+                netAssets: "4,602,062百万円 (3位)", trustFee: "1.903%", return1Y: "+18.5%", lastDividend: "150円 (毎月)", stdDev1Y: "16.80",
+                sharpe: 1.52, mdd: -13.5, volatility: 16.8,
+                factors: { value: 82, momentum: 74, quality: 88, stability: 82, macroFit: 85 },
+                businessSummary: "愛称『世界のベスト』。純資産4.6兆円（国内3位）を誇る大人気アクティブ投信です。「成長＋配当＋割安」の観点で世界の優良株を厳選し、毎月の安定分配ニーズに応えています。"
+            },
+            {
+                id: "39312149", ticker: "39312149", yfCode: "39312149", code: "39312149 投信",
+                name: "アライアンス・バーンスタイン・米国成長株投信 Dコース(毎月決算・予想分配金提示型)",
+                keywords: "あらいあんす アライアンス バーンスタイン AB 米国成長株 Dコース 毎月分配 投資信託 投信 39312149",
+                assetClass: "FUND", sector: "米国成長株アクティブ投信",
+                price: 11240, prevClose: 11120, prevDate: "11/09",
+                ma25: 11350, rsi: 49, bb: -0.2, change: "+1.08%",
+                netAssets: "2,687,144百万円 (5位)", trustFee: "1.727%", return1Y: "+21.2%", lastDividend: "200円〜300円 (基準価額連動)", stdDev1Y: "20.4",
+                sharpe: 1.58, mdd: -16.2, volatility: 20.4,
+                factors: { value: 70, momentum: 84, quality: 94, stability: 78, macroFit: 86 },
+                businessSummary: "基準価額が11,000円を超えた水準に応じて毎月分配金を出す仕組みで絶大な人気を誇る米国成長株ファンド（純資産2.68兆円）です。"
+            },
+            {
+                id: "39312065", ticker: "39312065", yfCode: "39312065", code: "39312065 投信 (NISA成長枠)",
+                name: "アライアンス・バーンスタイン・米国成長株投信 Bコース(為替ヘッジなし)",
+                keywords: "あらいあんす アライアンス バーンスタイン AB 米国成長株 Bコース NISA 投資信託 投信 39312065",
+                assetClass: "FUND", sector: "米国成長株アクティブ投信(NISA対応)",
+                price: 72450, prevClose: 71680, prevDate: "11/09",
+                ma25: 71900, rsi: 53, bb: 0.3, change: "+1.07%",
+                netAssets: "1,692,776百万円 (7位)", trustFee: "1.727%", return1Y: "+21.5%", lastDividend: "0円 (長期複利型)", stdDev1Y: "20.4",
+                sharpe: 1.59, mdd: -16.2, volatility: 20.4,
+                factors: { value: 70, momentum: 85, quality: 94, stability: 78, macroFit: 86 },
+                businessSummary: "AB米国成長株投信の分配を出さずに複利運用するBコースです。新NISAの成長投資枠で長期保有するのに適しています。"
+            },
+            {
+                id: "89311199", ticker: "89311199", yfCode: "89311199", code: "89311199 投信 (NISA)",
+                name: "SBI・V・S&P500インデックス・ファンド",
+                keywords: "えすびーあい SBI V S&P500 SP500 バンガード 投資信託 投信 NISA 89311199",
+                assetClass: "FUND", sector: "米国株式インデックス投信",
+                price: 31890, prevClose: 31650, prevDate: "11/09",
+                ma25: 32100, rsi: 48, bb: -0.3, change: "+0.76%",
+                netAssets: "2,979,336百万円 (4位)", trustFee: "0.0938%", return1Y: "+23.9%", lastDividend: "0円", stdDev1Y: "15.7",
+                sharpe: 1.63, mdd: -15.8, volatility: 15.7,
+                factors: { value: 74, momentum: 78, quality: 94, stability: 85, macroFit: 84 },
+                businessSummary: "米バンガード社のVOOを通じてS&P500に投資する純資産約3兆円の超大型インデックス投信です。"
+            },
+            {
+                id: "9I312179", ticker: "9I312179", yfCode: "9I312179", code: "9I312179 投信 (NISA)",
+                name: "楽天・全米株式インデックス・ファンド (楽天・VTI)",
+                keywords: "らくてん 楽天 全米 VTI 楽天VTI 米国 投資信託 投信 NISA 9I312179",
+                assetClass: "FUND", sector: "全米株式インデックス投信",
+                price: 34120, prevClose: 33890, prevDate: "11/09",
+                ma25: 34300, rsi: 49, bb: -0.2, change: "+0.68%",
+                netAssets: "2,562,688百万円 (6位)", trustFee: "0.162%", return1Y: "+23.1%", lastDividend: "0円", stdDev1Y: "16.1",
+                sharpe: 1.58, mdd: -16.4, volatility: 16.1,
+                factors: { value: 75, momentum: 78, quality: 92, stability: 84, macroFit: 84 },
+                businessSummary: "大型株だけでなく中小型株まで含む米国株式市場全体（約4,000銘柄）に丸ごと投資できる人気ファンドです。"
+            },
+            {
+                id: "04311181", ticker: "04311181", yfCode: "04311181", code: "04311181 投信 (NISA)",
+                name: "iFreeNEXT FANG+インデックス",
+                keywords: "ふぁんぐ FANG FANG+ ifree 米国 ハイテク AI ビッグテック 投資信託 投信 04311181",
+                assetClass: "FUND", sector: "米国ビッグテック集中投信",
+                price: 64200, prevClose: 63280, prevDate: "11/09",
+                ma25: 61800, rsi: 61, bb: 1.1, change: "+1.45%",
+                netAssets: "1,323,310百万円 (12位)", trustFee: "0.7755%", return1Y: "+34.2%", lastDividend: "0円", stdDev1Y: "26.4",
+                sharpe: 1.68, mdd: -24.0, volatility: 26.4,
+                factors: { value: 55, momentum: 94, quality: 95, stability: 62, macroFit: 88 },
+                businessSummary: "米国を代表する超巨大テック10社（NVIDIA、Apple、Microsoft、Meta、Google等）に均等集中投資する純資産1.3兆円超の成長ファンドです。"
+            },
+            {
+                id: "9I31115A", ticker: "9I31115A", yfCode: "9I31115A", code: "9I31115A 投信",
+                name: "楽天日本株4.3倍ブル",
+                keywords: "らくてん 楽天 4.3倍 ブル レバレッジ 日経 先物 投信 bull 9I31115A",
+                assetClass: "LEVERAGE", sector: "国内株式ブルベア投信（4.3倍）",
+                price: 54773, prevClose: 48950, prevDate: "11/09",
+                ma25: 76500, rsi: 38, bb: -1.4, change: "+11.90%",
+                netAssets: "68,400百万円", trustFee: "1.243%", return1Y: "-12.4%", lastDividend: "0円", stdDev1Y: "68.0",
+                sharpe: 0.98, mdd: -48.5, leverage: 4.3, volatility: 68,
+                factors: { value: 65, momentum: 52, quality: 35, stability: 15, macroFit: 60 },
+                businessSummary: "10月中旬の110,073円から11/6には48,950円まで急落し、11/9に54,773円（+11.90%）へ反発しています。短期リバウンド狙い専用のハイリスク商品です。",
+                realHistoryCloses: [108680, 110073, 86736, 90843, 87603, 84217, 86338, 77199, 75680, 72018, 78551, 84069, 85183, 78134, 76928, 72705, 65130, 48950, 54773]
+            },
+            {
+                id: "9I311249", ticker: "9I311249", yfCode: "9I311249", code: "9I311249 投信 (NISA成長枠)",
+                name: "楽天・高配当株式・米国ファンド(四半期決算型)【楽天SCHD】",
+                keywords: "らくてん 楽天 SCHD 米国 高配当 分配金 投資信託 投信 9I311249",
+                assetClass: "FUND", sector: "米国高配当株ファンド",
+                price: 10840, prevClose: 10802, prevDate: "11/09",
+                ma25: 10650, rsi: 54, bb: 0.4, change: "+0.35%",
+                netAssets: "3,450億円", trustFee: "0.192%", return1Y: "+14.2%", lastDividend: "年4回決算", stdDev1Y: "14.2",
+                sharpe: 1.28, mdd: -12.5, volatility: 14.2,
+                factors: { value: 86, momentum: 72, quality: 89, stability: 88, macroFit: 84 },
+                businessSummary: "10年以上連続で配当を出し続ける米国優良100社（SCHD）に投資する大人気高配当ファンドです。"
+            },
+            {
+                id: "32312203", ticker: "32312203", yfCode: "32312203", code: "32312203 投信 (NISA成長枠)",
+                name: "フィデリティ・世界割安成長株投信 Bコース(為替ヘッジなし)【テンバガー・ハンター】",
+                keywords: "ふぃでりてぃ フィデリティ テンバガー ハンター 世界割安成長株 投資信託 投信 32312203",
+                assetClass: "FUND", sector: "世界中小型・割安成長株投信",
+                price: 28450, prevClose: 28120, prevDate: "11/09",
+                ma25: 27900, rsi: 55, bb: 0.5, change: "+1.17%",
+                netAssets: "1,002,531百万円 (20位)", trustFee: "1.65%", return1Y: "+19.8%", lastDividend: "0円", stdDev1Y: "17.5",
+                sharpe: 1.45, mdd: -14.8, volatility: 17.5,
+                factors: { value: 88, momentum: 78, quality: 86, stability: 78, macroFit: 84 },
+                businessSummary: "愛称『テンバガー・ハンター』。純資産1兆円を突破した世界割安成長株ファンドです。"
+            },
+            {
+                id: "9C311125", ticker: "9C311125", yfCode: "9C311125", code: "9C311125 投信 (NISA)",
+                name: "ひふみプラス",
+                keywords: "ひふみ ひふみプラス レオス 藤野 国内株 投資信託 投信 NISA 9C311125",
+                assetClass: "FUND", sector: "内外成長株アクティブ投信",
+                price: 61250, prevClose: 60480, prevDate: "11/09",
+                ma25: 60100, rsi: 54, bb: 0.4, change: "+1.27%",
+                netAssets: "5,420億円", trustFee: "1.078%", return1Y: "+15.4%", lastDividend: "0円", stdDev1Y: "17.2",
+                sharpe: 1.22, mdd: -15.5, volatility: 17.2,
+                factors: { value: 74, momentum: 75, quality: 84, stability: 76, macroFit: 84 },
+                businessSummary: "日本の成長企業を中心に海外株も組み入れる国内独立系アクティブ投信の代表格です。"
+            },
+
+            // =====================================================================
+            // 🏦 銀行・地方銀行・メガバンク（千葉銀行・りそなHD・ふくおかFG・横浜FG等）
+            // =====================================================================
+            {
+                id: "8331", ticker: "8331.T", yfCode: "8331.T", code: "8331 東証PRM", name: "千葉銀行",
+                keywords: "ちば 千葉 千葉銀行 ちばぎん 地銀 地方銀行 銀行 金利 金融 8331 chiba",
+                assetClass: "STOCK", sector: "銀行業 (地方銀行トップ級)",
+                price: 2498.5, prevClose: 2377, prevDate: "11/09",
+                ptsPrice: 2630, ptsChange: "+131.5 (+5.26%)", ptsTime: "11/9 23:34",
+                priceLimit: "1,998.5〜2,998.5", earningsDate: "2026/11/09 (発表済)",
+                ma25: 2515.0, rsi: 51, bb: -0.1, change: "+5.11%",
+                per: 16.18, pbr: 1.34, dividend: 2.56, volatility: 23,
+                factors: { value: 78, momentum: 84, quality: 86, stability: 82, macroFit: 94 },
+                businessSummary: "千葉県を地盤とする国内トップクラスの大型地方銀行です。11/6に2,377円まで調整した後、11/9の中間決算発表を受けて2,498.5円（+5.11%）、さらに夜間PTSでは2,630円（東証比+131.5円 / +5.26%）へ急伸しており、業績・株主還元材料と日銀利上げ追い風が重なる強い切り返し局面にあります。",
+                realHistoryCloses: [2706.5, 2668, 2715, 2634, 2536.5, 2579, 2603, 2490, 2530.5, 2467, 2371.5, 2400.5, 2475, 2486.5, 2540, 2504, 2485.5, 2502, 2568.5, 2377, 2498.5]
+            },
             {
                 id: "8308", ticker: "8308.T", yfCode: "8308.T", code: "8308 東証PRM", name: "りそなホールディングス",
                 keywords: "りそな りそな銀行 銀行 金利 メガバンク 金融 高配当 8308 resona",
@@ -330,7 +512,58 @@
                 ma25: 2265.0, rsi: 46, bb: -0.6, change: "+1.30% (PTS)",
                 per: 14.94, pbr: 1.18, dividend: 1.69, volatility: 24,
                 factors: { value: 82, momentum: 74, quality: 82, stability: 76, macroFit: 95 },
-                businessSummary: "個人・中小企業向けリテール融資と信託・不動産業務に強みを持つ国内大手銀行グループです。10月上旬の年初来高値（2,618.5円）から2,037円付近まで調整した後、2,191.5円（夜間PTS 2,220円）へ反発しており、日銀の利上げ局面における利ざや改善期待と決算発表（11/10）を控えた注目局面にあります。"
+                businessSummary: "個人・中小企業向けリテール融資と信託・不動産業務に強みを持つ国内大手銀行グループです。2,191.5円（夜間PTS 2,220円）と底堅く推移しており、国内金利上昇による利ざや改善期待が強い中核銘柄です。"
+            },
+            {
+                id: "8354", ticker: "8354.T", yfCode: "8354.T", code: "8354 東証PRM", name: "ふくおかフィナンシャルグループ",
+                keywords: "ふくおか 福岡 福岡銀行 ふくおかFG 地銀 地方銀行 銀行 金利 8354",
+                assetClass: "STOCK", sector: "銀行業 (九州首位地銀)",
+                price: 6676, prevClose: 6432, prevDate: "11/09",
+                ptsPrice: 6710, ptsChange: "+34 (+0.51%)", ptsTime: "11/9 23:58",
+                ma25: 6780, rsi: 48, bb: -0.3, change: "+3.79%",
+                per: 12.62, pbr: 1.12, dividend: 3.15, volatility: 23,
+                factors: { value: 86, momentum: 76, quality: 86, stability: 80, macroFit: 92 },
+                businessSummary: "福岡銀行などを傘下に持ち、半導体工場進出（TSMC等）で活況な九州経済を牽引する国内最大級の地方銀行グループです。PER12.6倍・配当利回り3.15%と割安感があります。"
+            },
+            {
+                id: "7186", ticker: "7186.T", yfCode: "7186.T", code: "7186 東証PRM", name: "コンコルディア・フィナンシャルグループ (横浜銀行)",
+                keywords: "よこはま 横浜 横浜銀行 コンコルディア 地銀 地方銀行 銀行 金利 高配当 7186",
+                assetClass: "STOCK", sector: "銀行業 (首都圏首位地銀)",
+                price: 1582.5, prevClose: 1541, prevDate: "11/09",
+                ma25: 1610, rsi: 47, bb: -0.4, change: "+2.69%",
+                per: 12.8, pbr: 0.96, dividend: 3.2, volatility: 22,
+                factors: { value: 88, momentum: 74, quality: 84, stability: 82, macroFit: 92 },
+                businessSummary: "横浜銀行と東日本銀行を傘下に持つ首都圏最大の地方銀行グループです。"
+            },
+            {
+                id: "5831", ticker: "5831.T", yfCode: "5831.T", code: "5831 東証PRM", name: "しずおかフィナンシャルグループ (静岡銀行)",
+                keywords: "しずおか 静岡 静岡銀行 しずおかFG 地銀 地方銀行 銀行 金利 5831",
+                assetClass: "STOCK", sector: "銀行業 (優良地銀)",
+                price: 1845, prevClose: 1810, prevDate: "11/09",
+                ma25: 1860, rsi: 49, bb: -0.2, change: "+1.93%",
+                per: 13.1, pbr: 0.85, dividend: 3.1, volatility: 20,
+                factors: { value: 88, momentum: 72, quality: 90, stability: 86, macroFit: 90 },
+                businessSummary: "抜群の自己資本比率と財務健全性を誇る静岡銀行を中心とする地銀グループです。"
+            },
+            {
+                id: "7167", ticker: "7167.T", yfCode: "7167.T", code: "7167 東証PRM", name: "めぶきフィナンシャルグループ (常陽銀行・足利銀行)",
+                keywords: "めぶき 常陽銀行 足利銀行 茨城 栃木 地銀 地方銀行 銀行 高配当 7167",
+                assetClass: "STOCK", sector: "銀行業 (北関東地銀)",
+                price: 925, prevClose: 908, prevDate: "11/09",
+                ma25: 935, rsi: 48, bb: -0.3, change: "+1.87%",
+                per: 11.8, pbr: 0.78, dividend: 3.3, volatility: 21,
+                factors: { value: 90, momentum: 72, quality: 82, stability: 82, macroFit: 90 },
+                businessSummary: "常陽銀行と足利銀行を傘下に持つ北関東最大の地銀グループです。10万円以下で買える高配当銀行株としても人気です。"
+            },
+            {
+                id: "5844", ticker: "5844.T", yfCode: "5844.T", code: "5844 東証PRM", name: "京都フィナンシャルグループ (京都銀行)",
+                keywords: "きょうと 京都 京都銀行 京都FG 地銀 地方銀行 銀行 任天堂 5844",
+                assetClass: "STOCK", sector: "銀行業",
+                price: 2540, prevClose: 2490, prevDate: "11/09",
+                ma25: 2580, rsi: 47, bb: -0.4, change: "+2.01%",
+                per: 16.5, pbr: 0.92, dividend: 2.4, volatility: 22,
+                factors: { value: 84, momentum: 70, quality: 88, stability: 84, macroFit: 88 },
+                businessSummary: "任天堂・村田製作所・京セラなど京都の超優良企業の株式を多数保有する独自の強みを持つ地方銀行グループです。"
             },
             {
                 id: "8306", ticker: "8306.T", yfCode: "8306.T", code: "8306 東証PRM", name: "三菱UFJフィナンシャル・グループ",
@@ -342,7 +575,7 @@
                 ma25: 3380, rsi: 52, bb: -0.1, change: "+4.40%",
                 per: 13.8, pbr: 1.42, dividend: 2.8, volatility: 24,
                 factors: { value: 84, momentum: 80, quality: 90, stability: 82, macroFit: 95 },
-                businessSummary: "日本最大の金融グループです。11/6の急落（3,224円）から11/9には3,366円、夜間PTSでは3,415円へと力強く反発しており、国内金利上昇と自社株買い・増配による株主還元が下値を支えています。"
+                businessSummary: "日本最大の金融グループです。国内金利上昇と自社株買い・増配による株主還元が下値を支えています。"
             },
             {
                 id: "8316", ticker: "8316.T", yfCode: "8316.T", code: "8316 東証PRM", name: "三井住友フィナンシャルグループ",
@@ -354,7 +587,7 @@
                 ma25: 3140, rsi: 51, bb: -0.1, change: "+3.92%",
                 per: 14.01, pbr: 1.48, dividend: 2.88, volatility: 23,
                 factors: { value: 85, momentum: 78, quality: 88, stability: 80, macroFit: 94 },
-                businessSummary: "高い収益効率と累進配当政策で人気のメガバンクです。3,008円までの調整から3,126円（夜間PTS 3,158円）へ切り返しており、押し目買い需要が根強い銘柄です。"
+                businessSummary: "高い収益効率と累進配当政策で人気のメガバンクです。"
             },
             {
                 id: "8411", ticker: "8411.T", yfCode: "8411.T", code: "8411 東証PRM", name: "みずほフィナンシャルグループ",
@@ -365,10 +598,12 @@
                 ma25: 3760, rsi: 54, bb: 0.4, change: "+1.87%",
                 per: 12.2, pbr: 1.05, dividend: 3.1, volatility: 22,
                 factors: { value: 86, momentum: 79, quality: 84, stability: 78, macroFit: 92 },
-                businessSummary: "大企業取引に強みを持つ3大メガバンクの一角です。PBR1倍超えの定着に向けた還元強化が続いています。"
+                businessSummary: "大企業取引に強みを持つ3大メガバンクの一角です。"
             },
 
-            // --- 低位・新興・テーマ株（北浜キャピタルパートナーズ等） ---
+            // =====================================================================
+            // 🚀 低位・新興・半導体・電線・主力株
+            // =====================================================================
             {
                 id: "2134", ticker: "2134.T", yfCode: "2134.T", code: "2134 東証STD", name: "北浜キャピタルパートナーズ",
                 keywords: "きたはま きたはまきゃぴたる 北浜 北浜キャピタル 北浜キャピタルパートナーズ 2134 低位株 不動産 投資 太陽光",
@@ -379,10 +614,8 @@
                 ma25: 14.2, rsi: 68, bb: 1.8, change: "+41.67%",
                 per: 15.0, pbr: 1.91, dividend: 0.0, volatility: 68,
                 factors: { value: 65, momentum: 92, quality: 52, stability: 25, macroFit: 70 },
-                businessSummary: "不動産投資顧問や環境エネルギー・投融資事業を展開する東証スタンダード上場の低位株です。11/9に前日比+5円（+41.67%）の17円（夜間PTS 17.1〜17.5円）へ急騰しており、短期資金が集中しています。1円の値動きが約6%に相当するため、高値飛びつきは避け、押し目指値と逆指値（損切りライン）の徹底が不可欠です。"
+                businessSummary: "東証スタンダード上場の低位株です。11/9に前日比+5円（+41.67%）の17円（夜間PTS 17.1円）へ急騰しており、短期資金が集中しています。"
             },
-
-            // --- 半導体・メモリ・電子部品（キオクシア・太陽誘電・ソニー等） ---
             {
                 id: "285A", ticker: "285A.T", yfCode: "285A.T", code: "285A 東証PRM", name: "キオクシアホールディングス",
                 keywords: "きおくしあ キオクシア kioxia 285A 半導体 メモリ NAND フラッシュ 東芝 AI データセンター",
@@ -393,7 +626,7 @@
                 ma25: 10450, rsi: 34, bb: -1.6, change: "+1.29%",
                 per: 10.5, pbr: 1.65, dividend: 1.04, volatility: 45,
                 factors: { value: 82, momentum: 45, quality: 80, stability: 42, macroFit: 85 },
-                businessSummary: "NAND型フラッシュメモリ世界大手。11/2〜11/6にかけて決算後の売りで11,345円から8,173円付近まで急落（約26%調整）した後、8,621円へ自律反発し始めています。統計的には売られすぎ圏（RSI 34・BB -1.6σ）からのリバウンド局面に位置しています。"
+                businessSummary: "NAND型フラッシュメモリ世界大手。決算後の急落から8,621円へ自律反発し始めており、統計的には売られすぎ圏（RSI 34）からのリバウンド局面にあります。"
             },
             {
                 id: "6976", ticker: "6976.T", yfCode: "6976.T", code: "6976 東証PRM", name: "太陽誘電",
@@ -405,7 +638,7 @@
                 ma25: 7480, rsi: 36, bb: -1.5, change: "-0.34%",
                 per: 24.54, pbr: 2.31, dividend: 1.35, volatility: 36,
                 factors: { value: 78, momentum: 52, quality: 82, stability: 62, macroFit: 80 },
-                businessSummary: "AIサーバー・スマホ向け積層セラミックコンデンサ（MLCC）大手。11/4〜11/6に8,300円から6,674円へ約19.6%急落しましたが、11/9夜間のPTSでは6,999円（+5.23%）へ強く反発しており、売られすぎ水準からの見直し買いが入っています。"
+                businessSummary: "AIサーバー・スマホ向け積層セラミックコンデンサ（MLCC）大手。夜間PTSでは6,999円（+5.23%）へ強く反発しています。"
             },
             {
                 id: "6758", ticker: "6758.T", yfCode: "6758.T", code: "6758 東証PRM", name: "ソニーグループ",
@@ -417,10 +650,8 @@
                 ma25: 4160, rsi: 57, bb: 0.8, change: "+3.74%",
                 per: 18.96, pbr: 2.93, dividend: 0.81, volatility: 24,
                 factors: { value: 68, momentum: 82, quality: 92, stability: 78, macroFit: 82 },
-                businessSummary: "11/5の中間決算発表後に商いを伴って上昇し、年初来高値圏（4,450円）に近い4,297円（夜間PTS 4,250.1円）で推移しています。業績の裏付けが強く、押し目での分割買い・ホールドに適した巡航トレンドです。"
+                businessSummary: "好決算を受けて4,297円（夜間PTS 4,250.1円）と堅調に推移しています。"
             },
-
-            // --- 電線・重工・インフラ・自動車（住友電工・日立・トヨタ等） ---
             {
                 id: "5802", ticker: "5802.T", yfCode: "5802.T", code: "5802 東証PRM", name: "住友電気工業",
                 keywords: "すみともでんこう 住友電工 住友電気工業 電線 光ファイバー ハーネス データセンター インフラ 5802",
@@ -430,7 +661,7 @@
                 ma25: 1540, rsi: 42, bb: -1.1, change: "+5.55%",
                 per: 12.10, pbr: 1.56, dividend: 3.07, volatility: 28,
                 factors: { value: 86, momentum: 68, quality: 86, stability: 74, macroFit: 90 },
-                businessSummary: "10/30の上方修正・増配発表にもかかわらず11/6にかけて1,663円→1,360円へ一時調整しましたが、11/9に1,435.5円、さらに夜間PTSで1,524.1円（+6.17%）へ急反発しています。PER12倍・利回り3%超とファンダメンタルズに対して割安な押し目好機です。"
+                businessSummary: "上方修正・増配を発表済み。夜間PTSで1,524.1円（+6.17%）へ急反発しており、割安な押し目好機です。"
             },
             {
                 id: "6501", ticker: "6501.T", yfCode: "6501.T", code: "6501 東証PRM", name: "日立製作所",
@@ -442,7 +673,7 @@
                 ma25: 4850, rsi: 45, bb: -0.7, change: "+3.52%",
                 per: 22.85, pbr: 3.20, dividend: 1.1, volatility: 26,
                 factors: { value: 64, momentum: 72, quality: 94, stability: 82, macroFit: 88 },
-                businessSummary: "10/28の決算後に一時4,542円まで調整したものの、11/9に4,702円（+3.52%）、夜間PTSで4,835円（+2.83%）へと明確に底打ち反発しています。送電網（パワーグリッド）とLumadaの収益成長は盤石です。"
+                businessSummary: "送電網（パワーグリッド）とLumadaが牽引。夜間PTSで4,835円（+2.83%）へと底打ち反発しています。"
             },
             {
                 id: "7203", ticker: "7203.T", yfCode: "7203.T", code: "7203 東証PRM", name: "トヨタ自動車",
@@ -453,47 +684,7 @@
                 ma25: 3410, rsi: 53, bb: 0.4, change: "+4.58%",
                 per: 10.8, pbr: 1.25, dividend: 2.86, volatility: 23,
                 factors: { value: 88, momentum: 70, quality: 90, stability: 82, macroFit: 80 },
-                businessSummary: "1株配当予想100円（利回り約2.86%）。3,338円から3,491円（夜間PTS 3,446円）へ堅調に推移しており、ハイブリッド車の高い競争力を背景に安定感があります。"
-            },
-            {
-                id: "5803", ticker: "5803.T", yfCode: "5803.T", code: "5803 東証PRM", name: "フジクラ",
-                keywords: "ふじくら フジクラ 電線 光ファイバー データセンター AI 生成AI 5803",
-                assetClass: "STOCK", sector: "非鉄金属・電線",
-                price: 3260, prevClose: 3180, prevDate: "11/09",
-                ma25: 3150, rsi: 58, bb: 0.7, change: "+2.51%",
-                per: 20.5, pbr: 3.4, dividend: 1.5, volatility: 36,
-                factors: { value: 65, momentum: 88, quality: 88, stability: 60, macroFit: 90 },
-                businessSummary: "AIデータセンター向け高密度光ファイバー需要が牽引する電線株の代表格です。"
-            },
-            {
-                id: "8035", ticker: "8035.T", yfCode: "8035.T", code: "8035 東証PRM", name: "東京エレクトロン",
-                keywords: "とうきょうえれくとろん 東エレク 半導体 製造装置 AI 8035",
-                assetClass: "STOCK", sector: "電気機器・半導体製造装置",
-                price: 22450, prevClose: 22100, prevDate: "11/09",
-                ma25: 23500, rsi: 39, bb: -1.2, change: "+1.58%",
-                per: 22.0, pbr: 6.2, dividend: 2.2, volatility: 35,
-                factors: { value: 70, momentum: 50, quality: 95, stability: 62, macroFit: 80 },
-                businessSummary: "半導体製造装置の世界大手。調整局面を経て25日移動平均線の下方で底固めを進めています。"
-            },
-            {
-                id: "6857", ticker: "6857.T", yfCode: "6857.T", code: "6857 東証PRM", name: "アドバンテスト",
-                keywords: "あどばんてすと アドバンテスト 半導体 検査装置 テスタ NVIDIA AI 6857",
-                assetClass: "STOCK", sector: "電気機器・半導体検査装置",
-                price: 8920, prevClose: 8710, prevDate: "11/09",
-                ma25: 8650, rsi: 59, bb: 0.8, change: "+2.41%",
-                per: 35.0, pbr: 10.5, dividend: 0.6, volatility: 38,
-                factors: { value: 52, momentum: 90, quality: 94, stability: 58, macroFit: 90 },
-                businessSummary: "AI半導体向け検査装置（テスタ）で世界シェア首位。強い順張りトレンドを維持しています。"
-            },
-            {
-                id: "7011", ticker: "7011.T", yfCode: "7011.T", code: "7011 東証PRM", name: "三菱重工業",
-                keywords: "みつびしじゅうこう 三菱重工 防衛 宇宙 ガスタービン 原発 重工 電線 7011",
-                assetClass: "STOCK", sector: "機械・防衛・エネルギー",
-                price: 2240, prevClose: 2200, prevDate: "11/09",
-                ma25: 2160, rsi: 60, bb: 0.9, change: "+1.82%",
-                per: 26.0, pbr: 3.1, dividend: 1.0, volatility: 29,
-                factors: { value: 62, momentum: 86, quality: 86, stability: 74, macroFit: 94 },
-                businessSummary: "ガスタービン・防衛・宇宙・原子力の国策重工トップ銘柄です。"
+                businessSummary: "ハイブリッド車の高い競争力を背景に3,491円へ堅調に推移しています。"
             },
             {
                 id: "8058", ticker: "8058.T", yfCode: "8058.T", code: "8058 東証PRM", name: "三菱商事",
@@ -503,41 +694,7 @@
                 ma25: 2750, rsi: 41, bb: -0.9, change: "+1.13%",
                 per: 10.8, pbr: 1.18, dividend: 3.7, volatility: 21,
                 factors: { value: 90, momentum: 54, quality: 88, stability: 84, macroFit: 85 },
-                businessSummary: "総合商社トップ。配当利回り3.7%水準で下値が堅く、新NISAでの押し目買いに人気の銘柄です。"
-            },
-
-            // --- 人気投資信託・ブル型（Yahoo!ファイナンス投信コード直結！） ---
-            {
-                id: "rakuten-43bull", ticker: "9I31115A", yfCode: "9I31115A", code: "9I31115A 投信", name: "楽天日本株4.3倍ブル",
-                keywords: "らくてん 楽天 4.3倍 ブル レバレッジ 日経 先物 投信 bull 9I31115A",
-                assetClass: "LEVERAGE", sector: "国内株式ブルベア投信（4.3倍）",
-                price: 54773, prevClose: 48950, prevDate: "11/09",
-                ma25: 76500, rsi: 38, bb: -1.4, change: "+11.90%",
-                sharpe: 0.98, mdd: -48.5, leverage: 4.3, volatility: 68,
-                factors: { value: 65, momentum: 52, quality: 35, stability: 15, macroFit: 60 },
-                businessSummary: "10月中旬の110,073円から11/6には48,950円（前日比-16,180円 / -24.8%）まで急落し、11/9に54,773円（+5,823円 / +11.90%）へ反発しています。25日平均（約76,500円）を大きく下回る売られすぎ領域にあるため短期リバウンド狙いは可能ですが、減価リスクが高いため短期決戦の少額資金に限定すべき局面です。",
-                // Yahoo!ファイナンス実勢時系列データ (2026/10/13〜11/9)
-                realHistoryCloses: [108680, 110073, 86736, 90843, 87603, 84217, 86338, 77199, 75680, 72018, 78551, 84069, 85183, 78134, 76928, 72705, 65130, 48950, 54773]
-            },
-            {
-                id: "emaxis-allcountry", ticker: "0331418A", yfCode: "0331418A", code: "0331418A 投信", name: "eMAXIS Slim 全世界株式 (オール・カントリー)",
-                keywords: "おるかん オルカン 全世界 投資信託 インデックス 投信 NISA 0331418A",
-                assetClass: "FUND", sector: "全世界株式インデックス投信",
-                price: 29694, prevClose: 29599, prevDate: "11/09",
-                ma25: 30850, rsi: 45, bb: -0.8, change: "+0.32%",
-                sharpe: 1.78, mdd: -14.2, volatility: 15.5,
-                factors: { value: 78, momentum: 76, quality: 95, stability: 90, macroFit: 88 },
-                businessSummary: "純資産残高13.7兆円超・国内1位の王道インデックスファンドです。11/6に世界株安で一時下落しましたが、11/9には反発しており、3年年率リターン+25.31%・シャープレシオ1.78と抜群の長期効率を維持しています。毎月の定額積立継続が最適です。"
-            },
-            {
-                id: "emaxis-sp500", ticker: "03311187", yfCode: "03311187", code: "03311187 投信", name: "eMAXIS Slim 米国株式 (S&P500)",
-                keywords: "べいこく 米国 S&P500 投資信託 インデックス 投信 ダウ NISA 03311187",
-                assetClass: "FUND", sector: "米国株式インデックス投信",
-                price: 42755, prevClose: 44827, prevDate: "11/09",
-                ma25: 43900, rsi: 44, bb: -0.9, change: "-4.62%",
-                sharpe: 1.64, mdd: -15.8, volatility: 15.7,
-                factors: { value: 74, momentum: 78, quality: 94, stability: 85, macroFit: 84 },
-                businessSummary: "純資産12.6兆円超の米国株インデックス代表格です。直近の米国ハイテク株調整と為替変動により基準価額が42,755円付近へ押し目を作っており、定額積立に加えて余裕資金でのスポット買い増しにも好都合な水準です。"
+                businessSummary: "総合商社トップ。配当利回り3.7%水準で下値が堅い高配当コア銘柄です。"
             },
             {
                 id: "8951", ticker: "8951.T", yfCode: "8951.T", code: "8951 東証REIT", name: "日本ビルファンド投資法人",
@@ -547,12 +704,12 @@
                 ma25: 126800, rsi: 38, bb: -1.3, change: "-0.32%",
                 navRatio: 0.86, ltv: 41.5, dividend: 4.1, volatility: 13,
                 factors: { value: 88, momentum: 48, quality: 90, stability: 86, macroFit: 70 },
-                businessSummary: "三井不動産をスポンサーとする国内最大級のオフィス特化型J-REITです。NAV倍率0.86倍と資産価値に対して割安で、利回り4.1%の安定インカム資産として機能します。"
+                businessSummary: "三井不動産をスポンサーとする国内最大級のオフィス特化型J-REITです。"
             }
         ];
 
         /* =========================================================================
-         * 2. 高速・並列CORSプロキシ通信基盤（Promise.any で最速応答プロキシを自動採用）
+         * 2. 高速並列CORSプロキシ通信基盤
          * ========================================================================= */
         async function fetchFastCorsText(targetUrl, timeoutMs = 4500) {
             const proxyBuilders = [
@@ -561,7 +718,7 @@
                     const t = setTimeout(() => c.abort(), timeoutMs);
                     const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`, { signal: c.signal });
                     clearTimeout(t);
-                    if (!r.ok) throw new Error("allorigins-get failed");
+                    if (!r.ok) throw new Error("allorigins failed");
                     const j = await r.json();
                     if (!j.contents || j.contents.length < 30) throw new Error("empty");
                     return j.contents;
@@ -596,9 +753,9 @@
         }
 
         /* =========================================================================
-         * 3. Yahoo!ファイナンス日本版 (finance.yahoo.co.jp) 完全パーサー
-         *    ・朝8時台の「リアルタイム株価 ---」でも「前日終値 (2,191.5)」と「夜間PTS (2,220)」を確実に抽出！
-         *    ・時系列ページ (/history) からローソク足データ・25日線・RSI・BBを直接算出！
+         * 3. 株式＆投資信託 両対応！Yahoo!ファイナンス日本版 完全パーサー
+         *    ・株式の「東証株価 / 前日終値 / 夜間PTS / 値幅制限」も、
+         *    ・投資信託（3531299B netWIN等）の「基準価額 / 純資産 / 信託報酬 / 分配金」も両方抽出！
          * ========================================================================= */
         function parseCleanNum(val) {
             if (val === null || val === undefined) return NaN;
@@ -607,21 +764,43 @@
             return parseFloat(cleaned);
         }
 
+        function isFundCodeFormat(code) {
+            return /^[0-9A-Z]{8}$/i.test(String(code || "").trim());
+        }
+
+        function isStockCodeFormat(code) {
+            return /^([0-9]{4}|[0-9]{3}[A-Z])(\.T)?$/i.test(String(code || "").trim());
+        }
+
         function parseYahooJapanQuoteHtml(html) {
             if (!html) return null;
             const out = {};
 
-            // 1) window.__PRELOADED_STATE__ からの構造化抽出
+            // 0) <title>タグから正式な銘柄名・ファンド名とコードを抽出
+            const titleMatch = html.match(/<title>\s*([^<]+?)\【([0-9A-Z.]+)\】/i);
+            if (titleMatch) {
+                out.name = titleMatch[1].replace(/\(株\)|株式会社/g, "").trim();
+                out.extractedCode = titleMatch[2].toUpperCase();
+                if (isFundCodeFormat(out.extractedCode)) {
+                    out.isFund = true;
+                }
+            }
+
+            // 1) window.__PRELOADED_STATE__ からの構造化抽出（株式・投資信託両対応）
             const stateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
             if (stateMatch) {
                 try {
                     const st = JSON.parse(stateMatch[1]);
-                    const pb = st?.mainStocksPriceBoard?.priceBoard || st?.mainFundPriceBoard?.fundPrices || {};
-                    const dt = st?.mainStocksDetail?.detail || {};
+                    const stockPb = st?.mainStocksPriceBoard?.priceBoard || {};
+                    const fundPb = st?.mainFundPriceBoard?.fundPrices || st?.mainFundPriceBoard?.priceBoard || {};
+                    const pb = Object.keys(stockPb).length > 0 ? stockPb : fundPb;
+                    const dt = st?.mainStocksDetail?.detail || st?.mainFundDetail?.items || {};
 
-                    if (pb.name) out.name = String(pb.name).replace(/\(株\)|株式会社/g, "").trim();
+                    if (pb.name || pb.fundName) {
+                        out.name = String(pb.name || pb.fundName).replace(/\(株\)|株式会社/g, "").trim();
+                    }
 
-                    const rtPrice = parseCleanNum(pb.price);
+                    const rtPrice = parseCleanNum(pb.price || pb.nav);
                     const prevPrice = parseCleanNum(dt.previousPrice || pb.previousPrice);
                     const ptsPrice = parseCleanNum(pb.ptsPrice || pb?.pts?.price);
 
@@ -631,7 +810,7 @@
                     }
                     if (!isNaN(prevPrice) && prevPrice > 0) {
                         out.prevClose = prevPrice;
-                        if (dt.previousPriceDate) out.prevDate = dt.previousPriceDate;
+                        if (dt.previousPriceDate || pb.updateDate) out.prevDate = dt.previousPriceDate || pb.updateDate;
                     }
                     if (!isNaN(ptsPrice) && ptsPrice > 0) {
                         out.ptsPrice = ptsPrice;
@@ -641,9 +820,13 @@
                         if (pb.ptsTime || pb?.pts?.updateTime) out.ptsTime = pb.ptsTime || pb?.pts?.updateTime;
                     }
 
-                    const rateNum = parseCleanNum(pb.priceChangeRate);
+                    const diffNum = parseCleanNum(pb.priceChange || pb.navChange);
+                    const rateNum = parseCleanNum(pb.priceChangeRate || pb.navChangeRate);
                     if (!isNaN(rateNum)) {
-                        out.change = (rateNum >= 0 ? "+" : "") + rateNum.toFixed(2) + "%";
+                        const sign = rateNum >= 0 ? "+" : "";
+                        out.change = !isNaN(diffNum) && out.isFund
+                            ? `${sign}${rateNum.toFixed(2)}% (${sign}${diffNum.toLocaleString()}円)`
+                            : `${sign}${rateNum.toFixed(2)}%`;
                     }
 
                     if (dt.openPrice && dt.openPrice !== "---") out.openPrice = parseCleanNum(dt.openPrice);
@@ -654,7 +837,19 @@
                 } catch (e) {}
             }
 
-            // 2) HTMLテキストからの正規表現フォールバック抽出（PRELOADED_STATE仕様変更時も確実に動作）
+            // 2) HTMLテキストからの正規表現抽出（投資信託の基準価額・純資産・信託報酬・分配金・株式PTSも完全カバー）
+            if (!out.realtimePrice && !out.prevClose) {
+                // 投資信託の基準価額パターン（例: 48,494 前日比 +987 (+2.08%)）
+                const fundNavMatch = html.match(/([0-9]{1,3}(?:,[0-9]{3})+)\s*(?:円)?[\s\S]{1,120}?前日比\s*([+-][0-9,]+)\s*\(([+-][0-9.]+%)\)/);
+                if (fundNavMatch) {
+                    const p = parseCleanNum(fundNavMatch[1]);
+                    if (!isNaN(p) && p > 0) {
+                        out.realtimePrice = p;
+                        out.change = `${fundNavMatch[3]} (${fundNavMatch[2]}円)`;
+                        out.isFund = true;
+                    }
+                }
+            }
             if (!out.prevClose) {
                 const prevMatch = html.match(/前日終値[\s\S]{1,250}?([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]+)?)/);
                 if (prevMatch) {
@@ -669,10 +864,25 @@
                     if (!isNaN(p) && p > 0) out.ptsPrice = p;
                 }
                 const ptsRateMatch = html.match(/東証終値比[\s\S]{1,120}?([+-][0-9.,]+)\s*\(([+-][0-9.]+%)\)/);
-                if (ptsRateMatch) {
-                    out.ptsChange = `${ptsRateMatch[1]} (${ptsRateMatch[2]})`;
-                }
+                if (ptsRateMatch) out.ptsChange = `${ptsRateMatch[1]} (${ptsRateMatch[2]})`;
             }
+
+            // 投資信託固有の指標（純資産残高・信託報酬・1年トータルリターン・直近分配金・リスク標準偏差）を抽出
+            const netAssetMatch = html.match(/純資産残高[\s\S]{1,200}?([0-9,]+百万円)/);
+            if (netAssetMatch) out.netAssets = netAssetMatch[1];
+
+            const feeMatch = html.match(/信託報酬[\s\S]{1,200}?([0-9.]+%)/);
+            if (feeMatch) out.trustFee = feeMatch[1];
+
+            const ret1YMatch = html.match(/トータルリターン（1年）[\s\S]{1,200}?([+-]?[0-9.]+%)/);
+            if (ret1YMatch) out.return1Y = ret1YMatch[1];
+
+            const divMatch = html.match(/直近分配金[\s\S]{1,200}?([0-9,]+円)/);
+            if (divMatch) out.lastDividend = divMatch[1];
+
+            const stdMatch = html.match(/リスク（標準偏差・1年）[\s\S]{1,200}?([0-9.]+)/);
+            if (stdMatch) out.stdDev1Y = stdMatch[1];
+
             if (!out.priceLimit) {
                 const limMatch = html.match(/値幅制限[\s\S]{1,200}?([0-9,]+(?:\.[0-9]+)?〜[0-9,]+(?:\.[0-9]+)?)/);
                 if (limMatch) out.priceLimit = limMatch[1];
@@ -680,7 +890,6 @@
             const earnMatch = html.match(/決算発表予定日[\s：:]*([0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2})/);
             if (earnMatch) out.earningsDate = earnMatch[1];
 
-            // 優先価格の決定：東証リアルタイムが有効ならそれを使用、朝8時台で「---」なら前日終値を使用！
             const effectivePrice = out.realtimePrice || out.prevClose || out.ptsPrice;
             if (!effectivePrice || isNaN(effectivePrice)) return null;
 
@@ -692,12 +901,10 @@
             return out;
         }
 
-        // Yahoo!ファイナンス日本版「時系列 (/history)」HTMLからローソク足データを抽出
         function parseYahooJapanHistoryHtml(html) {
             if (!html) return null;
             const candles = [];
 
-            // パターンA: PRELOADED_STATE内の mainStocksHistory / mainFundHistory
             const stateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
             if (stateMatch) {
                 try {
@@ -716,7 +923,6 @@
                 } catch (e) {}
             }
 
-            // パターンB: HTMLの<table>行から抽出
             if (candles.length < 5) {
                 const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
                 let rm;
@@ -727,7 +933,6 @@
                     while ((tm = tdRegex.exec(rm[1])) !== null) {
                         cells.push(tm[1].replace(/<[^>]+>/g, "").trim());
                     }
-                    // 株式時系列: [日付, 始値, 高値, 安値, 終値, 出来高, 調整後終値]
                     if (cells.length >= 5 && /\d{4}年|\d{4}\//.test(cells[0])) {
                         const o = parseCleanNum(cells[1]);
                         const h = parseCleanNum(cells[2]);
@@ -738,36 +943,35 @@
                             candles.push({ date: cells[0].replace(/202\d年|202\d\//, ""), o, h, l, c, v });
                         }
                     } else if (cells.length >= 2 && /\d{4}年|\d{4}\//.test(cells[0])) {
-                        // 投資信託時系列: [日付, 基準価額, 前日比, 純資産]
                         const nav = parseCleanNum(cells[1]);
                         if (!isNaN(nav) && nav > 0) {
-                            candles.push({ date: cells[0].replace(/202\d年|202\d\//, ""), o: nav, h: nav * 1.004, l: nav * 0.996, c: nav, v: 0 });
+                            candles.push({ date: cells[0].replace(/202\d年|202\d\//, ""), o: nav, h: nav * 1.005, l: nav * 0.995, c: nav, v: 0 });
                         }
                     }
                 }
             }
 
-            if (candles.length >= 5) {
-                // 古い日付→新しい日付の順に整列
-                return candles.reverse();
-            }
+            if (candles.length >= 5) return candles.reverse();
             return null;
         }
 
         /* =========================================================================
-         * 4. 銘柄ごとのYahoo!ファイナンス ライブ株価＋チャート統合取得エンジン
+         * 4. Yahoo!ファイナンス ライブ株価・基準価額・チャート統合取得エンジン
          * ========================================================================= */
         async function fetchAndApplyLiveYahooData(item, reRenderModalIfOpen = false) {
             if (!item) return false;
-            const yfCode = item.yfCode || item.ticker || (/^([0-9]{4}|[0-9]{3}[A-Z])$/i.test(item.id) ? `${item.id}.T` : null);
+            let yfCode = item.yfCode || item.ticker || item.id;
             if (!yfCode) return false;
+            yfCode = String(yfCode).trim().toUpperCase();
+            if (/^([0-9]{4}|[0-9]{3}[A-Z])$/.test(yfCode)) {
+                yfCode = `${yfCode}.T`;
+            }
 
             const isStockOrReit = yfCode.endsWith(".T");
             const quoteUrl = `https://finance.yahoo.co.jp/quote/${yfCode}`;
             const historyUrl = `https://finance.yahoo.co.jp/quote/${yfCode}/history`;
             const chartApiUrl = isStockOrReit ? `https://query1.finance.yahoo.com/v8/finance/chart/${yfCode}?interval=1d&range=6mo` : null;
 
-            // 並列でYahoo!ファイナンスの詳細ページ・時系列ページ・チャートAPIを同時取得
             const [quoteHtml, historyHtml, chartApiJson] = await Promise.all([
                 fetchFastCorsText(quoteUrl, 4200),
                 fetchFastCorsText(historyUrl, 4200),
@@ -776,9 +980,11 @@
 
             let updated = false;
 
-            // A) 詳細ページ(quoteHtml)から現在値・前日終値・夜間PTS・値幅制限・決算予定日を反映
             const parsedQuote = parseYahooJapanQuoteHtml(quoteHtml);
             if (parsedQuote) {
+                if (parsedQuote.name && (item.name.includes("銘柄 (") || item.name.includes("ファンド ("))) {
+                    item.name = parsedQuote.name;
+                }
                 if (parsedQuote.price) item.price = parsedQuote.price;
                 if (parsedQuote.prevClose) item.prevClose = parsedQuote.prevClose;
                 if (parsedQuote.prevDate) item.prevDate = parsedQuote.prevDate;
@@ -791,12 +997,16 @@
                 if (parsedQuote.volume) item.volume = parsedQuote.volume;
                 if (parsedQuote.priceLimit) item.priceLimit = parsedQuote.priceLimit;
                 if (parsedQuote.earningsDate) item.earningsDate = parsedQuote.earningsDate;
+                if (parsedQuote.netAssets) item.netAssets = parsedQuote.netAssets;
+                if (parsedQuote.trustFee) item.trustFee = parsedQuote.trustFee;
+                if (parsedQuote.return1Y) item.return1Y = parsedQuote.return1Y;
+                if (parsedQuote.lastDividend) item.lastDividend = parsedQuote.lastDividend;
+                if (parsedQuote.stdDev1Y) item.stdDev1Y = parsedQuote.stdDev1Y;
                 if (parsedQuote.change) item.change = parsedQuote.change;
                 item.isRealtimeActive = Boolean(parsedQuote.isRealtimeActive);
                 updated = true;
             }
 
-            // B) チャートAPIまたは時系列ページからローソク足データを取得し、25日線・RSI・BBを再計算
             let candles = null;
             if (chartApiJson) {
                 try {
@@ -842,7 +1052,6 @@
                     }
                 }
 
-                // 25日移動平均とボリンジャーバンドの厳密計算
                 const slice25 = closes.slice(-25);
                 const ma25 = slice25.reduce((a, b) => a + b, 0) / slice25.length;
                 const std = Math.sqrt(slice25.reduce((a, b) => a + Math.pow(b - ma25, 2), 0) / slice25.length) || (ma25 * 0.02) || 1;
@@ -851,7 +1060,6 @@
                 item.ma25 = activePrice < 100 ? Number(ma25.toFixed(1)) : Math.round(ma25);
                 item.bb = Number(Math.max(-3.0, Math.min(3.0, (activePrice - ma25) / std)).toFixed(1));
 
-                // 14日RSIの厳密計算
                 if (closes.length >= 15) {
                     let gains = 0, losses = 0;
                     for (let i = closes.length - 14; i < closes.length; i++) {
@@ -876,11 +1084,9 @@
         }
 
         /* =========================================================================
-         * 5. 直近ローソク足＋25日線＋75日線＋出来高チャート生成エンジン (HTML5 Canvas)
-         *    ・Yahoo!ファイナンス実データが無い瞬間でも銘柄固有の価格推移から即座に描画し、
-         *      ライブデータ到着と同時にシームレスに再描画します。
+         * 5. 直近ローソク足＋移動平均線チャート生成エンジン (HTML5 Canvas)
          * ========================================================================= */
-        let currentChartPeriod = 60; // デフォルト3カ月(60営業日)
+        let currentChartPeriod = 60;
         let currentOpenAssetId = null;
 
         function getOrBuildCandles(item, count = 120) {
@@ -890,18 +1096,17 @@
             if (Array.isArray(item.realHistoryCloses) && item.realHistoryCloses.length >= 5) {
                 return item.realHistoryCloses.map((c, idx) => ({
                     date: `${idx + 1}日前`,
-                    o: idx > 0 ? item.realHistoryCloses[idx - 1] : c * 0.98,
-                    h: c * 1.018,
-                    l: c * 0.982,
+                    o: idx > 0 ? item.realHistoryCloses[idx - 1] : c * 0.99,
+                    h: c * 1.012,
+                    l: c * 0.988,
                     c: c,
                     v: 1500000
                 }));
             }
 
-            // シード固定によるリアルなヒストリカル日足生成（現在値と25日移動平均に完全一致するよう逆算）
             const endPrice = Number(item.price) || 1000;
             const targetMa25 = Number(item.ma25) || endPrice;
-            const volPct = (item.volatility || 24) / 100 / Math.sqrt(250);
+            const volPct = (item.volatility || 22) / 100 / Math.sqrt(250);
 
             let seed = 0;
             const idStr = String(item.id || item.name);
@@ -934,7 +1139,6 @@
                     v: Math.round(1000000 * (0.5 + rand()))
                 };
 
-                // 過去に向かってtargetMa25を経由するようにドリフト調整
                 const pullToMa = i > count - 25 ? (targetMa25 - cur) * 0.12 : 0;
                 const step = cur * volPct * (rand() - 0.48) + pullToMa;
                 cur = Math.max(endPrice * 0.3, cur + step);
@@ -959,9 +1163,7 @@
             const candles = allCandles.slice(-Math.min(periodDays, allCandles.length));
             if (candles.length === 0) return;
 
-            // 移動平均線(MA5, MA25)を全期間から計算
-            const ma5Arr = [];
-            const ma25Arr = [];
+            const ma5Arr = [], ma25Arr = [];
             for (let i = 0; i < allCandles.length; i++) {
                 const s5 = allCandles.slice(Math.max(0, i - 4), i + 1);
                 const s25 = allCandles.slice(Math.max(0, i - 24), i + 1);
@@ -971,10 +1173,7 @@
             const viewMa5 = ma5Arr.slice(-candles.length);
             const viewMa25 = ma25Arr.slice(-candles.length);
 
-            const padLeft = 8;
-            const padRight = 46;
-            const padTop = 14;
-            const padBottom = 22;
+            const padLeft = 8, padRight = 50, padTop = 14, padBottom = 22;
             const chartW = width - padLeft - padRight;
             const chartH = height - padTop - padBottom;
 
@@ -992,11 +1191,9 @@
             const yOf = val => padTop + chartH - ((val - minP) / (maxP - minP)) * chartH;
             const xOf = idx => padLeft + ((idx + 0.5) / candles.length) * chartW;
 
-            // 背景（Yahoo!ファイナンスチャート風ホワイト＆グリッド）
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, width, height);
 
-            // 横グリッド線と右軸価格ラベル
             ctx.strokeStyle = "#e2e8f0";
             ctx.lineWidth = 1;
             ctx.fillStyle = "#64748b";
@@ -1016,7 +1213,6 @@
                 ctx.fillText(labelStr, padLeft + chartW + 4, y + 3);
             }
 
-            // ローソク足の描画（Yahoo!ファイナンス日本版配色：陽線=赤ピンク #eb4d5c、陰線=青緑 #1f8efa）
             const barW = Math.max(2, Math.min(7, (chartW / candles.length) * 0.68));
             candles.forEach((c, idx) => {
                 const x = xOf(idx);
@@ -1026,20 +1222,17 @@
                 ctx.fillStyle = color;
                 ctx.lineWidth = 1;
 
-                // ヒゲ
                 ctx.beginPath();
                 ctx.moveTo(x, yOf(c.h));
                 ctx.lineTo(x, yOf(c.l));
                 ctx.stroke();
 
-                // 実体
                 const yTop = yOf(Math.max(c.o, c.c));
                 const yBot = yOf(Math.min(c.o, c.c));
                 const bodyH = Math.max(1.5, yBot - yTop);
                 ctx.fillRect(x - barW / 2, yTop, barW, bodyH);
             });
 
-            // 5日移動平均線（オレンジ）
             ctx.strokeStyle = "#f59e0b";
             ctx.lineWidth = 1.3;
             ctx.beginPath();
@@ -1049,7 +1242,6 @@
             });
             ctx.stroke();
 
-            // 25日移動平均線（グリーン：Yahoo!ファイナンス標準色）
             ctx.strokeStyle = "#10b981";
             ctx.lineWidth = 1.8;
             ctx.beginPath();
@@ -1059,7 +1251,6 @@
             });
             ctx.stroke();
 
-            // X軸の日付ラベル
             ctx.fillStyle = "#64748b";
             ctx.textAlign = "center";
             const step = Math.max(1, Math.floor(candles.length / 4));
@@ -1067,7 +1258,6 @@
                 ctx.fillText(candles[i].date, xOf(i), height - 6);
             }
 
-            // タッチ時のクロスヘア＆日付別四本値表示
             const activeIdx = highlightIdx !== null ? highlightIdx : candles.length - 1;
             const targetC = candles[activeIdx];
             if (targetC) {
@@ -1086,10 +1276,9 @@
                 if (infoEl) {
                     infoEl.innerHTML = `
                         <span>📅 ${targetC.date}</span>
-                        <span>始:${formatYen(targetC.o)}</span>
                         <span>高:${formatYen(targetC.h)}</span>
                         <span>安:${formatYen(targetC.l)}</span>
-                        <span class="text-teal-700 font-extrabold">終:${formatYen(targetC.c)}</span>
+                        <span class="text-teal-700 font-extrabold">終/基準:${formatYen(targetC.c)}</span>
                         <span class="text-emerald-600">25日線:${formatYen(viewMa25[activeIdx])}</span>
                     `;
                 }
@@ -1103,8 +1292,8 @@
                 const rect = canvas.getBoundingClientRect();
                 const allCandles = getOrBuildCandles(item, 130);
                 const candles = allCandles.slice(-Math.min(currentChartPeriod, allCandles.length));
-                const relX = Math.max(0, Math.min(rect.width - 54, clientX - rect.left - 8));
-                const idx = Math.min(candles.length - 1, Math.max(0, Math.floor((relX / (rect.width - 54)) * candles.length)));
+                const relX = Math.max(0, Math.min(rect.width - 58, clientX - rect.left - 8));
+                const idx = Math.min(candles.length - 1, Math.max(0, Math.floor((relX / (rect.width - 58)) * candles.length)));
                 drawYahooStyleChart(canvasId, item, currentChartPeriod, idx);
             };
             canvas.addEventListener("touchmove", e => {
@@ -1130,9 +1319,9 @@
         }
 
         /* =========================================================================
-         * 6. 監視リスト全体の高速並列同期 & ローカルストレージ管理（古い¥1,145キャッシュを強制更新）
+         * 6. 状態管理（netWIN・千葉銀行・りそなHDを含む新世代ストレージ）
          * ========================================================================= */
-        const STORAGE_KEY = "quant_advisor_pro_v9_live";
+        const STORAGE_KEY = "quant_advisor_pro_v10_funds";
         let currentFilter = "ALL";
         let currentCatalogCat = "ALL";
         let watchlist = [];
@@ -1148,12 +1337,11 @@
                 .toLowerCase()
                 .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
                 .replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60))
-                .replace(/\(株\)|株式会社|ホールディングス|グループ/g, "")
+                .replace(/\(株\)|株式会社|ホールディングス|フィナンシャルグループ|グループ/g, "")
                 .replace(/\s+/g, "");
         }
 
         function loadState() {
-            // 過去の古いキャッシュキー(v5〜v8)に残っていた古い価格(りそな¥1,145など)が干渉しないよう新世代キーを採用
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
@@ -1167,8 +1355,8 @@
                 }
             } catch (e) {}
 
-            // 初期監視リスト（りそなHD 2,191.5円/PTS 2,220円、北浜キャピタル 17円、キオクシア 8,621円、太陽誘電 6,651円/PTS 6,999円、住友電工、ソニー、楽天4.3倍ブル、オルカン）
-            const defaultIds = ["8308", "2134", "285A", "6976", "5802", "6758", "rakuten-43bull", "emaxis-allcountry"];
+            // 初期監視リスト（netWIN Bコース、千葉銀行、りそなHD、北浜キャピタル、キオクシア、太陽誘電、楽天4.3倍ブル、オルカン）
+            const defaultIds = ["3531299B", "8331", "8308", "2134", "285A", "6976", "9I31115A", "0331418A"];
             watchlist = defaultIds.map(id => {
                 const found = MASTER_MARKET_DB.find(m => m.id === id);
                 return found ? cloneObj(found) : null;
@@ -1200,9 +1388,8 @@
             const btnIcon = document.getElementById("syncBtnIcon");
             const statusText = document.getElementById("syncStatusText");
             if (btnIcon) btnIcon.classList.add("animate-spin-fast");
-            if (statusText) statusText.innerText = "⏳ Yahoo!ファイナンスから全銘柄の最新株価・PTSを並列取得中...";
+            if (statusText) statusText.innerText = "⏳ Yahoo!ファイナンスから全銘柄・投信を並列取得中...";
 
-            // 4銘柄ずつ並列バッチで高速取得
             const batchSize = 4;
             for (let i = 0; i < watchlist.length; i += batchSize) {
                 const batch = watchlist.slice(i, i + batchSize);
@@ -1212,18 +1399,18 @@
             if (btnIcon) btnIcon.classList.remove("animate-spin-fast");
             const nowStr = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
             if (statusText) {
-                statusText.innerText = `✅ Y!ファイナンス最新株価・PTS・チャート同期済 (${nowStr})`;
+                statusText.innerText = `✅ Y!ファイナンス最新株価・基準価額・チャート同期済 (${nowStr})`;
             }
             isSyncingAll = false;
         }
 
         /* =========================================================================
-         * 7. クオンツ評価エンジン & XAI解説ジェネレーター（東証終値 / 夜間PTS 切替対応）
+         * 7. クオンツ評価エンジン & XAI解説ジェネレーター
          * ========================================================================= */
         function formatYen(val) {
             const num = Number(val);
             if (isNaN(num)) return "---";
-            if (num < 1000 && num % 1 !== 0) return "¥" + num.toLocaleString("ja-JP", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            if (num < 3000 && num % 1 !== 0) return "¥" + num.toLocaleString("ja-JP", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
             return "¥" + Math.round(num).toLocaleString("ja-JP");
         }
 
@@ -1304,11 +1491,16 @@
                     badgeText = "🟢 積立＋スポット買い増し好機";
                     badgeStyle = "bg-emerald-100 text-emerald-900 border-emerald-400";
                     actionHeadline = "定額積立に加えて、待機資金でのスポット購入が有効な押し目局面";
-                } else {
+                } else if (rsi >= 68 || bb >= 1.6) {
                     signalCode = "HOLD_DCA";
-                    badgeText = "🌱 積立継続（売却不要）";
+                    badgeText = "🌱 積立継続（一括買いは見送り）";
+                    badgeStyle = "bg-amber-50 text-amber-800 border-amber-300";
+                    actionHeadline = "短期的に高値圏のため、スポット一括購入は控え定額積立のみ継続";
+                } else {
+                    signalCode = "BUY";
+                    badgeText = "🌱 積立＆分割エントリー好機";
                     badgeStyle = "bg-teal-50 text-teal-800 border-teal-300";
-                    actionHeadline = "毎月の定額積立を淡々と継続。今あえて一括購入する必要はなし";
+                    actionHeadline = "堅調な上昇トレンドを維持。定額積立または予算の3割ずつ分割購入が有効";
                 }
             } else if (activePrice < 100) {
                 if (rsi >= 65 || bb >= 1.4 || maDiffPct >= 15) {
@@ -1393,7 +1585,8 @@
             }
 
             const ptsNote = asset.ptsPrice ? `（夜間PTS価格は **${formatYen(asset.ptsPrice)}** / 東証終値比 **${asset.ptsChange || ''}**）` : "";
-            const factText = `Yahoo!ファイナンス連動による現在価格は **${formatYen(quant.activePrice)}** ${ptsNote}で、${maWord}に位置しています。また、市場の買われすぎ・売られすぎを0〜100度で測る温度計 **「RSI」は ${asset.rsi}度**（30以下で売られすぎ、70以上で買われすぎ）、価格の振れ幅を示す **「ボリンジャーバンド」は ${asset.bb > 0 ? '+' + asset.bb : asset.bb}σ** となっています。`;
+            const priceLabel = (asset.assetClass === "FUND" || asset.assetClass === "LEVERAGE") ? "現在基準価額" : "現在価格";
+            const factText = `Yahoo!ファイナンス連動による${priceLabel}は **${formatYen(quant.activePrice)}** ${ptsNote}で、${maWord}に位置しています。また、市場の買われすぎ・売られすぎを0〜100度で測る温度計 **「RSI」は ${asset.rsi}度**（30以下で売られすぎ、70以上で買われすぎ）、価格の振れ幅を示す **「ボリンジャーバンド」は ${asset.bb > 0 ? '+' + asset.bb : asset.bb}σ** となっています。`;
 
             let logicText = `${asset.businessSummary} クオンツ5大ファクター分析では、ファンダメンタルズ評価とテクニカル位置（RSI **${asset.rsi}** / 25日線乖離 **${quant.maDiffPct}%**）を統合解析しています。過学習（まぐれ当たり）を除外したCPCV信頼度は **${quant.cpcvConfidence}%** です。`;
 
@@ -1411,7 +1604,7 @@
                     name: "📈 強気（好転）シナリオ",
                     prob: quant.signalCode.includes("BUY") ? "55%" : "35%",
                     target: `${formatYen(quant.takeProfit)} 付近`,
-                    desc: "25日移動平均線を明確に上抜け（または維持）し、機関投資家の買い戻しで上値目標へ到達する展開。"
+                    desc: "25日移動平均線を明確に上抜け（または維持）し、資金流入で上値目標へ到達する展開。"
                 },
                 {
                     name: "⚖️ 基本（メイン）シナリオ",
@@ -1431,7 +1624,7 @@
         }
 
         /* =========================================================================
-         * 8. 詳細モーダル描画（【最上部】にYahoo!ファイナンス株価・夜間PTS・チャートを配置！）
+         * 8. 詳細モーダル描画（株式モード＆投資信託モードの両対応最上部ボード）
          * ========================================================================= */
         function openDetailModal(assetId) {
             const item = watchlist.find(w => w.id === assetId);
@@ -1441,7 +1634,6 @@
             renderDetailModalContent(item);
             document.getElementById("detailModal").classList.remove("hidden");
 
-            // モーダルを開いた瞬間にYahoo!ファイナンスから最新株価・PTS・時系列チャートを非同期取得して最上部を更新
             fetchAndApplyLiveYahooData(item, true);
         }
 
@@ -1460,14 +1652,18 @@
             const quant = evaluateQuantMetrics(item, macro);
             const xai = generateXaiExplanation(item, quant, budget);
             const typeBadge = getAssetTypeBadge(item.assetClass);
+            const isFundType = item.assetClass === "FUND" || item.assetClass === "LEVERAGE";
 
             document.getElementById("modalAssetBadge").className = `text-[10px] font-extrabold px-2 py-0.5 rounded ${typeBadge.cls}`;
             document.getElementById("modalAssetBadge").innerText = typeBadge.label;
             document.getElementById("modalCode").innerText = `${item.code || ''} ・ ${item.sector || ''}`;
             document.getElementById("modalTitle").innerText = item.name;
 
-            const yfCode = item.yfCode || item.ticker || (/^([0-9]{4}|[0-9]{3}[A-Z])$/i.test(item.id) ? `${item.id}.T` : null);
-            const yfUrl = yfCode ? `https://finance.yahoo.co.jp/quote/${yfCode}` : `https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(item.name)}`;
+            let yfCode = item.yfCode || item.ticker || item.id;
+            if (/^([0-9]{4}|[0-9]{3}[A-Z])$/i.test(yfCode)) yfCode = `${yfCode}.T`;
+            const yfUrl = (isStockCodeFormat(yfCode) || isFundCodeFormat(yfCode))
+                ? `https://finance.yahoo.co.jp/quote/${yfCode}`
+                : `https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(item.name)}`;
 
             document.getElementById("deleteAssetBtn").onclick = () => {
                 watchlist = watchlist.filter(w => w.id !== item.id);
@@ -1477,45 +1673,75 @@
             };
 
             const refreshBtn = document.getElementById("refreshSingleBtn");
-            refreshBtn.innerText = "🔄 Y!最新株価を再取得";
+            refreshBtn.innerText = "🔄 Y!最新データを再取得";
             refreshBtn.onclick = async () => {
                 refreshBtn.innerText = "⏳ Y!から取得中...";
                 await fetchAndApplyLiveYahooData(item, true);
                 refreshBtn.innerText = "✅ 最新反映済";
             };
 
-            const hasPts = Boolean(item.ptsPrice);
+            const hasPts = Boolean(item.ptsPrice) && !isFundType;
             const isPtsPositive = String(item.ptsChange || "").includes("+");
             const isMainPositive = String(item.change || "").startsWith("+");
+
+            // 下部詳細情報テーブル（株式用 vs 投資信託用）
+            const bottomMetricsHtml = isFundType ? `
+                <div class="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-slate-100 text-[10px]">
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">純資産残高</span>
+                        <strong class="text-slate-800 font-extrabold truncate block">${item.netAssets || '大型ファンド'}</strong>
+                    </div>
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">信託報酬 / 1年リターン</span>
+                        <strong class="text-slate-800 font-extrabold">${item.trustFee || '---'} / <span class="text-emerald-600">${item.return1Y || '---'}</span></strong>
+                    </div>
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">直近分配金 / 標準偏差</span>
+                        <strong class="text-slate-800 font-extrabold truncate block">${item.lastDividend || '無分配'} / ${item.stdDev1Y || item.volatility || '--'}</strong>
+                    </div>
+                </div>
+            ` : `
+                <div class="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-slate-100 text-[10px]">
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">前日終値 (${item.prevDate || '直近'})</span>
+                        <strong class="text-slate-800 font-extrabold">${formatYen(item.prevClose || item.price)}</strong>
+                    </div>
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">高値 / 安値</span>
+                        <strong class="text-slate-800 font-extrabold">${item.highPrice ? `${formatYen(item.highPrice)} / ${formatYen(item.lowPrice)}` : '--- / ---'}</strong>
+                    </div>
+                    <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                        <span class="text-slate-400 block">値幅制限 / 出来高</span>
+                        <strong class="text-slate-800 font-extrabold truncate block">${item.priceLimit || item.volume || '東証基準'}</strong>
+                    </div>
+                </div>
+            `;
 
             const body = document.getElementById("modalBody");
             body.innerHTML = `
                 <!-- =========================================================
-                     【最上部】Yahoo!ファイナンス直結 株価・夜間PTS・直近チャートボード
+                     【最上部】Yahoo!ファイナンス直結 株価/基準価額・夜間PTS・直近チャートボード
                 ========================================================== -->
-                <div class=" rounded-3xl overflow-hidden border border-slate-300 shadow-md bg-white">
-                    <!-- 上段: ダークネイビーのYahoo!ファイナンス風価格ヘッダー -->
+                <div class="rounded-3xl overflow-hidden border border-slate-300 shadow-md bg-white">
                     <div class="yf-board p-4">
                         <div class="flex justify-between items-center text-[10px] text-slate-300 mb-2">
-                            <span>${item.earningsDate ? `📅 決算発表予定日: <strong class="text-white underline">${item.earningsDate}</strong>` : `📊 東証・Y!ファイナンス連動データ`}</span>
+                            <span>${isFundType ? `🌱 投資信託 基準価額・ファンド情報 (${item.prevDate || '最新'})` : (item.earningsDate ? `📅 決算発表予定日: <strong class="text-white underline">${item.earningsDate}</strong>` : `📊 東証・Y!ファイナンス連動データ`)}</span>
                             <a href="${yfUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2.5 py-1 rounded-lg font-bold">
-                                🔗 Y!ファイナンスを開く ↗
+                                🔗 Y!ファイナンスで見る ↗
                             </a>
                         </div>
 
                         <div class="grid ${hasPts ? 'grid-cols-2' : 'grid-cols-1'} gap-3 items-center pt-1">
-                            <!-- 左: 東証株価（または前日終値） -->
                             <div class="${hasPts ? 'border-r border-slate-600/80 pr-2' : ''}">
                                 <span class="text-[10px] text-slate-300 block">
-                                    ${item.isRealtimeActive ? '東証リアルタイム株価' : `東証株価 (前日終値 ${item.prevDate || '11/09'})`}
+                                    ${isFundType ? '基準価額 (1万口あたり)' : (item.isRealtimeActive ? '東証リアルタイム株価' : `東証株価 (終値 ${item.prevDate || '11/09'})`)}
                                 </span>
-                                <div class="flex items-baseline gap-2 mt-0.5">
+                                <div class="flex items-baseline gap-2 mt-0.5 flex-wrap">
                                     <span class="text-2xl font-extrabold tracking-tight text-white">${formatYen(item.price)}</span>
-                                    <span class="text-xs font-bold px-1.5 py-0.5 rounded ${isMainPositive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${item.change}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded ${isMainPositive ? 'bg-sky-500/30 text-sky-200' : 'bg-rose-500/30 text-rose-200'}">前日比 ${item.change}</span>
                                 </div>
                             </div>
 
-                            <!-- 右: 夜間PTS株価（存在する場合） -->
                             ${hasPts ? `
                             <div class="pl-1">
                                 <div class="flex items-center justify-between">
@@ -1530,7 +1756,6 @@
                             ` : ''}
                         </div>
 
-                        <!-- 東証終値 vs 夜間PTS のAI判定基準ワンタップ切替バー -->
                         ${hasPts ? `
                         <div class="mt-3 pt-2.5 border-t border-slate-700/80 flex items-center justify-between text-[10px]">
                             <span class="text-slate-300 font-medium">AI判定に使う基準価格:</span>
@@ -1546,7 +1771,7 @@
                         ` : ''}
                     </div>
 
-                    <!-- 中段: 直近のローソク足＋移動平均線チャート（Yahoo!ファイナンス型） -->
+                    <!-- 直近チャート -->
                     <div class="p-3 bg-white">
                         <div class="flex justify-between items-center mb-1.5">
                             <div class="flex items-center gap-2 text-[10px] font-bold">
@@ -1561,41 +1786,24 @@
                             </div>
                         </div>
 
-                        <!-- 指でなぞると日付別の四本値が表示される情報バー -->
                         <div id="chartCrosshairInfo" class="text-[10px] font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 flex flex-wrap justify-between gap-1 mb-1.5">
-                            <span>グラフを指でなぞると日別の四本値を表示します</span>
+                            <span>グラフを指でなぞると日別の価格推移を表示します</span>
                         </div>
 
                         <div class="w-full h-[185px] relative">
                             <canvas id="yfCandlestickCanvas" class="w-full h-full block cursor-crosshair"></canvas>
                         </div>
 
-                        <!-- 下段: Yahoo!ファイナンス 株価詳細値テーブル（前日終値・四本値・値幅制限） -->
-                        <div class="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-slate-100 text-[10px]">
-                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
-                                <span class="text-slate-400 block">前日終値 (${item.prevDate || '直近'})</span>
-                                <strong class="text-slate-800 font-extrabold">${formatYen(item.prevClose || item.price)}</strong>
-                            </div>
-                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
-                                <span class="text-slate-400 block">高値 / 安値</span>
-                                <strong class="text-slate-800 font-extrabold">${item.highPrice ? `${formatYen(item.highPrice)} / ${formatYen(item.lowPrice)}` : '--- / ---'}</strong>
-                            </div>
-                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
-                                <span class="text-slate-400 block">値幅制限 / 出来高</span>
-                                <strong class="text-slate-800 font-extrabold truncate block">${item.priceLimit || item.volume || '東証基準'}</strong>
-                            </div>
-                        </div>
+                        ${bottomMetricsHtml}
                     </div>
                 </div>
 
-                <!-- =========================================================
-                     2段目：クオンツAIの最終結論サマリーカード
-                ========================================================== -->
+                <!-- 2段目：クオンツAIの最終結論 -->
                 <div class="bg-white rounded-3xl p-4 border-2 border-teal-500/30">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <span class="text-[10px] font-bold text-slate-400 block mb-0.5">
-                                クオンツAIの最終結論（基準価格: ${formatYen(quant.activePrice)}）
+                                クオンツAIの最終結論（基準: ${formatYen(quant.activePrice)}）
                             </span>
                             <span class="inline-block text-sm font-extrabold px-3 py-1 rounded-xl border ${quant.badgeStyle}">
                                 ${quant.badgeText}
@@ -1653,7 +1861,7 @@
                         <div class="space-y-1.5 text-[10px]">
                             ${renderFactorBar("割安度 (Value)", quant.factors.value)}
                             ${renderFactorBar("勢い (Momentum)", quant.factors.momentum)}
-                            ${renderFactorBar("稼ぐ力・財務 (Quality)", quant.factors.quality)}
+                            ${renderFactorBar("稼ぐ力・運用力 (Quality)", quant.factors.quality)}
                             ${renderFactorBar("値動きの安定度 (Low-Vol)", quant.factors.stability)}
                             ${renderFactorBar("今の経済環境との相性", quant.factors.macroFit)}
                         </div>
@@ -1663,7 +1871,7 @@
                 <!-- 5段目：具体的な売買指値と資金配分 -->
                 <div class="bg-gradient-to-br from-teal-50 to-emerald-50/70 rounded-3xl p-4 border border-teal-200 space-y-3">
                     <h4 class="text-xs font-extrabold text-teal-900 flex items-center gap-1.5">
-                        <span>🎯</span> 具体的な売買指値目安・資金配分
+                        <span>🎯</span> 具体的なエントリー目安・資金配分
                     </h4>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
@@ -1672,14 +1880,14 @@
                             <span class="text-[10px] font-bold text-teal-600 block mt-0.5">配分: ¥${xai.yen1.toLocaleString()} (${Math.round(xai.ratio1*100)}%)</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
-                            <span class="text-[10px] font-bold text-slate-400 block">② 第2弾：本命押し目指値</span>
+                            <span class="text-[10px] font-bold text-slate-400 block">② 第2弾：本命押し目目安</span>
                             <strong class="text-sm font-extrabold text-sky-700">${formatYen(quant.entry2)}</strong>
                             <span class="text-[10px] font-bold text-sky-600 block mt-0.5">配分: ¥${xai.yen2.toLocaleString()} (${Math.round(xai.ratio2*100)}%)</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
                             <span class="text-[10px] font-bold text-slate-400 block">🎉 利益確定の目標目安</span>
                             <strong class="text-sm font-extrabold text-emerald-700">${formatYen(quant.takeProfit)}</strong>
-                            <span class="text-[10px] text-slate-500 block mt-0.5">到達で半分利確を検討</span>
+                            <span class="text-[10px] text-slate-500 block mt-0.5">到達で一部利確を検討</span>
                         </div>
                         <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
                             <span class="text-[10px] font-bold text-slate-400 block">🛡️ 損切り・撤退ライン</span>
@@ -1704,7 +1912,6 @@
                 </div>
             `;
 
-            // チャートCanvasを即座に描画＆タッチイベント設定
             setTimeout(() => {
                 drawYahooStyleChart("yfCandlestickCanvas", item, currentChartPeriod, null);
                 bindChartTouchEvents("yfCandlestickCanvas", item);
@@ -1730,40 +1937,128 @@
         }
 
         /* =========================================================================
-         * 9. 検索予測（内蔵辞書＋Y!ファイナンス日本版ライブ検索）
+         * 9. 株式＋投資信託＋銘柄コード 完全対応！Yahoo!ファイナンス ライブ検索エンジン
          * ========================================================================= */
         let liveSearchCache = {};
         let liveSearchTimer = null;
 
+        // JSONツリー内から { code, name } を再帰抽出するヘルパー
+        function extractItemsFromStateJson(obj, seenCodes, results) {
+            if (!obj || typeof obj !== "object" || results.length >= 10) return;
+            if (Array.isArray(obj)) {
+                for (const el of obj) extractItemsFromStateJson(el, seenCodes, results);
+                return;
+            }
+            const rawCode = obj.code || obj.fundCode || obj.symbol;
+            const rawName = obj.name || obj.fundName || obj.shortName;
+            if (rawCode && rawName && typeof rawCode === "string" && typeof rawName === "string") {
+                const cleanCode = rawCode.replace(/\.T$/i, "").toUpperCase();
+                const isFund = isFundCodeFormat(cleanCode);
+                const isStock = /^([0-9]{4}|[0-9]{3}[A-Z])$/.test(cleanCode);
+                if ((isFund || isStock) && !seenCodes.has(cleanCode)) {
+                    const cleanName = rawName.replace(/\(株\)|株式会社/g, "").trim();
+                    if (cleanName.length >= 2 && !/チャート|掲示板|ニュース|詳細|時系列|ランキング/.test(cleanName)) {
+                        seenCodes.add(cleanCode);
+                        results.push({
+                            id: cleanCode,
+                            ticker: isFund ? cleanCode : `${cleanCode}.T`,
+                            yfCode: isFund ? cleanCode : `${cleanCode}.T`,
+                            code: isFund ? `${cleanCode} 投信` : `${cleanCode} 東証`,
+                            name: cleanName,
+                            assetClass: isFund ? "FUND" : "STOCK"
+                        });
+                    }
+                }
+            }
+            for (const k of Object.keys(obj)) {
+                extractItemsFromStateJson(obj[k], seenCodes, results);
+            }
+        }
+
         async function searchYahooJapanByKeyword(query) {
             const cleanQ = (query || "").trim();
-            if (!cleanQ || cleanQ.length < 2) return [];
+            if (!cleanQ) return [];
             if (liveSearchCache[cleanQ]) return liveSearchCache[cleanQ];
 
             const results = [];
+            const seenCodes = new Set();
+
             try {
+                // コード直接入力（例: 8331 や 3531299B）の場合は直接個別ページも照会
+                const normalizedCode = cleanQ.replace(/\.T$/i, "").toUpperCase();
+                if (isStockCodeFormat(normalizedCode) || isFundCodeFormat(normalizedCode)) {
+                    const isFund = isFundCodeFormat(normalizedCode);
+                    const targetCode = isFund ? normalizedCode : `${normalizedCode}.T`;
+                    const directHtml = await fetchFastCorsText(`https://finance.yahoo.co.jp/quote/${targetCode}`, 3800);
+                    const parsed = parseYahooJapanQuoteHtml(directHtml);
+                    if (parsed && parsed.price) {
+                        seenCodes.add(normalizedCode);
+                        results.push({
+                            id: normalizedCode,
+                            ticker: targetCode,
+                            yfCode: targetCode,
+                            code: isFund ? `${normalizedCode} 投信` : `${normalizedCode} 東証`,
+                            name: parsed.name || (isFund ? `投資信託 (${normalizedCode})` : `東証銘柄 (${normalizedCode})`),
+                            assetClass: isFund ? "FUND" : "STOCK",
+                            price: parsed.price,
+                            change: parsed.change || "0.00%"
+                        });
+                        liveSearchCache[cleanQ] = results;
+                        return results;
+                    }
+                }
+
+                // Yahoo!ファイナンス日本版 総合検索（株式も投資信託もヒットする）
                 const searchUrl = `https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(cleanQ)}`;
-                const html = await fetchFastCorsText(searchUrl, 4000);
+                const html = await fetchFastCorsText(searchUrl, 4200);
                 if (html) {
-                    const regexLink = /href="https:\/\/finance\.yahoo\.co\.jp\/quote\/([0-9]{4}|[0-9]{3}[A-Z])\.T"[^>]*>([\s\S]*?)<\/a>/gi;
+                    // A) PRELOADED_STATE内のJSONから株式・投信をすべて抽出
+                    const stateMatch = html.match(/window\.__PRELOADED_STATE__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
+                    if (stateMatch) {
+                        try {
+                            const st = JSON.parse(stateMatch[1]);
+                            extractItemsFromStateJson(st, seenCodes, results);
+                        } catch (e) {}
+                    }
+
+                    // B) HTML内の <a href=".../quote/XXXX"> から株式(.T)および投資信託(8桁英数字)をすべて抽出（相対パス・絶対パス両対応）
+                    const regexLink = /href="(?:https?:\/\/finance\.yahoo\.co\.jp)?\/quote\/([0-9]{4}\.T|[0-9]{3}[A-Z]\.T|[0-9A-Z]{8}|[0-9]{4})(?:[/?#"][^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
                     let match;
-                    const seenCodes = new Set();
                     while ((match = regexLink.exec(html)) !== null) {
-                        const code = match[1].toUpperCase();
+                        const rawCode = match[1].toUpperCase();
+                        const cleanCode = rawCode.replace(/\.T$/i, "");
+                        const isFund = isFundCodeFormat(cleanCode);
                         let rawTitle = match[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
                         rawTitle = rawTitle.replace(/\(株\)|株式会社|【.*?】/g, "").trim();
-                        if (code && rawTitle && rawTitle.length >= 2 && !/チャート|掲示板|ニュース|詳細|時系列/.test(rawTitle) && !seenCodes.has(code)) {
-                            seenCodes.add(code);
-                            results.push({ id: code, ticker: `${code}.T`, yfCode: `${code}.T`, code: `${code} 東証`, name: rawTitle });
+
+                        if (cleanCode && rawTitle && rawTitle.length >= 2 && !/チャート|掲示板|ニュース|詳細|時系列|企業情報|株主優待|ファンド詳細/.test(rawTitle) && !seenCodes.has(cleanCode)) {
+                            seenCodes.add(cleanCode);
+                            results.push({
+                                id: cleanCode,
+                                ticker: isFund ? cleanCode : `${cleanCode}.T`,
+                                yfCode: isFund ? cleanCode : `${cleanCode}.T`,
+                                code: isFund ? `${cleanCode} 投信` : `${cleanCode} 東証`,
+                                name: rawTitle,
+                                assetClass: isFund ? "FUND" : "STOCK"
+                            });
                         }
-                        if (results.length >= 6) break;
+                        if (results.length >= 8) break;
                     }
+
+                    // C) 1件ヒットで直接個別ページに飛んだ場合
                     if (results.length === 0) {
-                        const titleMatch = html.match(/<title>\s*([^<]+?)\【([0-9]{4}|[0-9]{3}[A-Z])\.T\】/i);
-                        if (titleMatch) {
-                            const name = titleMatch[1].replace(/\(株\)|株式会社/g, "").trim();
-                            const code = titleMatch[2].toUpperCase();
-                            results.push({ id: code, ticker: `${code}.T`, yfCode: `${code}.T`, code: `${code} 東証`, name });
+                        const parsedDirect = parseYahooJapanQuoteHtml(html);
+                        if (parsedDirect && parsedDirect.extractedCode) {
+                            const cCode = parsedDirect.extractedCode.replace(/\.T$/i, "");
+                            const isFund = isFundCodeFormat(cCode);
+                            results.push({
+                                id: cCode,
+                                ticker: isFund ? cCode : `${cCode}.T`,
+                                yfCode: isFund ? cCode : `${cCode}.T`,
+                                code: isFund ? `${cCode} 投信` : `${cCode} 東証`,
+                                name: parsedDirect.name || cleanQ,
+                                assetClass: isFund ? "FUND" : "STOCK"
+                            });
                         }
                     }
                 }
@@ -1797,8 +2092,8 @@
 
             let localMatches = [];
             if (!q) {
-                titleEl.innerText = "🔥 注目・主要銘柄（タップでY!株価＆チャート表示）";
-                localMatches = MASTER_MARKET_DB.slice(0, 12);
+                titleEl.innerText = "🔥 注目・人気銘柄＆投信（タップでY!株価/基準価額＆チャート表示）";
+                localMatches = MASTER_MARKET_DB.slice(0, 14);
             } else {
                 localMatches = MASTER_MARKET_DB.filter(item => {
                     const hay = normalizeText(`${item.name} ${item.id} ${item.code} ${item.keywords} ${item.sector}`);
@@ -1813,6 +2108,7 @@
             localMatches.forEach(item => {
                 const quant = evaluateQuantMetrics(item, macro);
                 const alreadyIn = watchlist.some(w => w.id === item.id);
+                const typeBadge = getAssetTypeBadge(item.assetClass);
 
                 const row = document.createElement("div");
                 row.className = "p-3 bg-white hover:bg-teal-50 flex justify-between items-center gap-2 cursor-pointer";
@@ -1820,60 +2116,133 @@
                 row.innerHTML = `
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${typeBadge.cls} shrink-0">${typeBadge.label}</span>
                             <span class="text-xs font-extrabold text-slate-800 truncate">${item.name}</span>
-                            <span class="text-[10px] font-bold text-slate-400 shrink-0">${item.code}</span>
                         </div>
                         <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] font-bold text-slate-400">${item.code}</span>
                             <span class="text-[10px] font-bold text-teal-700">${quant.badgeText}</span>
-                            <span class="text-[10px] text-slate-600 font-bold">${formatYen(item.price)} ${item.ptsPrice ? `(PTS ${formatYen(item.ptsPrice)})` : ''}</span>
+                            <span class="text-[10px] text-slate-700 font-extrabold">${formatYen(item.price)}</span>
                         </div>
                     </div>
                     <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 ${alreadyIn ? 'bg-slate-200 text-slate-700' : 'bg-teal-600 text-white shadow-sm'}">
-                        ${alreadyIn ? 'チャート＆診断' : '＋ 選択'}
+                        ${alreadyIn ? 'チャート＆診断' : '＋ 追加'}
                     </button>
                 `;
                 listEl.appendChild(row);
             });
 
+            // 入力文字がある場合、パネルの最下部に「直接Yahoo!ファイナンスから取得して追加」ボタンを必ず常時表示（行き止まりゼロ保証）
+            if (rawQuery.length > 0) {
+                const safeQ = rawQuery.replace(/['"<>&]/g, "");
+                const directActionBox = document.createElement("div");
+                directActionBox.id = "directFetchActionRow";
+                directActionBox.className = "p-3 bg-gradient-to-r from-teal-50 to-sky-50 text-center";
+                directActionBox.innerHTML = `
+                    <button type="button" id="directFetchBtn" onclick="directFetchByQueryOrCode('${safeQ}')" class="w-full py-2.5 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow-sm">
+                        ⚡ 「${safeQ}」をYahoo!ファイナンスから直接検索・取得して追加
+                    </button>
+                `;
+                listEl.appendChild(directActionBox);
+            }
+
             panel.classList.remove("hidden");
 
-            if (rawQuery.length >= 2) {
+            // 1文字以上入力されていれば、Yahoo!ファイナンス日本版のライブ検索を非同期実行して候補をリアルタイム挿入
+            if (rawQuery.length >= 1) {
                 clearTimeout(liveSearchTimer);
                 liveStatus.classList.remove("hidden");
-                document.getElementById("liveSearchStatusText").innerText = `🌐 Yahoo!ファイナンスから「${rawQuery}」の社名候補を検索中...`;
+                document.getElementById("liveSearchStatusText").innerText = `🌐 Yahoo!ファイナンスから「${rawQuery}」の株・投信を検索中...`;
 
                 liveSearchTimer = setTimeout(async () => {
                     const onlineHits = await searchYahooJapanByKeyword(rawQuery);
                     const currentVal = document.getElementById("quickSearchInput").value.trim();
                     if (currentVal !== rawQuery) return;
 
+                    const directBox = document.getElementById("directFetchActionRow");
+                    let addedCount = 0;
+
                     onlineHits.forEach(hit => {
                         if (localMatches.some(m => m.id === hit.id)) return;
+                        addedCount++;
+                        const isFund = hit.assetClass === "FUND";
                         const row = document.createElement("div");
                         row.className = "p-3 bg-sky-50/40 hover:bg-sky-50 flex justify-between items-center gap-2 cursor-pointer";
-                        row.onclick = () => selectOnlineCandidate(hit.id, hit.name);
+                        row.onclick = () => selectOnlineCandidate(hit.id, hit.name, hit.assetClass);
                         row.innerHTML = `
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
-                                    <span class="text-[9px] font-bold bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded">Y!検索予測</span>
+                                    <span class="text-[9px] font-bold ${isFund ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'} px-1.5 py-0.5 rounded shrink-0">
+                                        ${isFund ? '🌱 Y!投信' : '🏢 Y!株式'}
+                                    </span>
                                     <span class="text-xs font-extrabold text-slate-800 truncate">${hit.name}</span>
-                                    <span class="text-[10px] font-bold text-slate-500 shrink-0">(${hit.id})</span>
                                 </div>
                                 <div class="text-[10px] text-slate-500 mt-0.5">
-                                    タップするとYahoo!ファイナンスから現在株価・PTS・チャートを自動取得します
+                                    コード: <strong>${hit.id}</strong> ・タップで現在値＆チャートを自動取得して追加
                                 </div>
                             </div>
                             <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 bg-sky-600 text-white shadow-sm">
-                                ＋ 取得＆診断
+                                ＋ 取得＆追加
                             </button>
                         `;
-                        listEl.appendChild(row);
+                        if (directBox && directBox.parentNode === listEl) {
+                            listEl.insertBefore(row, directBox);
+                        } else {
+                            listEl.appendChild(row);
+                        }
                     });
 
-                    document.getElementById("liveSearchStatusText").innerText = `✅ 候補をタップするとYahoo!ファイナンスの最新株価＆チャートを表示します`;
-                }, 300);
+                    document.getElementById("liveSearchStatusText").innerText = (addedCount > 0 || localMatches.length > 0)
+                        ? `✅ 候補をタップするとYahoo!ファイナンスの最新データ＆チャートを表示します`
+                        : `💡 下の緑ボタンを押すとYahoo!ファイナンスから直接取得します`;
+                }, 280);
             } else {
                 liveStatus.classList.add("hidden");
+            }
+        }
+
+        // パネル下部の「直接取得して追加」ボタンまたは「検索」ボタンが押された時の処理
+        async function directFetchByQueryOrCode(rawQuery) {
+            const q = (rawQuery || "").trim();
+            if (!q) return;
+
+            const btn = document.getElementById("directFetchBtn");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = `⏳ Yahoo!ファイナンスから「${q}」を取得中...`;
+            }
+
+            // 1. 内蔵マスター辞書に一致があればそれを優先選択
+            const normQ = normalizeText(q);
+            const masterHit = MASTER_MARKET_DB.find(m =>
+                m.id.toLowerCase() === q.toLowerCase() ||
+                normalizeText(m.name).includes(normQ) ||
+                normalizeText(m.keywords).includes(normQ)
+            );
+            if (masterHit) {
+                await selectAndFetchLive(masterHit);
+                return;
+            }
+
+            // 2. コード形式（4桁証券コード or 8桁投信コード）なら直接ページを取得
+            const cleanCode = q.replace(/\.T$/i, "").toUpperCase();
+            if (isStockCodeFormat(cleanCode) || isFundCodeFormat(cleanCode)) {
+                const isFund = isFundCodeFormat(cleanCode);
+                await selectOnlineCandidate(cleanCode, isFund ? `投資信託 (${cleanCode})` : `東証銘柄 (${cleanCode})`, isFund ? "FUND" : "STOCK");
+                return;
+            }
+
+            // 3. キーワードでYahoo!ファイナンスを検索して1位ヒットを取得
+            const hits = await searchYahooJapanByKeyword(q);
+            if (hits.length > 0) {
+                await selectOnlineCandidate(hits[0].id, hits[0].name, hits[0].assetClass);
+                return;
+            }
+
+            alert(`「${q}」の自動検索がタイムアウトしました。銘柄コード（株は4桁、投資信託は8桁コード）を入力すると確実につながります。`);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = `⚡ 「${q}」をYahoo!ファイナンスから直接検索・取得して追加`;
             }
         }
 
@@ -1890,28 +2259,31 @@
             openDetailModal(target.id);
         }
 
-        async function selectOnlineCandidate(code, companyName) {
+        async function selectOnlineCandidate(code, assetName, assetClass = "STOCK") {
+            const cleanCode = String(code).replace(/\.T$/i, "").toUpperCase();
+            const isFund = assetClass === "FUND" || isFundCodeFormat(cleanCode);
+
             const newItem = {
-                id: code,
-                ticker: `${code}.T`,
-                yfCode: `${code}.T`,
-                code: `${code} 東証`,
-                name: companyName,
-                keywords: `${companyName} ${code}`,
-                assetClass: "STOCK",
-                sector: "東証上場銘柄 (Y!ファイナンス連動)",
-                price: 1000,
-                ma25: 1000,
+                id: cleanCode,
+                ticker: isFund ? cleanCode : `${cleanCode}.T`,
+                yfCode: isFund ? cleanCode : `${cleanCode}.T`,
+                code: isFund ? `${cleanCode} 投信` : `${cleanCode} 東証`,
+                name: assetName,
+                keywords: `${assetName} ${cleanCode}`,
+                assetClass: isFund ? "FUND" : "STOCK",
+                sector: isFund ? "投資信託 (Y!ファイナンス直結)" : "東証上場銘柄 (Y!ファイナンス直結)",
+                price: isFund ? 20000 : 1500,
+                ma25: isFund ? 20000 : 1500,
                 rsi: 50,
                 bb: 0.0,
                 change: "取得中...",
-                volatility: 26,
-                factors: { value: 75, momentum: 72, quality: 75, stability: 72, macroFit: 80 },
-                businessSummary: `Yahoo!ファイナンス（${code}.T）から自動取得したリアルタイム株価・PTS・過去日足データに基づき、25日移動平均線・14日RSI・ボリンジャーバンドを計算してクオンツ判定を行っています。`
+                volatility: isFund ? 18 : 25,
+                factors: { value: 75, momentum: 74, quality: 80, stability: 76, macroFit: 82 },
+                businessSummary: `Yahoo!ファイナンス（コード: ${cleanCode}）から自動取得した最新データおよび過去時系列データに基づき、25日移動平均線・14日RSI・ボリンジャーバンドを計算してクオンツ判定を行っています。`
             };
 
-            if (!MASTER_MARKET_DB.some(m => m.id === code)) MASTER_MARKET_DB.unshift(newItem);
-            const existingIdx = watchlist.findIndex(w => w.id === code);
+            if (!MASTER_MARKET_DB.some(m => m.id === cleanCode)) MASTER_MARKET_DB.unshift(newItem);
+            const existingIdx = watchlist.findIndex(w => w.id === cleanCode);
             if (existingIdx >= 0) watchlist[existingIdx] = cloneObj(newItem);
             else watchlist.unshift(cloneObj(newItem));
 
@@ -1919,7 +2291,7 @@
             closeCatalogModal();
             saveState();
             renderWatchlist();
-            openDetailModal(code);
+            openDetailModal(cleanCode);
         }
 
         async function triggerSearchNow() {
@@ -1928,11 +2300,9 @@
                 renderSearchCandidates(true);
                 return;
             }
-            if (/^([0-9]{4}|[0-9]{3}[A-Za-z])$/.test(rawQuery)) {
-                const code = rawQuery.toUpperCase();
-                const hits = await searchYahooJapanByKeyword(code);
-                const name = hits.length > 0 ? hits[0].name : `東証銘柄 (${code})`;
-                await selectOnlineCandidate(code, name);
+            const cleanCode = rawQuery.replace(/\.T$/i, "").toUpperCase();
+            if (isStockCodeFormat(cleanCode) || isFundCodeFormat(cleanCode)) {
+                await directFetchByQueryOrCode(cleanCode);
                 return;
             }
             renderSearchCandidates(true);
@@ -1964,7 +2334,7 @@
             if (type === "STOCK") return { label: "🏢 個別株", cls: "bg-blue-50 text-blue-700 border border-blue-200" };
             if (type === "REIT") return { label: "🏙️ J-REIT", cls: "bg-amber-50 text-amber-800 border border-amber-200" };
             if (type === "LEVERAGE") return { label: "⚡ ブル型投信", cls: "bg-purple-50 text-purple-700 border border-purple-200" };
-            return { label: "🌱 インデックス投信", cls: "bg-teal-50 text-teal-700 border border-teal-200" };
+            return { label: "🌱 投資信託", cls: "bg-teal-50 text-teal-700 border border-teal-200" };
         }
 
         function updateAllCalculations() {
@@ -2043,13 +2413,13 @@
 
                 card.innerHTML = `
                     <div class="flex justify-between items-start gap-2 mb-2.5">
-                        <div>
+                        <div class="min-w-0 flex-1">
                             <div class="flex items-center gap-1.5 mb-1 flex-wrap">
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${typeBadge.cls}">${typeBadge.label}</span>
                                 <span class="text-[10px] font-bold text-slate-400">${item.code || ''}</span>
                                 ${item.ptsPrice ? `<span class="text-[9px] font-bold text-sky-800 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">🌙 夜間PTS ${formatYen(item.ptsPrice)}</span>` : ''}
                             </div>
-                            <h3 class="text-sm font-extrabold text-slate-800">${item.name}</h3>
+                            <h3 class="text-sm font-extrabold text-slate-800 leading-snug">${item.name}</h3>
                         </div>
                         <div class="text-right shrink-0">
                             <div class="text-sm font-extrabold text-slate-900">${formatYen(item.price)}</div>
@@ -2091,7 +2461,7 @@
 
         function setCatalogCat(cat) {
             currentCatalogCat = cat;
-            ["ALL", "銀行", "半導体", "低位株", "電線", "高配当", "投信"].forEach(c => {
+            ["ALL", "投信", "銀行", "半導体", "電線", "高配当", "低位株"].forEach(c => {
                 const btn = document.getElementById(`cat-${c}`);
                 if (!btn) return;
                 btn.className = c === cat
@@ -2125,11 +2495,11 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-extrabold text-slate-800 truncate">${item.name}</span>
-                            <span class="text-[10px] font-bold text-slate-400 shrink-0">${item.code}</span>
                         </div>
                         <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] font-bold text-slate-400 shrink-0">${item.code}</span>
                             <span class="text-[10px] font-bold text-teal-700">${quant.badgeText}</span>
-                            <span class="text-[10px] text-slate-600 font-bold">${formatYen(item.price)} ${item.ptsPrice ? `(PTS ${formatYen(item.ptsPrice)})` : ''}</span>
+                            <span class="text-[10px] text-slate-700 font-bold">${formatYen(item.price)}</span>
                         </div>
                     </div>
                     <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 ${alreadyIn ? 'bg-slate-100 text-slate-600' : 'bg-teal-600 text-white'}">
@@ -2150,23 +2520,28 @@
 
         async function submitCustomAsset() {
             const name = document.getElementById("custName").value.trim();
-            const codeInput = document.getElementById("custCode").value.trim().toUpperCase();
+            const codeInput = document.getElementById("custCode").value.trim().replace(/\.T$/i, "").toUpperCase();
             const assetClass = document.getElementById("custType").value;
             let price = parseFloat(document.getElementById("custPrice").value);
-            let rsi = parseFloat(document.getElementById("custRsi").value) || 50;
 
             if (!name && !codeInput) {
-                alert("銘柄名または証券コードを入力してください。");
+                alert("銘柄コード（または銘柄名）を入力してください。");
                 return;
             }
 
-            if (codeInput && /^([0-9]{4}|[0-9]{3}[A-Z])$/.test(codeInput)) {
+            if (codeInput && (isStockCodeFormat(codeInput) || isFundCodeFormat(codeInput))) {
+                const isFund = isFundCodeFormat(codeInput) || assetClass === "FUND" || assetClass === "LEVERAGE";
                 closeCustomModal();
-                await selectOnlineCandidate(codeInput, name || `東証銘柄 (${codeInput})`);
+                await selectOnlineCandidate(codeInput, name || (isFund ? `投資信託 (${codeInput})` : `東証銘柄 (${codeInput})`), isFund ? "FUND" : "STOCK");
                 return;
             }
 
-            if (isNaN(price) || price <= 0) price = 10000;
+            if (isNaN(price) || price <= 0) {
+                closeCustomModal();
+                await directFetchByQueryOrCode(name || codeInput);
+                return;
+            }
+
             const newItem = {
                 id: "custom-" + Date.now(),
                 code: "手動登録",
@@ -2176,7 +2551,7 @@
                 sector: "カスタム登録銘柄",
                 price,
                 ma25: price,
-                rsi,
+                rsi: 50,
                 bb: 0.0,
                 change: "0.00%",
                 volatility: 20,
