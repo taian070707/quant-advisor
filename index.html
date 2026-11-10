@@ -18,6 +18,7 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
 </head>
 <body class="max-w-md mx-auto min-h-screen px-3.5 pt-3">
 
+<!-- 1. ヘッダー -->
 <header class="flex justify-between items-center mb-3">
   <div>
     <div class="flex items-center gap-1.5 mb-0.5">
@@ -32,6 +33,7 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </header>
 
+<!-- 2. 検索バー（株・投信・4桁/8桁コード対応） -->
 <section class="mb-3.5">
   <div class="card rounded-2xl p-3 border-2 border-teal-500/40">
     <div class="flex items-center gap-1.5">
@@ -60,6 +62,7 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </section>
 
+<!-- 3. 予算＆マクロ環境 -->
 <section class="card rounded-3xl p-3.5 mb-3.5 bg-gradient-to-br from-white to-teal-50/40">
   <div class="grid grid-cols-2 gap-2 mb-2.5">
     <div class="bg-slate-50 p-2 rounded-xl border">
@@ -79,6 +82,7 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
   <div id="allocBox" class="grid grid-cols-3 gap-2 text-center"></div>
 </section>
 
+<!-- 4. フィルター -->
 <div class="flex items-center justify-between gap-2 mb-2.5">
   <div class="flex gap-1 overflow-x-auto sc">
     <button type="button" onclick="setFlt('ALL')" id="f-ALL" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-teal-600 text-white">すべて</button>
@@ -93,6 +97,7 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
   </select>
 </div>
 
+<!-- 5. 監視リスト -->
 <section>
   <div class="flex justify-between items-center mb-2 px-1">
     <span class="text-[11px] font-bold text-slate-500">💡 タップで最上部にY!株価/基準価額＆チャート表示</span>
@@ -167,63 +172,63 @@ body{background:#f4f8f6;color:#1e293b;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <script>
-// 1. 高効率タプル辞書: [id, name, class, sector, price, ma25, rsi, bb, change, extra, kw]
-const RAW_DB = [
-  ["47311988","日経２２５ノーロードオープン","FUND","国内株式投信(日経225)",44529,45120,46,-0.5,"+2.32% (+1,011円)",{netAssets:"4,756億円",trustFee:"0.55%",return1Y:"+21.8%",proxyEtf:"1321.T",desc:"純資産4,756億円の大型日経225連動投信。25日線付近の押し目水準で積立・分割買い増しに好適です。"},"にっけい 日経225 ノーロード"],
-  ["AJ313178","Ｓｍａｒｔ－ｉ 日経２２５インデックス","FUND","国内株式投信(低コスト日経225)",35159,35620,46,-0.5,"+2.33% (+802円)",{netAssets:"434億円",trustFee:"0.187%",return1Y:"+22.4%",proxyEtf:"1321.T",desc:"りそなAM運用の低コスト日経225投信(NISA対象)。基準価額35,159円へ反発中です。"},"すまーとあい smart-i スマートi 日経225 りそな"],
-  ["3531299B","netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)","FUND","北米ハイテク株式投信",48494,46800,58,0.8,"+2.08% (+987円)",{netAssets:"1兆5,345億円",trustFee:"2.09%",return1Y:"+17.95%",proxyEtf:"2244.T",desc:"ゴールドマン・サックス運用の超大型米国AI・ハイテク株投信(純資産8位)。強い順張りトレンドを維持しています。"},"netwin ねっとうぃん ネットウィン GS テクノロジー"],
-  ["3531199B","netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)","FUND","北米ハイテク投信(ヘッジ有)",26850,26100,56,0.6,"+1.94% (+510円)",{netAssets:"1,850億円",trustFee:"2.09%",return1Y:"+12.4%",proxyEtf:"2244.T",desc:"netWINの為替ヘッジありコース。円高リスクを抑えつつ米国AI企業の成長を享受できます。"},"netwin ねっとうぃん ネットウィン Aコース"],
-  ["0331418A","eMAXIS Slim 全世界株式 (オール・カントリー)","FUND","全世界株式投信",29694,30850,45,-0.8,"+0.32%",{netAssets:"13.7兆円(1位)",trustFee:"0.05775%",return1Y:"+22.4%",proxyEtf:"2559.T",desc:"国内純資産1位の王道オルカン。極限の低コストで毎月のコア積立に最適です。"},"おるかん オルカン 全世界 emaxis"],
-  ["03311187","eMAXIS Slim 米国株式 (S&P500)","FUND","米国株式投信",42755,43900,44,-0.9,"-4.62%",{netAssets:"12.6兆円(2位)",trustFee:"0.0814%",return1Y:"+24.1%",proxyEtf:"2558.T",desc:"国内純資産2位のS&P500連動投信。直近の調整で押し目を作っており積立＋スポット購入に好機です。"},"べいこく 米国 S&P500 SP500 emaxis"],
-  ["03311182","eMAXIS Slim 国内株式 (日経平均)","FUND","国内株式投信",39120,39600,46,-0.5,"+2.30%",{netAssets:"9,200億円",trustFee:"0.143%",return1Y:"+22.1%",proxyEtf:"1321.T",desc:"業界最低水準の信託報酬で日経平均に連動するインデックス投信です。"},"にっけい 日経平均 日経225 emaxis"],
-  ["2931113C","ニッセイ日経２２５インデックスファンド","FUND","国内株式投信(日経225)",41280,41800,46,-0.5,"+2.31%",{netAssets:"2,650億円",trustFee:"0.275%",return1Y:"+22.0%",proxyEtf:"1321.T",desc:"実績豊富なニッセイAMの日経225連動インデックス投信です。"},"にっせい ニッセイ 日経225"],
-  ["4731115C","たわらノーロード 日経２２５","FUND","国内株式投信(日経225)",38450,38900,46,-0.5,"+2.32%",{netAssets:"1,980億円",trustFee:"0.143%",return1Y:"+22.2%",proxyEtf:"1321.T",desc:"低コストで人気のたわらノーロード日経225投信です。"},"たわら 日経225"],
-  ["18312991","インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】","FUND","世界株式投信(毎月分配)",8596,8680,48,-0.3,"+0.66%",{netAssets:"4.6兆円(3位)",trustFee:"1.903%",return1Y:"+18.5%",proxyEtf:"2559.T",desc:"愛称『世界のベスト』。高い毎月分配実績と世界優良株分散で純資産3位の人気投信です。"},"いんべすこ インベスコ 世界のベスト"],
-  ["39312149","アライアンス・バーンスタイン・米国成長株投信 Dコース","FUND","米国成長株投信(毎月分配)",11240,11350,49,-0.2,"+1.08%",{netAssets:"2.68兆円(5位)",trustFee:"1.727%",return1Y:"+21.2%",proxyEtf:"2558.T",desc:"基準価額に応じた毎月分配で絶大な人気を誇る米国成長株ファンドです。"},"あらいあんす AB 米国成長株 Dコース"],
-  ["04311181","iFreeNEXT FANG+インデックス","FUND","米国ビッグテック集中投信",64200,61800,61,1.1,"+1.45%",{netAssets:"1.32兆円",trustFee:"0.7755%",return1Y:"+34.2%",proxyEtf:"2244.T",desc:"米国巨大テック10社に集中投資する高成長ファンドです。"},"ふぁんぐ FANG FANG+ ifree"],
-  ["01312098","野村世界業種別投資シリーズ(世界半導体株投資)","FUND","世界半導体投信",162400,165000,46,-0.4,"+1.63%",{netAssets:"1.35兆円",trustFee:"1.65%",return1Y:"+38.5%",proxyEtf:"2244.T",desc:"NVIDIA・TSMC等の世界半導体株に集中投資する超人気ファンドです。"},"のむら 野村 世界半導体"],
-  ["9I311249","楽天・高配当株式・米国ファンド【楽天SCHD】","FUND","米国高配当株投信",10840,10650,54,0.4,"+0.35%",{netAssets:"3,450億円",trustFee:"0.192%",return1Y:"+14.2%",proxyEtf:"2558.T",desc:"米国連続増配100社(SCHD)に投資する大人気高配当ファンドです。"},"らくてん 楽天 SCHD 高配当"],
-  ["9I31115A","楽天日本株4.3倍ブル","LEVERAGE","国内株ブル投信(4.3倍)",54773,76500,38,-1.4,"+11.90%",{netAssets:"684億円",trustFee:"1.243%",return1Y:"-12.4%",proxyEtf:"1570.T",desc:"日経平均の4.3倍動く超ハイリスク投信。急落後の短期リバウンド狙い限定です。"},"らくてん 楽天 4.3倍 ブル レバレッジ"],
-  ["8331","千葉銀行","STOCK","銀行業(地銀首位級)",2498.5,2515,51,-0.1,"+5.11%",{ptsPrice:2630,ptsChange:"+131.5 (+5.26%)",priceLimit:"1,998.5〜2,998.5",desc:"好決算と株主還元を発表し、夜間PTSで2,630円(+5.26%)へ急伸中。日銀利上げ追い風の本命地銀です。"},"ちば 千葉 ちばぎん 地銀 地方銀行"],
-  ["8308","りそなホールディングス","STOCK","銀行業",2191.5,2265,46,-0.6,"+1.30% (PTS)",{ptsPrice:2220,ptsChange:"+28.5 (+1.30%)",priceLimit:"1,691.5〜2,691.5",earningsDate:"2026/11/10",desc:"リテール・信託に強み。2,191.5円(夜間PTS 2,220円)へ反発しており、金利上昇による利ざや改善期待が強い中核銘柄です。"},"りそな りそな銀行 メガバンク"],
-  ["8306","三菱UFJフィナンシャル・グループ","STOCK","銀行業",3366,3380,52,-0.1,"+4.40%",{ptsPrice:3415,ptsChange:"+49 (+1.46%)",desc:"国内最大の金融グループ。3,366円(PTS 3,415円)と力強く反発中です。"},"みつびしUFJ 三菱UFJ メガバンク"],
-  ["8316","三井住友フィナンシャルグループ","STOCK","銀行業",3126,3140,51,-0.1,"+3.92%",{ptsPrice:3158,ptsChange:"+32 (+1.02%)",desc:"累進配当政策で人気のメガバンク。押し目買い需要が旺盛です。"},"みついすみとも 三井住友 メガバンク"],
-  ["8411","みずほフィナンシャルグループ","STOCK","銀行業",3810,3760,54,0.4,"+1.87%",{ptsPrice:3845,ptsChange:"+35 (+0.92%)",desc:"3大メガバンクの一角。還元強化で堅調推移。"},"みずほ メガバンク"],
-  ["8354","ふくおかフィナンシャルグループ","STOCK","銀行業(九州地銀)",6676,6780,48,-0.3,"+3.79%",{ptsPrice:6710,ptsChange:"+34 (+0.51%)",desc:"半導体投資で活況な九州経済を牽引する地銀トップグループです。"},"ふくおか 福岡 福岡銀行 地銀"],
-  ["7186","コンコルディア・FG (横浜銀行)","STOCK","銀行業(首都圏地銀)",1582.5,1610,47,-0.4,"+2.69%",{desc:"横浜銀行を中核とする首都圏最大の地銀グループです。"},"よこはま 横浜 横浜銀行 コンコルディア 地銀"],
-  ["5831","しずおかFG (静岡銀行)","STOCK","銀行業(地銀)",1845,1860,49,-0.2,"+1.93%",{desc:"鉄壁の財務を誇る静岡銀行グループです。"},"しずおか 静岡 静岡銀行 地銀"],
-  ["7167","めぶきフィナンシャルグループ","STOCK","銀行業(北関東地銀)",925,935,48,-0.3,"+1.87%",{desc:"常陽銀行・足利銀行を傘下に持つ高配当地銀です。"},"めぶき 常陽 足利 茨城 栃木 地銀"],
-  ["8334","群馬銀行","STOCK","銀行業(地銀)",1285,1295,49,-0.2,"+2.80%",{desc:"積極的な株主還元で評価を高める北関東の有力地銀です。"},"ぐんま 群馬 群馬銀行 地銀"],
-  ["5838","楽天銀行","STOCK","銀行業(ネット銀行)",4980,4820,58,0.7,"+2.68%",{desc:"日銀利上げの恩恵を直に受ける国内最大手ネット銀行です。"},"らくてんぎんこう 楽天銀行"],
-  ["2134","北浜キャピタルパートナーズ","STOCK","金融・投資(低位株)",17,14.2,68,1.8,"+41.67%",{ptsPrice:17.1,ptsChange:"+0.1 (+0.59%)",earningsDate:"2026/11/16",desc:"17円(前日比+41.67%)へ急騰中の低位株。1円の値動きが大きいため押し目指値と逆指値の徹底が必須です。"},"きたはま 北浜 北浜キャピタル 低位株"],
-  ["285A","キオクシアホールディングス","STOCK","半導体メモリ",8621,10450,34,-1.6,"+1.29%",{ptsPrice:8690,ptsChange:"+69 (+0.80%)",desc:"NAND型フラッシュメモリ世界大手。急落後の売られすぎ水準(RSI 34)から自律反発局面に入っています。"},"きおくしあ キオクシア 半導体 メモリ"],
-  ["6976","太陽誘電","STOCK","電子部品(MLCC)",6651,7480,36,-1.5,"-0.34%",{ptsPrice:6999,ptsChange:"+348 (+5.23%)",desc:"セラミックコンデンサ大手。売られすぎ圏から夜間PTSで6,999円(+5.23%)へ急反発しています。"},"たいようゆうでん 太陽誘電 半導体 電子部品"],
-  ["6758","ソニーグループ","STOCK","電気機器・エンタメ",4297,4160,57,0.8,"+3.74%",{ptsPrice:4250.1,ptsChange:"-46.9 (-1.09%)",desc:"好決算を背景に4,297円と堅調な上昇トレンドを維持しています。"},"そにー ソニー ゲーム 半導体"],
-  ["5802","住友電気工業","STOCK","非鉄金属・電線",1435.5,1540,42,-1.1,"+5.55%",{ptsPrice:1524.1,ptsChange:"+88.6 (+6.17%)",desc:"上方修正・増配を発表済。夜間PTSで1,524.1円(+6.17%)へ急反発しており絶好の押し目水準です。"},"すみともでんこう 住友電工 電線"],
-  ["6501","日立製作所","STOCK","電気機器・インフラ",4702,4850,45,-0.7,"+3.52%",{ptsPrice:4835,ptsChange:"+133 (+2.83%)",desc:"送電網とLumadaが牽引。夜間PTSで4,835円へ反発中です。"},"ひたち 日立 インフラ 電線"],
-  ["7203","トヨタ自動車","STOCK","輸送用機器",3491,3410,53,0.4,"+4.58%",{ptsPrice:3446,ptsChange:"-45 (-1.29%)",desc:"HVの圧倒的競争力で3,491円と堅調推移。"},"とよた トヨタ 自動車"],
-  ["8035","東京エレクトロン","STOCK","半導体製造装置",22450,23500,39,-1.2,"+1.58%",{desc:"半導体製造装置の世界大手。押し目形成中です。"},"とうきょうえれくとろん 東エレク 半導体"],
-  ["6857","アドバンテスト","STOCK","半導体検査装置",8920,8650,59,0.8,"+2.41%",{desc:"AI半導体テスタ世界首位。強い順張りモメンタムです。"},"あどばんてすと アドバンテスト 半導体"],
-  ["5803","フジクラ","STOCK","非鉄金属・電線",3260,3150,58,0.7,"+2.51%",{desc:"AIデータセンター向け光ファイバーが急伸中。"},"ふじくら フジクラ 電線"],
-  ["7011","三菱重工業","STOCK","機械・防衛",2240,2160,60,0.9,"+1.82%",{desc:"防衛・宇宙・ガスタービンの国策重工トップ銘柄。"},"みつびしじゅうこう 三菱重工 防衛"],
-  ["8058","三菱商事","STOCK","総合商社・高配当",2690,2750,41,-0.9,"+1.13%",{desc:"利回り3.7%水準で下値が堅い総合商社トップ。"},"みつびししょうじ 三菱商事 商社 高配当"],
-  ["8951","日本ビルファンド投資法人","REIT","オフィスJ-REIT",124500,126800,38,-1.3,"-0.32%",{desc:"三井不動産系の国内最大級J-REIT。NAV0.86倍と割安。"},"りーと REIT 不動産 ビル"]
-];
+// 1. 圧縮マスターデータ (id|name|class|sector|price|ma25|rsi|bb|change|pts|proxyEtf|kw|desc)
+const RAW = `47311988|日経２２５ノーロードオープン|FUND|国内株式投信(日経225)|44529|45120|46|-0.5|+2.32% (+1,011円)||1321.T|にっけい 日経225 ノーロード|純資産4,756億円の大型日経225連動投信。25日線付近の押し目水準で積立・分割買い増しに好適です。
+AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株式投信(低コスト日経225)|35159|35620|46|-0.5|+2.33% (+802円)||1321.T|すまーとあい smart-i スマートi 日経225 りそな|りそなAM運用の低コスト日経225投信(NISA対象)。基準価額35,159円へ反発中です。
+3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|北米ハイテク株式投信|48494|46800|58|0.8|+2.08% (+987円)||2244.T|netwin ねっとうぃん ネットウィン GS テクノロジー|ゴールドマン・サックス運用の超大型米国AI・ハイテク株投信(純資産1.53兆円)。強い順張りトレンドを維持しています。
+3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|北米ハイテク投信(ヘッジ有)|26850|26100|56|0.6|+1.94% (+510円)||2244.T|netwin ねっとうぃん ネットウィン Aコース|netWINの為替ヘッジありコース。円高リスクを抑えつつ米国AI企業の成長を享受できます。
+0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|全世界株式投信|29694|30850|45|-0.8|+0.32%||2559.T|おるかん オルカン 全世界 emaxis|国内純資産1位(13.7兆円)の王道オルカン。極限の低コストで毎月のコア積立に最適です。
+03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国株式投信|42755|43900|44|-0.9|-4.62%||2558.T|べいこく 米国 S&P500 SP500 emaxis|国内純資産2位のS&P500連動投信。直近の調整で押し目を作っており積立＋スポット購入に好機です。
+03311182|eMAXIS Slim 国内株式 (日経平均)|FUND|国内株式投信|39120|39600|46|-0.5|+2.30%||1321.T|にっけい 日経平均 日経225 emaxis|業界最低水準の信託報酬で日経平均に連動するインデックス投信です。
+2931113C|ニッセイ日経２２５インデックスファンド|FUND|国内株式投信(日経225)|41280|41800|46|-0.5|+2.31%||1321.T|にっせい ニッセイ 日経225|実績豊富なニッセイAMの日経225連動インデックス投信です。
+4731115C|たわらノーロード 日経２２５|FUND|国内株式投信(日経225)|38450|38900|46|-0.5|+2.32%||1321.T|たわら 日経225|低コストで人気のたわらノーロード日経225投信です。
+18312991|インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】|FUND|世界株式投信(毎月分配)|8596|8680|48|-0.3|+0.66%||2559.T|いんべすこ インベスコ 世界のベスト|愛称『世界のベスト』。高い毎月分配実績と世界優良株分散で純資産3位の人気投信です。
+39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国成長株投信(毎月分配)|11240|11350|49|-0.2|+1.08%||2558.T|あらいあんす AB 米国成長株 Dコース|基準価額に応じた毎月分配で絶大な人気を誇る米国成長株ファンドです。
+04311181|iFreeNEXT FANG+インデックス|FUND|米国ビッグテック集中投信|64200|61800|61|1.1|+1.45%||2244.T|ふぁんぐ FANG FANG+ ifree|米国巨大テック10社に集中投資する高成長ファンドです。
+01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界半導体投信|162400|165000|46|-0.4|+1.63%||2244.T|のむら 野村 世界半導体|NVIDIA・TSMC等の世界半導体株に集中投資する超人気ファンドです。
+9I311249|楽天・高配当株式・米国ファンド【楽天SCHD】|FUND|米国高配当株投信|10840|10650|54|0.4|+0.35%||2558.T|らくてん 楽天 SCHD 高配当|米国連続増配100社(SCHD)に投資する大人気高配当ファンドです。
+9I31115A|楽天日本株4.3倍ブル|LEVERAGE|国内株ブル投信(4.3倍)|54773|76500|38|-1.4|+11.90%||1570.T|らくてん 楽天 4.3倍 ブル レバレッジ|日経平均の4.3倍動く超ハイリスク投信。急落後の短期リバウンド狙い限定です。
+8331|千葉銀行|STOCK|銀行業(地銀首位級)|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)||ちば 千葉 ちばぎん 地銀 地方銀行|好決算と株主還元を発表し、夜間PTSで2,630円(+5.26%)へ急伸中。日銀利上げ追い風の本命地銀です。
+8308|りそなホールディングス|STOCK|銀行業|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)||りそな りそな銀行 メガバンク|リテール・信託に強み。2,191.5円(夜間PTS 2,220円)へ反発しており、金利上昇による利ざや改善期待が強い中核銘柄です。
+8306|三菱UFJフィナンシャル・グループ|STOCK|銀行業|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)||みつびしUFJ 三菱UFJ メガバンク|国内最大の金融グループ。3,366円(PTS 3,415円)と力強く反発中です。
+8316|三井住友フィナンシャルグループ|STOCK|銀行業|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)||みついすみとも 三井住友 メガバンク|累進配当政策で人気のメガバンク。押し目買い需要が旺盛です。
+8411|みずほフィナンシャルグループ|STOCK|銀行業|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)||みずほ メガバンク|3大メガバンクの一角。還元強化で堅調推移。
+8354|ふくおかフィナンシャルグループ|STOCK|銀行業(九州地銀)|6676|6780|48|-0.3|+3.79%|6710:+34 (+0.51%)||ふくおか 福岡 福岡銀行 地銀|半導体投資で活況な九州経済を牽引する地銀トップグループです。
+7186|コンコルディア・FG (横浜銀行)|STOCK|銀行業(首都圏地銀)|1582.5|1610|47|-0.4|+2.69%|||よこはま 横浜 横浜銀行 コンコルディア 地銀|横浜銀行を中核とする首都圏最大の地銀グループです。
+5831|しずおかFG (静岡銀行)|STOCK|銀行業(地銀)|1845|1860|49|-0.2|+1.93%|||しずおか 静岡 静岡銀行 地銀|鉄壁の財務を誇る静岡銀行グループです。
+7167|めぶきフィナンシャルグループ|STOCK|銀行業(北関東地銀)|925|935|48|-0.3|+1.87%|||めぶき 常陽 足利 茨城 栃木 地銀|常陽銀行・足利銀行を傘下に持つ高配当地銀です。
+8334|群馬銀行|STOCK|銀行業(地銀)|1285|1295|49|-0.2|+2.80%|||ぐんま 群馬 群馬銀行 地銀|積極的な株主還元で評価を高める北関東の有力地銀です。
+5838|楽天銀行|STOCK|銀行業(ネット銀行)|4980|4820|58|0.7|+2.68%|||らくてんぎんこう 楽天銀行|日銀利上げの恩恵を直に受ける国内最大手ネット銀行です。
+2134|北浜キャピタルパートナーズ|STOCK|金融・投資(低位株)|17|14.2|68|1.8|+41.67%|17.1:+0.1 (+0.59%)||きたはま 北浜 北浜キャピタル 低位株|17円(前日比+41.67%)へ急騰中の低位株。1円の値動きが大きいため押し目指値と逆指値の徹底が必須です。
+285A|キオクシアホールディングス|STOCK|半導体メモリ|8621|10450|34|-1.6|+1.29%|8690:+69 (+0.80%)||きおくしあ キオクシア 半導体 メモリ|NAND型フラッシュメモリ世界大手。急落後の売られすぎ水準(RSI 34)から自律反発局面に入っています。
+6976|太陽誘電|STOCK|電子部品(MLCC)|6651|7480|36|-1.5|-0.34%|6999:+348 (+5.23%)||たいようゆうでん 太陽誘電 半導体 電子部品|セラミックコンデンサ大手。売られすぎ圏から夜間PTSで6,999円(+5.23%)へ急反発しています。
+6758|ソニーグループ|STOCK|電気機器・エンタメ|4297|4160|57|0.8|+3.74%|4250.1:-46.9 (-1.09%)||そにー ソニー ゲーム 半導体|好決算を背景に4,297円と堅調な上昇トレンドを維持しています。
+5802|住友電気工業|STOCK|非鉄金属・電線|1435.5|1540|42|-1.1|+5.55%|1524.1:+88.6 (+6.17%)||すみともでんこう 住友電工 電線|上方修正・増配を発表済。夜間PTSで1,524.1円(+6.17%)へ急反発しており絶好の押し目水準です。
+6501|日立製作所|STOCK|電気機器・インフラ|4702|4850|45|-0.7|+3.52%|4835:+133 (+2.83%)||ひたち 日立 インフラ 電線|送電網とLumadaが牽引。夜間PTSで4,835円へ反発中です。
+7203|トヨタ自動車|STOCK|輸送用機器|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)||とよた トヨタ 自動車|HVの圧倒的競争力で3,491円と堅調推移。
+8035|東京エレクトロン|STOCK|半導体製造装置|22450|23500|39|-1.2|+1.58%|||とうきょうえれくとろん 東エレク 半導体|半導体製造装置の世界大手。押し目形成中です。
+6857|アドバンテスト|STOCK|半導体検査装置|8920|8650|59|0.8|+2.41%|||あどばんてすと アドバンテスト 半導体|AI半導体テスタ世界首位。強い順張りモメンタムです。
+5803|フジクラ|STOCK|非鉄金属・電線|3260|3150|58|0.7|+2.51%|||ふじくら フジクラ 電線|AIデータセンター向け光ファイバーが急伸中。
+7011|三菱重工業|STOCK|機械・防衛|2240|2160|60|0.9|+1.82%|||みつびしじゅうこう 三菱重工 防衛|防衛・宇宙・ガスタービンの国策重工トップ銘柄。
+8058|三菱商事|STOCK|総合商社・高配当|2690|2750|41|-0.9|+1.13%|||みつびししょうじ 三菱商事 商社 高配当|利回り3.7%水準で下値が堅い総合商社トップ。
+8951|日本ビルファンド投資法人|REIT|オフィスJ-REIT|124500|126800|38|-1.3|-0.32%|||りーと REIT 不動産 ビル|三井不動産系の国内最大級J-REIT。NAV0.86倍と割安。`;
 
-const mkAsset = r => {
-  const [id,name,assetClass,sector,price,ma25,rsi,bb,change,ext,kw] = r;
-  const isF = assetClass==="FUND"||assetClass==="LEVERAGE";
-  return Object.assign({
-    id,name,assetClass,sector,price,prevClose:price,ma25,rsi,bb,change,
-    code:isF?`${id} 投信`:`${id} 東証`,keywords:`${name} ${id} ${sector} ${kw||""}`,
+function mkItem(line) {
+  const [id,name,assetClass,sector,p,ma,rsi,bb,change,pts,proxyEtf,kw,desc] = line.split("|");
+  const isF = assetClass==="FUND"||assetClass==="LEVERAGE", price = parseFloat(p), ma25 = parseFloat(ma);
+  const [ptsP, ptsC] = (pts||"").split(":");
+  return {
+    id, name, assetClass, sector, price, prevClose:price, ma25, rsi:parseFloat(rsi), bb:parseFloat(bb), change,
+    ptsPrice:ptsP?parseFloat(ptsP):null, ptsChange:ptsC||"", proxyEtf:proxyEtf||"",
+    code:isF?`${id} 投信`:`${id} 東証`, keywords:`${name} ${id} ${sector} ${kw||""}`,
     volatility:assetClass==="LEVERAGE"?65:(price<100?60:22),
-    businessSummary:ext.desc||`${name}の市場データおよび連動指数に基づくクオンツ分析です。`
-  },ext);
-};
-const DB = RAW_DB.map(mkAsset);
+    businessSummary:desc||`${name}の市場データおよび連動指数に基づくクオンツ分析です。`
+  };
+}
+const DB = RAW.trim().split("\n").map(mkItem);
 
 // 2. マルチプロキシ ＆ 投信・株式取得エンジン
-async function fetchCors(url, tm=4000) {
+async function fetchCors(url, tm=3800) {
   const ps = [
     `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&_=${Date.now()}`,
     `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
@@ -292,9 +297,9 @@ async function fetchLive(it, rerender=false) {
   const isF = it.assetClass==="FUND"||it.assetClass==="LEVERAGE"||isFCode(cid);
   const sym = isF ? getBenchEtf(it) : `${cid}.T`;
   const [mkH, yfH, cJson] = await Promise.all([
-    fetchCors(isF ? `https://itf.minkabu.jp/fund/${cid}` : `https://minkabu.jp/stock/${cid}`, 3800),
-    fetchCors(`https://finance.yahoo.co.jp/quote/${isF ? cid : cid+'.T'}`, 3800),
-    fetchCors(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=6mo`, 3600)
+    fetchCors(isF ? `https://itf.minkabu.jp/fund/${cid}` : `https://minkabu.jp/stock/${cid}`, 3600),
+    fetchCors(`https://finance.yahoo.co.jp/quote/${isF ? cid : cid+'.T'}`, 3600),
+    fetchCors(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=6mo`, 3500)
   ]);
 
   const pd = parseHtml(mkH) || parseHtml(yfH);
@@ -344,12 +349,12 @@ async function fetchLive(it, rerender=false) {
 }
 
 // 3. 状態管理 ＆ 旧「¥20,000 / 取得中...」自動修復
-const KEY = "quant_nav_v13_solid";
+const KEY = "quant_nav_v14_fast";
 let wList = [], curFlt = "ALL", curOpenId = null, cDays = 60;
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY) || localStorage.getItem("quant_nav_v12_clean") || localStorage.getItem("quant_advisor_pro_v11_all_assets");
+    const raw = localStorage.getItem(KEY) || localStorage.getItem("quant_nav_v13_solid") || localStorage.getItem("quant_advisor_pro_v11_all_assets");
     if(raw) {
       const p = JSON.parse(raw);
       if(Array.isArray(p.watchlist) && p.watchlist.length>0) {
@@ -527,7 +532,7 @@ function renderModal(it) {
     <div class="rounded-3xl overflow-hidden border border-slate-300 shadow-sm bg-white">
       <div class="yf-head p-3.5">
         <div class="flex justify-between items-center text-[10px] text-slate-300 mb-1.5">
-          <span>${isF?'🌱 投資信託 基準価額ボード':(it.earningsDate?`📅 決算発表日: <strong class="text-white">${it.earningsDate}</strong>`:'📊 東証・Y!ファイナンス直結ボード')}</span>
+          <span>${isF?'🌱 投資信託 基準価額ボード':'📊 東証・Y!ファイナンス直結ボード'}</span>
           <a href="https://finance.yahoo.co.jp/quote/${isF?it.id:it.id+'.T'}" target="_blank" rel="noopener" class="bg-white/15 px-2 py-0.5 rounded font-bold text-white">🔗 Y!で見る ↗</a>
         </div>
         <div class="grid ${hasPts?'grid-cols-2':'grid-cols-1'} gap-2 items-center">
@@ -546,11 +551,6 @@ function renderModal(it) {
         </div>
         <div id="cInfo" class="text-[10px] font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded border flex justify-between mb-1"></div>
         <div class="w-full h-[175px]"><canvas id="yfCv" class="w-full h-full block"></canvas></div>
-        <div class="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t text-[10px]">
-          <div class="bg-slate-50 p-1.5 rounded-lg"><span class="text-slate-400 block">${isF?'純資産残高':'前日終値'}</span><strong class="text-slate-800">${isF?(it.netAssets||'大型投信'):fYen(it.prevClose||it.price)}</strong></div>
-          <div class="bg-slate-50 p-1.5 rounded-lg"><span class="text-slate-400 block">${isF?'信託報酬':'25日移動平均'}</span><strong class="text-slate-800">${isF?(it.trustFee||'低コスト'):fYen(it.ma25)}</strong></div>
-          <div class="bg-slate-50 p-1.5 rounded-lg"><span class="text-slate-400 block">${isF?'1年リターン':'値幅制限'}</span><strong class="text-slate-800">${isF?(it.return1Y||'好調推移'):(it.priceLimit||'東証基準')}</strong></div>
-        </div>
       </div>
     </div>
     <div class="bg-white rounded-3xl p-3.5 border-2 border-teal-500/30">
@@ -614,7 +614,7 @@ function renderSearch(showEmpty=false) {
     clearTimeout(sTimer);
     const msg = document.getElementById("sMsg"); msg.classList.remove("hidden"); msg.innerText = `🌐 「${raw}」の株・投信をオンライン検索中...`;
     sTimer = setTimeout(async () => {
-      const html = await fetchCors(`https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(raw)}`, 3600);
+      const html = await fetchCors(`https://finance.yahoo.co.jp/search/?query=${encodeURIComponent(raw)}`, 3500);
       if(!html){ msg.innerText="💡 上の候補または緑ボタンから即座に取得できます"; return; }
       const reg = /href="(?:https?:\/\/finance\.yahoo\.co\.jp)?\/quote\/([0-9]{4}\.T|[0-9]{3}[A-Z]\.T|[0-9A-Z]{8})(?:[/?#"][^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
       let m, cnt=0, seen = new Set(hits.map(x=>x.id));
@@ -639,7 +639,7 @@ async function addCode(code, name, cls="FUND") {
   const c = String(code).replace(/\.T$/i,"").toUpperCase(), hit = DB.find(m=>m.id===c);
   if(hit){ selMaster(hit); return; }
   const isF = cls==="FUND"||isFCode(c);
-  const it = mkAsset([c, name, isF?"FUND":"STOCK", isF?"投資信託(自動連動)":"東証銘柄(自動連動)", isF?25000:1800, isF?24600:1770, 50, 0, "取得中...", {desc:`コード ${c} の最新データおよび連動指数から25日移動平均線・RSI・ボリンジャーバンドを自動算出しています。`}, c]);
+  const it = mkItem(`${c}|${name}|${isF?"FUND":"STOCK"}|${isF?"投資信託(自動連動)":"東証銘柄(自動連動)"}|${isF?25000:1800}|${isF?24600:1770}|50|0|取得中...|||${c}|コード ${c} の最新データおよび連動指数から25日移動平均線・RSI・ボリンジャーバンドを自動算出しています。`);
   const idx = wList.findIndex(w=>w.id===c);
   if(idx>=0) wList[idx]=it; else wList.unshift(it);
   clrSearch(); modal("catModal",0); modal("custModal",0); renderAll(); openDt(c);
@@ -668,7 +668,7 @@ async function submitCust() {
   if(!c && !n){ alert("コードまたは銘柄名を入力してください"); return; }
   if(c && (isSCode(c)||isFCode(c))){ await addCode(c, n||(isFCode(c)?`投資信託 (${c})`:`東証銘柄 (${c})`), t); return; }
   const id = c||("cust-"+Date.now()), pr = p>0?p:25000;
-  wList.unshift(mkAsset([id, n||id, t, "カスタム監視銘柄", pr, Math.round(pr*0.985), 50, 0, "取得中...", {}, n]));
+  wList.unshift(mkItem(`${id}|${n||id}|${t}|カスタム監視銘柄|${pr}|${Math.round(pr*0.985)}|50|0|取得中...|||${n}|`));
   modal("custModal",0); renderAll(); openDt(id);
 }
 
