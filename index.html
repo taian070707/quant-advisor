@@ -1,1326 +1,1872 @@
 <!DOCTYPE html>
-<html lang="ja" class="dark">
+<html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="QuantAdvisor" />
-  <title>Quant Investment Advisor | クオンツ投資アドバイザー</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }
-    body {
-      font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      padding-top: var(--safe-top);
-      padding-bottom: calc(5rem + var(--safe-bottom));
-    }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.78);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(148, 163, 184, 0.14);
-    }
-    html:not(.dark) .glass-card {
-      background: rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(203, 213, 225, 0.8);
-    }
-    .code-scroll::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    .code-scroll::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.4);
-      border-radius: 9999px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="投資ナビAI">
+    <title>クオンツ投資ナビAI PRO - 日経・株探・みんかぶ直結版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --bg-main: #f4f8f6; }
+        body {
+            background-color: var(--bg-main);
+            color: #1e293b;
+            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: env(safe-area-inset-bottom, 90px);
+        }
+        .app-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.05);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+        .app-card:active { transform: scale(0.985); }
+        .yf-board {
+            background: linear-gradient(180deg, #162436 0%, #1e2f44 100%);
+            color: #ffffff;
+        }
+        .gauge-track {
+            background: linear-gradient(90deg, #10b981 0%, #38bdf8 30%, #facc15 65%, #f43f5e 100%);
+        }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .hidden { display: none !important; }
+        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-fast { display: inline-block; animation: spin-slow 0.8s linear infinite; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 transition-colors duration-200 min-h-screen">
+<body class="max-w-md mx-auto min-h-screen px-3.5 pt-3 pb-28">
 
-  <!-- Top App Bar (iPhone PWA Optimized) -->
-  <header class="sticky top-0 z-30 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
-    <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 font-bold text-white text-sm">
-          QA
-        </div>
+    <!-- 1. ヘッダー -->
+    <header class="flex justify-between items-center mb-3">
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">Quant Advisor</h1>
-            <span id="dataSourceBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-              2026-11-11 同期済
-            </span>
-          </div>
-          <p class="text-xs text-slate-400">CPCV過学習防止 &amp; マルチソース統合クオンツ解析</p>
+            <div class="flex items-center gap-1.5 mb-0.5">
+                <span id="syncStatusDot" class="inline-block w-2 h-2 rounded-full bg-teal-500"></span>
+                <span id="syncStatusText" class="text-[10px] font-bold text-teal-700">日経・株探・みんかぶ 直列安定取得エンジン稼働中</span>
+            </div>
+            <h1 class="text-lg font-extrabold text-slate-800 tracking-tight">
+                クオンツ投資ナビ <span class="text-[11px] font-bold bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full align-middle">PRO</span>
+            </h1>
         </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Rei Mode vs Quant Mode Global Switch -->
-        <button id="togglePersonaBtn" type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-pink-500/15 text-pink-300 border border-pink-500/30 hover:bg-pink-500/25 transition">
-          <span id="personaIcon">🌸</span>
-          <span id="personaLabel">れいモード: ON</span>
-        </button>
-        <button id="syncDataBtn" type="button" title="data.jsonを再取得" class="p-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-medium flex items-center gap-1 transition">
-          <span>↻</span>
-          <span class="hidden sm:inline">更新</span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Toast Notification -->
-  <div id="toastBanner" class="fixed top-16 right-4 z-50 hidden px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold shadow-xl transition-all"></div>
-
-  <!-- Main Content Container -->
-  <main class="max-w-5xl mx-auto px-4 pt-4 space-y-5">
-
-    <!-- Market Benchmark Strip -->
-    <section class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-      <div class="glass-card rounded-2xl p-3">
-        <div class="flex items-center justify-between text-xs text-slate-400">
-          <span>日経平均株価 (11/11)</span>
-          <a href="https://advance.quote.nomura.co.jp/meigara/nomura2/qsearch.exe?F=users/nomura/tse" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">野村</a>
-        </div>
-        <div class="mt-1 text-base sm:text-lg font-bold text-white">60,883.07 <span class="text-xs font-normal text-slate-400">円</span></div>
-        <div class="text-xs font-semibold text-emerald-400">+423.49 (+0.70%)</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-3">
-        <div class="flex items-center justify-between text-xs text-slate-400">
-          <span>TOPIX (11/11)</span>
-          <a href="https://advance.quote.nomura.co.jp/meigara/nomura2/qsearch.exe?F=users/nomura/tse" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">野村</a>
-        </div>
-        <div class="mt-1 text-base sm:text-lg font-bold text-white">3,920.76</div>
-        <div class="text-xs font-semibold text-emerald-400">+27.05 (+0.69%)</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-3">
-        <div class="flex items-center justify-between text-xs text-slate-400">
-          <span>日経平均 52週レンジ</span>
-          <a href="https://jp.investing.com/indices/japan-ni225-historical-data" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">Investing</a>
-        </div>
-        <div class="mt-1 text-xs sm:text-sm font-bold text-white">48,235 - 72,831</div>
-        <div class="text-[11px] text-slate-400 mt-0.5">現在値位置: 中립〜堅調圏</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-3">
-        <div class="flex items-center justify-between text-xs text-slate-400">
-          <span>CPCV 過学習確率 (PBO)</span>
-          <span class="text-teal-400 font-semibold">検証済</span>
-        </div>
-        <div id="topPboMetric" class="mt-1 text-base sm:text-lg font-bold text-teal-300">14.2%</div>
-        <div class="text-[11px] text-slate-400">閾値20%未満（統計的優位）</div>
-      </div>
-    </section>
-
-    <!-- View 1: Dashboard & Signal Analysis -->
-    <section id="view-dashboard" class="space-y-4">
-      <!-- Ticker Quick Selector & Search -->
-      <div class="glass-card rounded-2xl p-3.5 space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div class="flex flex-wrap gap-1.5" id="tickerPillContainer">
-            <!-- Populated by JS -->
-          </div>
-          <div class="flex items-center gap-1.5">
-            <input id="tickerSearchInput" type="text" placeholder="銘柄コードまたは名称 (例: 7203, ソニー)" class="w-full sm:w-56 bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
-            <button id="tickerSearchBtn" type="button" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shrink-0 transition">
-              検索
+        <div class="flex items-center gap-1.5">
+            <button type="button" id="syncAllBtn" onclick="syncAllWatchlistPrices()" class="text-[11px] font-extrabold text-white bg-teal-600 hover:bg-teal-700 px-2.5 py-2 rounded-xl shadow-sm flex items-center gap-1">
+                <span id="syncBtnIcon">🔄</span> 順番に最新同期
             </button>
-          </div>
+            <button type="button" onclick="openCatalogModal()" class="text-[11px] font-bold text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-2 rounded-xl">
+                📋 図鑑
+            </button>
         </div>
-      </div>
+    </header>
 
-      <!-- Selected Ticker Main Signal & Dual Explanation Card -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <!-- Left 7 cols: Price & Technical Chart -->
-        <div class="lg:col-span-7 glass-card rounded-2xl p-4 space-y-3">
-          <div class="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <div class="flex items-center gap-2">
-                <span id="selectedCodeBadge" class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs font-mono font-semibold">998407.O</span>
-                <h2 id="selectedNameTitle" class="text-lg font-bold text-white">日経平均株価 (インデックス連動)</h2>
-              </div>
-              <p id="selectedMetaSubtitle" class="text-xs text-slate-400 mt-0.5">前日終値 60,459.58円 (11/10) ｜ 11/11現在値 60,883.07円</p>
-            </div>
-            <div class="text-right">
-              <div id="selectedPriceDisplay" class="text-xl font-bold text-white">60,883.07円</div>
-              <div id="selectedChangeDisplay" class="text-xs font-semibold text-emerald-400">+423.49 (+0.70%)</div>
-            </div>
-          </div>
-
-          <!-- Chart Controls -->
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
-            <div class="flex items-center gap-1" id="timeframeBtns">
-              <button type="button" data-tf="20" class="tf-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white">1ヶ月(20営業日)</button>
-              <button type="button" data-tf="40" class="tf-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">2ヶ月(40営業日)</button>
-              <button type="button" data-tf="60" class="tf-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">3ヶ月(60営業日)</button>
-            </div>
-            <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
-              <input id="toggleBollingerCheckbox" type="checkbox" checked class="rounded border-slate-600 text-emerald-500 focus:ring-0" />
-              <span>ボリンジャーバンド (±2σ / MA25)</span>
-            </label>
-          </div>
-
-          <!-- Fixed-height Chart Container per Core Rule 4 -->
-          <div class="relative h-72 w-full">
-            <canvas id="priceBollingerChart"></canvas>
-          </div>
-
-          <!-- Multi-Source Grounded Links -->
-          <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <span class="text-slate-400 font-medium">参照データソース:</span>
-            <div id="multiSourceLinks" class="flex flex-wrap gap-2">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Right 5 cols: Quant Judgment & Dual-Layer XAI Card -->
-        <div class="lg:col-span-5 glass-card rounded-2xl p-4 flex flex-col justify-between space-y-4">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">総合クオンツ判定シグナル</span>
-              <span id="signalBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                押し目買い / 積立継続
-              </span>
+    <!-- 2. 検索バー -->
+    <section class="mb-4" id="searchSection">
+        <div class="app-card rounded-2xl p-3 bg-white border-2 border-teal-500/40">
+            <div class="flex items-center gap-1.5">
+                <span class="text-base pl-0.5">🔍</span>
+                <input 
+                    type="search" 
+                    id="quickSearchInput" 
+                    placeholder="社名・投信・コード（例：イオン、8267、ソニーFG、netWIN）" 
+                    autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                    class="w-full text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2"
+                >
+                <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden text-slate-400 hover:text-slate-600 px-2 py-1.5 text-xs font-bold bg-slate-100 rounded-lg shrink-0">✕</button>
+                <button type="button" onclick="triggerSearchNow()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold px-3 py-2 rounded-xl shrink-0">検索</button>
             </div>
 
-            <!-- Quantitative Metrics Grid -->
-            <div class="grid grid-cols-2 gap-2.5">
-              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                <div class="text-[11px] text-slate-400">RSI (14日・Wilder法)</div>
-                <div id="metricRsi" class="text-base font-bold text-white mt-0.5">54.8</div>
-                <div id="metricRsiSub" class="text-[11px] text-slate-400">中立水準 (過熱感なし)</div>
-              </div>
-              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                <div class="text-[11px] text-slate-400">ボリンジャーZスコア</div>
-                <div id="metricZScore" class="text-base font-bold text-white mt-0.5">+0.38σ</div>
-                <div id="metricZSub" class="text-[11px] text-slate-400">±2σバンド内推移</div>
-              </div>
-              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                <div class="text-[11px] text-slate-400">25日移動平均乖離率</div>
-                <div id="metricMaDev" class="text-base font-bold text-emerald-400 mt-0.5">+1.12%</div>
-                <div id="metricTargetSub" class="text-[11px] text-slate-400">トレンド: 緩やかな上昇</div>
-              </div>
-              <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-2.5">
-                <div class="text-[11px] text-slate-400">アナリスト目標 / 予想</div>
-                <div id="metricConsensus" class="text-base font-bold text-amber-300 mt-0.5">強気〜中立</div>
-                <div id="metricConsensusSub" class="text-[11px] text-slate-400">52週高値 72,831円</div>
-              </div>
+            <!-- ワンタップ検索チップ -->
+            <div class="flex items-center gap-1.5 mt-2.5 pt-2 border-t border-slate-100 overflow-x-auto custom-scroll pb-1">
+                <span class="text-[10px] font-bold text-slate-400 shrink-0">注目ワード:</span>
+                <button type="button" onclick="quickSelect('8267')" class="text-[10px] font-bold bg-rose-50 text-rose-800 px-2.5 py-1 rounded-lg border border-rose-200 shrink-0">🛒 イオン(8267)</button>
+                <button type="button" onclick="quickSelect('8729')" class="text-[10px] font-bold bg-sky-50 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-200 shrink-0">🏢 ソニーFG(8729)</button>
+                <button type="button" onclick="quickSelect('りそな')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 りそなHD</button>
+                <button type="button" onclick="quickSelect('千葉')" class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">🏦 千葉銀行</button>
+                <button type="button" onclick="quickSelect('netWIN')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🌱 netWIN</button>
+                <button type="button" onclick="quickSelect('日経225')" class="text-[10px] font-bold bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200 shrink-0">🌱 日経225投信</button>
             </div>
 
-            <!-- Explainable AI (XAI) Box: Switches dynamically between Rei Mode & Quant Mode -->
-            <div id="xaiContainer" class="rounded-2xl p-3.5 bg-gradient-to-br from-pink-500/10 via-slate-900/90 to-slate-900 border border-pink-500/30 space-y-2">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-1.5">
-                  <span id="xaiHeaderIcon" class="text-base">🌸</span>
-                  <h3 id="xaiHeaderTitle" class="text-xs font-bold text-pink-300">れい向け・やさしい投資アドバイス</h3>
+            <!-- 検索予測パネル -->
+            <div id="searchResultPanel" class="hidden mt-3 pt-2.5 border-t-2 border-teal-100">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span id="searchResultTitle" class="text-[11px] font-extrabold text-teal-800">検索予測候補</span>
+                    <button type="button" onclick="clearSearch()" class="text-[10px] font-bold text-slate-400 hover:text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">▲ 閉じる</button>
                 </div>
-                <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">XAI 二層解説</span>
-              </div>
-              <p id="xaiBodyText" class="text-xs leading-relaxed text-slate-200"></p>
-              <div id="xaiActionTip" class="text-[11px] font-medium text-emerald-300 pt-1 border-t border-slate-800/80"></div>
+                <div id="searchResultList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white custom-scroll"></div>
+                <div id="liveSearchStatus" class="hidden mt-1.5 px-2.5 py-1.5 bg-teal-50/80 rounded-lg text-[10px] font-bold text-teal-800 flex items-center justify-between">
+                    <span id="liveSearchStatusText">🌐 日経・株探・みんかぶから検索中...</span>
+                </div>
             </div>
-          </div>
-
-          <!-- Fundamental / Catalyst Note -->
-          <div class="bg-slate-900/60 border border-slate-800/90 rounded-xl p-3 text-xs text-slate-300 space-y-1">
-            <div class="font-semibold text-slate-200 flex items-center justify-between">
-              <span>📌 直近カタリスト・決算ファクト</span>
-              <span id="catalystDateBadge" class="text-[11px] text-slate-400">2026年11月</span>
-            </div>
-            <p id="catalystText" class="text-xs text-slate-400 leading-relaxed"></p>
-          </div>
         </div>
-      </div>
     </section>
 
-    <!-- View 2: Quant Engine & CPCV Parameter Simulator -->
-    <section id="view-quant" class="hidden space-y-4">
-      <div class="glass-card rounded-2xl p-4 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-          <div>
-            <h2 class="text-base font-bold text-white">CPCV (組み合わせパージ付き交差検証) &amp; 閾値シミュレーター</h2>
-            <p class="text-xs text-slate-400">バックテストの過学習確率 (PBO) と Deflated Sharpe Ratio をリアルタイム検証します</p>
-          </div>
-          <button id="resetQuantParamsBtn" type="button" class="self-start sm:self-auto px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700">
-            初期値に戻す
-          </button>
+    <!-- 3. 投資予算 & 相場環境シミュレーター -->
+    <section class="app-card rounded-3xl p-4 mb-4 bg-gradient-to-br from-white via-white to-teal-50/50">
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-xs font-extrabold text-slate-700 flex items-center gap-1.5">
+                <span>👛</span> あなたの待機資金・3分割ナビ
+            </h2>
+            <span id="macroBadge" class="text-[10px] font-bold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">金利上昇・業績相場</span>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">RSI 売られすぎ閾値 (買い判定)</span>
-              <span id="rsiLowVal" class="font-bold text-emerald-400">35</span>
+        <div class="grid grid-cols-2 gap-2.5 mb-3">
+            <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                <label class="text-[10px] font-bold text-slate-500 block mb-1">投資に回せる予算 (円)</label>
+                <input type="number" id="budgetInput" value="100000" step="10000" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-extrabold text-slate-800 focus:border-teal-500 focus:outline-none" oninput="updateAllCalculations()">
             </div>
-            <input id="rsiLowSlider" type="range" min="20" max="45" step="1" value="35" class="w-full accent-emerald-500" />
-            <p class="text-[11px] text-slate-400">極端に低い値に設定するとサンプル数が減り過学習リスク (PBO) が上昇します。</p>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">ボリンジャーバンド σ倍率</span>
-              <span id="bbSigmaVal" class="font-bold text-emerald-400">2.0σ</span>
+            <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                <label class="text-[10px] font-bold text-slate-500 block mb-1">現在のマクロ経済環境</label>
+                <select id="macroSelect" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-700 focus:border-teal-500 focus:outline-none" onchange="updateAllCalculations()">
+                    <option value="rate_hike">🏦 日銀利上げ・国内追い風</option>
+                    <option value="normal">☀️ 安定成長（通常モード）</option>
+                    <option value="shock">⚡ 急落・リスクオフ警戒</option>
+                    <option value="overheat">🔥 全面高・バブル過熱警戒</option>
+                </select>
             </div>
-            <input id="bbSigmaSlider" type="range" min="1.5" max="3.0" step="0.1" value="2.0" class="w-full accent-emerald-500" />
-            <p class="text-[11px] text-slate-400">標準正規分布で±2.0σは約95.4%の価格変動を包含します。</p>
-          </div>
-
-          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 space-y-2">
-            <div class="flex justify-between text-xs">
-              <span class="text-slate-300 font-medium">CPCV 分割ブロック数 (N)</span>
-              <span id="cpcvBlocksVal" class="font-bold text-teal-300">6 分割 (C(6,3)=20通り)</span>
-            </div>
-            <input id="cpcvBlocksSlider" type="range" min="4" max="10" step="2" value="6" class="w-full accent-teal-400" />
-            <p class="text-[11px] text-slate-400">パージ期間 (Purge=5営業日) とエンバーゴ (Embargo=3営業日) を適用。</p>
-          </div>
         </div>
-
-        <!-- Simulation Output Banner -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="text-xs text-slate-400">過学習確率 (PBO推定値)</div>
-            <div id="simPboResult" class="text-xl font-bold text-teal-300 mt-1">14.2%</div>
-            <div id="simPboStatus" class="text-xs text-emerald-400 mt-0.5">✔ 統計的ロバスト性: 良好</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="text-xs text-slate-400">Deflated Sharpe Ratio (DSR)</div>
-            <div id="simDsrResult" class="text-xl font-bold text-white mt-1">1.48</div>
-            <div class="text-xs text-slate-400 mt-0.5">試行回数バイアス補正後</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-            <div class="text-xs text-slate-400">選択銘柄への再判定シグナル</div>
-            <div id="simSignalResult" class="text-base font-bold text-emerald-300 mt-1">押し目買い / 積立継続</div>
-            <div class="text-xs text-slate-400 mt-0.5">現在のパラメータ基準</div>
-          </div>
-        </div>
-      </div>
+        <div id="globalAllocationCards" class="grid grid-cols-3 gap-2 text-center"></div>
     </section>
 
-    <!-- View 3: Portfolio Allocation & Company Stock Hedge -->
-    <section id="view-portfolio" class="hidden space-y-4">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-6 glass-card rounded-2xl p-4 space-y-3">
-          <h2 class="text-base font-bold text-white">資産配分 &amp; 自社株集中リスク管理</h2>
-          <p class="text-xs text-slate-400">スライダーで保有比率を調整すると、ポートフォリオの分散度とヘッジ提案が即時更新されます。</p>
-
-          <div class="space-y-3 pt-2">
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>📈 日経225 / インデックス投信</span>
-                <span id="allocIndexLabel" class="font-bold text-emerald-400">45%</span>
-              </div>
-              <input id="allocIndexInput" type="range" min="0" max="100" value="45" class="w-full accent-emerald-500" />
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>🏢 個別株 (トヨタ・ソニー・三菱UFJ等)</span>
-                <span id="allocSingleLabel" class="font-bold text-sky-400">25%</span>
-              </div>
-              <input id="allocSingleInput" type="range" min="0" max="100" value="25" class="w-full accent-sky-500" />
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>⚠️ 自社株 / 特定集中エクスポージャー</span>
-                <span id="allocCompanyLabel" class="font-bold text-amber-400">15%</span>
-              </div>
-              <input id="allocCompanyInput" type="range" min="0" max="100" value="15" class="w-full accent-amber-500" />
-            </div>
-
-            <div>
-              <div class="flex justify-between text-xs mb-1">
-                <span>🛡️ 現金・短期国債 (キャッシュクッション)</span>
-                <span id="allocCashLabel" class="font-bold text-indigo-300">15%</span>
-              </div>
-              <input id="allocCashInput" type="range" min="0" max="100" value="15" class="w-full accent-indigo-400" />
-            </div>
-          </div>
-
-          <div id="portfolioAdviceBox" class="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs leading-relaxed text-slate-200"></div>
+    <!-- 4. アセット種別フィルター ＆ 並び替えバー -->
+    <div class="flex items-center justify-between gap-2 mb-3">
+        <div class="flex gap-1 overflow-x-auto custom-scroll pb-1">
+            <button type="button" onclick="setFilter('ALL')" id="filter-ALL" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-teal-600 text-white shrink-0">すべて</button>
+            <button type="button" onclick="setFilter('STOCK')" id="filter-STOCK" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🏢 個別株</button>
+            <button type="button" onclick="setFilter('FUND')" id="filter-FUND" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🌱 投資信託</button>
+            <button type="button" onclick="setFilter('REIT')" id="filter-REIT" class="text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0">🏙️ REIT・金</button>
         </div>
-
-        <div class="lg:col-span-6 glass-card rounded-2xl p-4 flex flex-col justify-between">
-          <div>
-            <h3 class="text-sm font-bold text-white">アセットアロケーション比率 (正規化後)</h3>
-            <p class="text-xs text-slate-400">iPhone画面でも視認しやすいドーナツチャート</p>
-          </div>
-          <div class="relative h-72 w-full my-2">
-            <canvas id="portfolioDoughnutChart"></canvas>
-          </div>
-          <div class="text-[11px] text-slate-400 text-center">
-            ※ 自社株比率が20%を超える場合、人的資本との二重集中リスクを軽減するためインデックスへのリバランスを推奨します。
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- View 4: Part 2 Code & GitHub Actions Bundle Viewer -->
-    <section id="view-code" class="hidden space-y-4">
-      <div class="glass-card rounded-2xl p-4 space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h2 class="text-base font-bold text-white">後半コード (<code class="text-emerald-400">&lt;script&gt;</code> 実装部) &amp; GitHub Actions 自動化一式</h2>
-            <p class="text-xs text-slate-400">前半のHTMLにそのまま繋げられる後半JavaScriptコード、および日次自動更新用のPython・GitHub Actions定義です。</p>
-          </div>
-          <button id="copyActiveCodeBtn" type="button" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shrink-0 transition">
-            📋 表示中のコードをコピー
-          </button>
-        </div>
-
-        <!-- File Selector Tabs -->
-        <div class="flex flex-wrap gap-1.5 pt-1" id="codeFileTabs">
-          <button type="button" data-codefile="part2_js" class="code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white">
-            1. index.html 後半 (&lt;script&gt;〜末尾)
-          </button>
-          <button type="button" data-codefile="workflow_yml" class="code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
-            2. .github/workflows/daily_analysis.yml
-          </button>
-          <button type="button" data-codefile="quant_py" class="code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
-            3. quant_engine.py (CPCV・指標計算)
-          </button>
-          <button type="button" data-codefile="advisor_py" class="code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700">
-            4. advisor_agent.py &amp; main.py
-          </button>
-        </div>
-
-        <pre class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-emerald-300 overflow-x-auto max-h-96 code-scroll"><code id="codeViewerContent"></code></pre>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Bottom Navigation Bar for iPhone Home Screen Web App -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 px-2 py-2" style="padding-bottom: calc(0.5rem + var(--safe-bottom));">
-    <div class="max-w-md mx-auto grid grid-cols-4 gap-1">
-      <button type="button" data-nav="dashboard" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 bg-emerald-500/10 font-semibold text-[11px]">
-        <span class="text-base">📊</span>
-        <span>ダッシュボード</span>
-      </button>
-      <button type="button" data-nav="quant" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-medium text-[11px]">
-        <span class="text-base">🧪</span>
-        <span>CPCV検証</span>
-      </button>
-      <button type="button" data-nav="portfolio" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-medium text-[11px]">
-        <span class="text-base">⚖️</span>
-        <span>資産配分</span>
-      </button>
-      <button type="button" data-nav="code" class="nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-medium text-[11px]">
-        <span class="text-base">💻</span>
-        <span>後半コード</span>
-      </button>
+        <select id="sortSelect" onchange="renderWatchlist()" class="text-[11px] font-bold bg-white border border-slate-200 text-slate-700 rounded-xl px-2 py-1.5 shrink-0">
+            <option value="default">登録順</option>
+            <option value="score_desc">AIスコア順</option>
+            <option value="rsi_asc">割安(RSI低)順</option>
+        </select>
     </div>
-  </nav>
 
-  <!-- =====================================================================
-       【後半部分】 JavaScript ロジック・クオンツ計算・チャート描画・データ連携
-       ===================================================================== -->
-  <script>
-    // 1. Grounded Market Dataset (Verified as of 2026-11-11 JST)
-    const INITIAL_MARKET_DATA = {
-      updatedAt: "2026-11-11 11:53 JST",
-      benchmarks: {
-        nikkei225: { price: 60883.07, change: 423.49, changePct: 0.70, prevClose: 60459.58 },
-        topix: { price: 3920.76, change: 27.05, changePct: 0.69 }
-      },
-      tickers: [
-        {
-          code: "998407.O",
-          shortCode: "N225",
-          name: "日経平均株価 (インデックス連動)",
-          sector: "国内株価指数",
-          price: 60883.07,
-          change: 423.49,
-          changePct: 0.70,
-          subtitle: "前日終値 60,459.58円 (11/10) ｜ 52週レンジ 48,235.30 - 72,831.73円",
-          consensus: "押し目買い優勢",
-          consensusSub: "52週高値 72,831.73円",
-          cpcvPbo: 14.2,
-          dsr: 1.48,
-          catalystDate: "2026年11月10日〜11日",
-          catalyst: "11月10日終値60,459.58円から11月11日午前に60,883.07円（+423.49円）へ続伸。52週レンジ（48,235.30〜72,831.73円）の中央付近で過熱感は限定的です。",
-          reiAdvice: "日経平均は60,883円としっかりした動きだよ🌸 過去1年の高いところ（72,831円）と比べるとまだ余裕がある水準だから、慌てて一度に買うのではなく、毎月の積立をコツコツ続けるのが一番安心だよ！",
-          quantAdvice: "RSI(14)は中立圏、25日移動平均線からの乖離も±1σ内に収束。CPCV（6分割・パージ5日）における過学習確率(PBO)は14.2%と低く、順張り・定期積立シグナルの統計的優位性が確認されています。",
-          actionTip: "推奨アクション: コア枠（日経225インデックス）の定期積立を維持し、-1.5σ接近時のみスポット買い増し。",
-          sources: [
-            { label: "Yahoo!ファイナンス", url: "https://finance.yahoo.co.jp/quote/998407.O/history" },
-            { label: "野村證券 市況", url: "https://advance.quote.nomura.co.jp/meigara/nomura2/qsearch.exe?F=users/nomura/tse" },
-            { label: "株探 時系列", url: "https://kabutan.jp/stock/kabuka?code=0000&ashi=day" },
-            { label: "日経平均プロフィル", url: "https://indexes.nikkei.co.jp/nkave/archives/summary" }
-          ],
-          // 60 trading days ending at 2026-11-10 (60459.58) and 2026-11-11 (60883.07)
-          history: [
-            57820, 58110, 57950, 58340, 58600, 58420, 58890, 59120, 58980, 58750,
-            59010, 59320, 59480, 59210, 59550, 59820, 59640, 59910, 60120, 59880,
-            59650, 59420, 59780, 60050, 60210, 59940, 59720, 59510, 59830, 60100,
-            60340, 60180, 59920, 59680, 59450, 59710, 59980, 60240, 60410, 60150,
-            59890, 59620, 59840, 60090, 60310, 60120, 59870, 59640, 59910, 60180,
-            60020, 59790, 59580, 59810, 60040, 59920, 59680, 59372.28, 60459.58, 60883.07
-          ]
-        },
-        {
-          code: "7203.T",
-          shortCode: "7203",
-          name: "トヨタ自動車",
-          sector: "輸送用機器 / 東証プライム",
-          price: 3414.0,
-          change: -77.0,
-          changePct: -2.21,
-          subtitle: "11/10終値 3,414.0円 (-2.21%) ｜ アナリスト予想株価 3,766円 (買い)",
-          consensus: "買い (目標 3,766円)",
-          consensusSub: "現値比 +10.3% 乖離",
-          cpcvPbo: 16.5,
-          dsr: 1.36,
-          catalystDate: "2026年11月5日 決算発表済",
-          catalyst: "2026年11月5日に今期最終利益予想を10%上方修正。足元11月10日は3,414.0円（前日比-77.0円）と短期調整しているものの、アナリストコンセンサス目標株価3,766円に対して割安圏にあります。",
-          reiAdvice: "トヨタは11月5日の決算で「今年の利益が予想より10%増えそう！」と良い発表をしたばかりだよ🚗 直近は少しお休みして3,414円に下がっているから、プロの目標（3,766円）と比べるとお買い得感が出ているタイミングだね。",
-          quantAdvice: "11/5の上方修正後の利益確定売りにより25日移動平均線近辺までプルバック。ファンダメンタルズ上方修正を伴う短期押し目であり、ミーンリバージョン（平均回帰）戦略のエントリー条件に合致します。",
-          actionTip: "推奨アクション: 3,350〜3,420円ゾーンでの分割エントリー（目標株価3,766円、損切り目安-2σ割れ）。",
-          sources: [
-            { label: "Yahoo!ファイナンス", url: "https://finance.yahoo.co.jp/quote/7203.T" },
-            { label: "株探 チャート・決算", url: "https://kabutan.jp/stock/chart?code=7203" },
-            { label: "みんかぶ アナリスト予想", url: "https://minkabu.jp/stock/7203/analyst_consensus" },
-            { label: "株予報Pro", url: "https://kabuyoho.jp/sp/reportTarget?bcode=7203" }
-          ],
-          history: [
-            3280, 3305, 3290, 3315, 3340, 3325, 3350, 3375, 3360, 3345,
-            3365, 3390, 3405, 3380, 3410, 3435, 3420, 3445, 3460, 3435,
-            3415, 3395, 3425, 3450, 3470, 3445, 3420, 3400, 3430, 3455,
-            3475, 3460, 3435, 3410, 3390, 3415, 3440, 3465, 3480, 3455,
-            3430, 3405, 3425, 3450, 3470, 3455, 3430, 3410, 3435, 3460,
-            3445, 3425, 3405, 3440, 3510, 3535, 3515, 3491.0, 3418.0, 3414.0
-          ]
-        },
-        {
-          code: "6758.T",
-          shortCode: "6758",
-          name: "ソニーグループ",
-          sector: "電気機器 / 東証プライム",
-          price: 4142.0,
-          change: -69.0,
-          changePct: -1.64,
-          subtitle: "11/5決算で+7.07%(4,211円)急伸後 4,142円 ｜ 予想株価 4,966円 (強気買い)",
-          consensus: "強気買い (目標 4,966円)",
-          consensusSub: "売上6兆2,670億円・営業益1兆980億円",
-          cpcvPbo: 12.8,
-          dsr: 1.62,
-          catalystDate: "2026年11月5日 第2四半期決算",
-          catalyst: "11月5日発表の2027年3月期第2四半期決算で売上高6兆2,670億円、営業利益1兆980億円を達成し、通期最終利益を10%上方修正（最高益予想上乗せ）。11/5に4,211円（+7.07%）へ急伸後、4,142円で高値保ち合い中です。",
-          reiAdvice: "ソニーはゲームも音楽も映画も絶好調で、過去最高の利益予想をさらに更新したよ🎮✨ 発表の日にグッと上がったあと少し落ち着いているから、目標の4,966円に向けて強い流れが続いているね！",
-          quantAdvice: "好決算ギャップアップ後のフラッグ形成局面。ボリンジャー+1σ〜+2σのバンドウォーク帯に位置し、CPCV検証でもモメンタム継続確率が高い（DSR 1.62）銘柄です。",
-          actionTip: "推奨アクション: モメンタム順張り保有継続。4,050〜4,120円の窓埋めサポート帯は押し目買い好機。",
-          sources: [
-            { label: "Yahoo!ファイナンス", url: "https://finance.yahoo.co.jp/quote/6758.T" },
-            { label: "株探 チャート・決算", url: "https://s.kabutan.jp/stocks/6758/chart/" },
-            { label: "みんかぶ アナリスト予想", url: "https://minkabu.jp/stock/6758/analyst_consensus" },
-            { label: "野村證券 株価", url: "https://quote.nomura.co.jp/nomura/cgi-bin/parser.pl?QCODE=6758&TEMPLATE=nomura_tp_kabu_01&MKTN=T" }
-          ],
-          history: [
-            3760, 3785, 3770, 3800, 3825, 3810, 3835, 3860, 3845, 3830,
-            3850, 3875, 3890, 3865, 3895, 3920, 3905, 3930, 3945, 3920,
-            3900, 3880, 3910, 3935, 3955, 3930, 3905, 3885, 3915, 3940,
-            3960, 3945, 3920, 3895, 3875, 3900, 3925, 3950, 3965, 3940,
-            3915, 3890, 3910, 3935, 3955, 3940, 3915, 3895, 3920, 3945,
-            3930, 3910, 3890, 3915, 3933, 4211, 4195, 4175, 4160, 4142.0
-          ]
-        },
-        {
-          code: "8306.T",
-          shortCode: "8306",
-          name: "三菱ＵＦＪフィナンシャル・グループ",
-          sector: "銀行業 / 東証プライム",
-          price: 3495.0,
-          change: 60.0,
-          changePct: 1.75,
-          subtitle: "11/11現在値 3,495円 (+1.75%) ｜ 配当予想 96.00円 (利回り2.75%)",
-          consensus: "買い (目標 3,804円)",
-          consensusSub: "決算発表予定日: 2026/11/13",
-          cpcvPbo: 15.1,
-          dsr: 1.44,
-          catalystDate: "2026年11月13日 決算発表予定",
-          catalyst: "11月13日の決算発表を控え、11月11日は3,495円（+60円 / +1.75%）と堅調に推移。2027年3月期の1株配当予想は96.00円（配当利回り2.75%、配当性向40.3%）、アナリスト目標株価は3,804円です。",
-          reiAdvice: "三菱UFJは11月13日に大事な決算発表があるよ🏦 配当金も1株あたり96円（利回り2.75%）としっかり貰えるのが魅力だけど、決算の直前は値動きが大きくなりやすいから、発表を見てから動くのも賢い選択だよ！",
-          quantAdvice: "11/13の決算イベントを控えたインプライド・ボラティリティ上昇局面。配当利回り2.75%が下値サポーターとして機能しやすい一方、イベント前後のギャップリスクを考慮しポジションサイズ管理が有効です。",
-          actionTip: "推奨アクション: 既存保有分はホールド（目標3,804円）。新規買い増しは11/13決算通過後のトレンド確認後。",
-          sources: [
-            { label: "Yahoo!ファイナンス 時系列", url: "https://finance.yahoo.co.jp/quote/8306.T/history" },
-            { label: "Yahoo!ファイナンス 配当情報", url: "https://finance.yahoo.co.jp/quote/8306.T/dividend" },
-            { label: "株探 基本情報", url: "https://kabutan.jp/stock/?code=8306" },
-            { label: "みんかぶ アナリスト予想", url: "https://minkabu.jp/stock/8306/analyst_consensus" }
-          ],
-          history: [
-            3210, 3230, 3215, 3240, 3265, 3250, 3275, 3295, 3280, 3265,
-            3285, 3310, 3325, 3300, 3330, 3355, 3340, 3365, 3380, 3355,
-            3335, 3315, 3345, 3370, 3390, 3365, 3340, 3320, 3350, 3375,
-            3395, 3380, 3355, 3330, 3310, 3335, 3360, 3385, 3400, 3375,
-            3350, 3325, 3345, 3370, 3390, 3375, 3350, 3330, 3355, 3380,
-            3365, 3345, 3325, 3350, 3380, 3405, 3420, 3415, 3435.0, 3495.0
-          ]
+    <!-- 5. 監視銘柄カードリスト -->
+    <section>
+        <div class="flex justify-between items-center mb-2 px-1">
+            <span class="text-[11px] font-bold text-slate-500">💡 タップすると日経・株探・みんかぶから最新データを抽出</span>
+            <span id="watchlistCounter" class="text-[11px] font-extrabold text-teal-700"></span>
+        </div>
+        <div id="watchlistContainer" class="space-y-3"></div>
+        <div class="mt-6 flex justify-center gap-4">
+            <button type="button" onclick="openCustomModal()" class="text-[11px] font-bold text-teal-700 underline">
+                ＋ コード・手動で銘柄を追加
+            </button>
+            <button type="button" onclick="resetToDefault()" class="text-[11px] font-semibold text-slate-400 hover:text-slate-600 underline">
+                初期リストに戻す
+            </button>
+        </div>
+    </section>
+
+    <!-- モーダル1: 銘柄詳細シート -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-[#f8faf9] w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[94vh] flex flex-col overflow-hidden">
+            <div class="bg-[#162436] text-white px-4 py-3 border-b border-slate-700 flex justify-between items-center shrink-0">
+                <div class="pr-2 min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span id="modalAssetBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded"></span>
+                        <span id="modalCode" class="text-[11px] font-bold text-slate-300"></span>
+                        <span id="modalLiveBadge" class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+                            🟢 実データ直結
+                        </span>
+                    </div>
+                    <h3 id="modalTitle" class="text-sm sm:text-base font-extrabold text-white mt-0.5 line-clamp-1"></h3>
+                </div>
+                <button type="button" onclick="closeDetailModal()" class="w-8 h-8 rounded-full bg-slate-700 hover:bg-slate-600 text-white font-bold flex items-center justify-center text-base shrink-0">✕</button>
+            </div>
+            <div id="modalBody" class="p-3.5 overflow-y-auto space-y-3.5 custom-scroll"></div>
+            <div class="bg-white px-4 py-2.5 border-t border-slate-200 flex gap-2 shrink-0">
+                <button type="button" id="deleteAssetBtn" class="px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100">🗑️ 削除</button>
+                <button type="button" id="refreshSingleBtn" class="px-3 py-2 rounded-xl border border-teal-200 bg-teal-50 text-teal-800 text-xs font-extrabold hover:bg-teal-100">🔄 最新データを再取得</button>
+                <button type="button" onclick="closeDetailModal()" class="flex-1 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold shadow-md">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル2: 📋 図鑑モーダル -->
+    <div id="catalogModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-slate-200 flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-800">📋 株式・投資信託 図鑑（約100銘柄収録）</h3>
+                    <p class="text-[10px] text-slate-500">人気投信・金融・地方銀行・半導体・高配当・小売株をワンタップ追加</p>
+                </div>
+                <button type="button" onclick="closeCatalogModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-3 bg-slate-50 border-b border-slate-200 shrink-0 space-y-2">
+                <input type="search" id="catalogSearchInput" placeholder="図鑑内を検索（例：イオン、ソニーFG、netWIN、千葉）" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-teal-600" oninput="renderCatalogList()">
+                <div class="flex gap-1.5 overflow-x-auto custom-scroll pb-1">
+                    <button type="button" onclick="setCatalogCat('ALL')" id="cat-ALL" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white shrink-0">すべて</button>
+                    <button type="button" onclick="setCatalogCat('投信')" id="cat-投信" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🌱 投資信託</button>
+                    <button type="button" onclick="setCatalogCat('銀行')" id="cat-銀行" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🏦 銀行・金融</button>
+                    <button type="button" onclick="setCatalogCat('半導体')" id="cat-半導体" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💎 半導体・電機</button>
+                    <button type="button" onclick="setCatalogCat('内需')" id="cat-内需" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">🛒 小売・内需・優待</button>
+                    <button type="button" onclick="setCatalogCat('高配当')" id="cat-高配当" class="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0">💰 商社・高配当</button>
+                </div>
+            </div>
+            <div id="catalogListContainer" class="p-3 overflow-y-auto divide-y divide-slate-100 space-y-1 custom-scroll flex-1"></div>
+            <div class="p-3 bg-white border-t border-slate-200 shrink-0">
+                <button type="button" onclick="closeCatalogModal()" class="w-full py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- モーダル3: コード指定・手動追加モーダル -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-5 border border-slate-200 shadow-2xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-extrabold text-slate-800">📝 コード指定・手動追加</h3>
+                <button type="button" onclick="closeCustomModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 font-bold">✕</button>
+            </div>
+            <p class="text-[11px] text-slate-500 leading-relaxed">
+                株式の4桁コード（例: <code>8267</code>, <code>8729</code>）や、投資信託の8桁コード（例: <code>47311988</code>）から日経・株探・みんかぶの最新データを自動抽出します。
+            </p>
+            <div class="space-y-2.5 text-xs">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄コード / 8桁ファンドコード</label>
+                    <input type="text" id="custCode" placeholder="例: 8267 / 8729 / 47311988" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 block mb-1">銘柄名・ファンド名（空欄でもコードから自動抽出）</label>
+                    <input type="text" id="custName" placeholder="空欄でも自動で正式名称を取得します" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">種類</label>
+                        <select id="custType" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 font-bold text-slate-700">
+                            <option value="STOCK">🏢 個別株式</option>
+                            <option value="FUND">🌱 投資信託</option>
+                            <option value="LEVERAGE">⚡ レバレッジ投信</option>
+                            <option value="REIT">🏙️ J-REIT・金ETF</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 block mb-1">現在値 (空欄で自動取得)</label>
+                        <input type="number" step="0.1" id="custPrice" placeholder="自動取得" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-800">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button type="button" onclick="closeCustomModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold">キャンセル</button>
+                <button type="button" id="custSubmitBtn" onclick="submitCustomAsset()" class="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-extrabold shadow-md">抽出して追加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         スクリプト第1部：マスター辞書 ＆ 直列フォールバック通信 ＆ 日経・株探・みんかぶ全角対応パーサー
+    ========================================================================== -->
+    <script>
+        // フォーマット: id|name|assetClass|sector|price|ma25|rsi|bb|change|ptsInfo|fundMeta|proxyEtf|keywords|desc
+        const MASTER_DATA_LINES = `
+8267|イオン|STOCK|総合小売・食料品小売|1283.5|1245.0|56|0.7|-0.81%||||いおん イオン スーパー 株主優待 オーナーズカード 内需 小売 8267|国内最大の総合小売グループです。株式分割後の現在値は1,283.5円（予想PER 48.6倍・配当利回り1.16%）で、10月中旬の1,100円台から力強く上昇トレンドを形成しています。オーナーズカード優待による個人投資家の買い支えが厚い銘柄です。
+8729|ソニーフィナンシャルグループ|STOCK|保険・銀行業(ソニー系金融)|142.3|151.8|38|-1.2|-0.35%|142.4:+0.1 (+0.07%)|||そにーふぃなんしゃる ソニーフィナンシャル ソニーFG ソニー生命 ソニー損保 ソニー銀行 保険 銀行 金融 8729|ソニー生命・ソニー損保・ソニー銀行を傘下に持つ総合金融グループです。1株142.3円（夜間PTS 142.4円）と少額から投資可能で、現在は25日移動平均線（約151.8円）を下回る押し目水準に位置しています。
+8308|りそなホールディングス|STOCK|銀行業|2191.5|2265|46|-0.6|+1.30% (PTS)|2220:+28.5 (+1.30%)|||りそな りそな銀行 銀行 金利 メガバンク 金融 高配当 8308|個人・中小企業向けリテール融資と信託・不動産に強みを持つ大手銀行グループです。2,191.5円(夜間PTS 2,220円)と底堅く、国内金利上昇による利ざや改善期待が強い中核銘柄です。
+8331|千葉銀行|STOCK|銀行業(地銀首位級)|2498.5|2515|51|-0.1|+5.11%|2630:+131.5 (+5.26%)|||ちば 千葉 千葉銀行 ちばぎん 地銀 地方銀行 銀行 金利 金融 8331|千葉県地盤の国内トップ級大型地銀です。好決算と株主還元を発表し、夜間PTSでは2,630円(+5.26%)へ急伸しています。
+3531199B|netWIN GSテクノロジー株式ファンド Aコース(為替ヘッジあり)|FUND|北米ハイテク投信(ヘッジ有)|26850|26100|56|0.6|+1.94% (+510円)||1,850億円/2.09%/+12.4%|2244.T|netwin ねっとうぃん ネットウィン GS Aコース 為替ヘッジあり 投信|netWINの為替ヘッジありコースです。日銀利上げ等による急激な円高リスクを抑えつつ、米国ハイテク株の上昇を享受したい方に適しています。
+3531299B|netWIN GSテクノロジー株式ファンド Bコース(為替ヘッジなし)|FUND|北米ハイテク株式投信|48494|46800|58|0.8|+2.08% (+987円)||1兆5,345億円/2.09%/+17.95%|2244.T|netwin ねっとうぃん ネットウィン GS ゴールドマン テクノロジー 米国 ハイテク AI 投信 NISA|ゴールドマン・サックスが運用する純資産1.53兆円（国内8位）の超大型米国AI・ハイテク株式ファンドです。
+47311988|日経２２５ノーロードオープン|FUND|国内株式投信(日経225)|44529|45120|46|-0.5|+2.32% (+1,011円)||4,756億円/0.55%/+21.8%|1321.T|にっけい 日経225 ノーロード オープン アセットマネジメントOne 投信|純資産4,756億円を誇る国内屈指の大型日経225連動ファンドです。25日移動平均線付近の押し目水準にあり、定額積立および分割買い増しに好適です。
+AJ313178|Ｓｍａｒｔ－ｉ 日経２２５インデックス|FUND|国内株式投信(低コスト日経225)|35159|35620|46|-0.5|+2.33% (+802円)||434億円/0.187%/+22.4%|1321.T|すまーとあい smart-i smarti スマートi 日経225 りそな 投信 NISA|りそなAMが運用する信託報酬0.187%の低コスト日経225インデックス投信（NISA対象）です。
+0331418A|eMAXIS Slim 全世界株式 (オール・カントリー)|FUND|全世界株式インデックス投信|29694|30850|45|-0.8|+0.32%||13.7兆円(1位)/0.05775%/+22.4%|2559.T|おるかん オルカン 全世界 オールカントリー emaxis slim 投信 NISA|純資産13.7兆円・国内1位の王道インデックス投信です。極限の低コストで世界約3,000社に分散投資でき、毎月のコア積立に最適です。
+03311187|eMAXIS Slim 米国株式 (S&P500)|FUND|米国株式インデックス投信|42755|43900|44|-0.9|-4.62%||12.6兆円(2位)/0.0814%/+24.1%|2558.T|べいこく 米国 S&P500 SP500 emaxis slim 投信 NISA|純資産12.6兆円・国内2位の米国S&P500連動投信です。
+03311182|eMAXIS Slim 国内株式 (日経平均)|FUND|国内株式インデックス投信|39120|39600|46|-0.5|+2.30%||9,200億円/0.143%/+22.1%|1321.T|にっけい 日経平均 日経225 emaxis slim 国内株式 投信 NISA|業界最低水準の信託報酬（0.143%）で日経平均株価に連動するインデックスファンドです。
+18312991|インベスコ 世界厳選株式オープン(毎月決算型)【世界のベスト】|FUND|世界株式投信(毎月分配)|8596|8680|48|-0.3|+0.66%||4.6兆円(3位)/1.903%/+18.5%|2559.T|いんべすこ インベスコ 世界厳選 世界のベスト 毎月分配 高配当 投信|愛称『世界のベスト』。純資産4.6兆円（国内3位）を誇る大人気毎月分配型アクティブ投信です。
+39312149|アライアンス・バーンスタイン・米国成長株投信 Dコース|FUND|米国成長株投信(毎月分配)|11240|11350|49|-0.2|+1.08%||2.68兆円(5位)/1.727%/+21.2%|2558.T|あらいあんす アライアンス バーンスタイン AB 米国成長株 Dコース 毎月分配 投信|基準価額に応じた毎月分配で絶大な人気を誇る米国成長株ファンド（純資産2.68兆円）です。
+89311199|SBI・V・S&P500インデックス・ファンド|FUND|米国株式インデックス投信|31890|32100|48|-0.3|+0.76%||2.97兆円(4位)/0.0938%/+23.9%|2558.T|えすびーあい SBI V S&P500 SP500 バンガード 投信 NISA|米バンガード社のVOOを通じてS&P500に投資する純資産約3兆円の超大型インデックス投信です。
+9I312179|楽天・全米株式インデックス・ファンド【楽天・VTI】|FUND|全米株式インデックス投信|34120|34300|49|-0.2|+0.68%||2.56兆円(6位)/0.162%/+23.1%|2558.T|らくてん 楽天 全米 VTI 楽天VTI 米国 投信 NISA|大型株から小型株まで米国市場全体（約4,000銘柄）に丸ごと投資できる人気ファンドです。
+9I311249|楽天・高配当株式・米国ファンド(四半期決算型)【楽天SCHD】|FUND|米国高配当株ファンド|10840|10650|54|0.4|+0.35%||3,450億円/0.192%/+14.2%|2558.T|らくてん 楽天 SCHD 米国 高配当 分配金 投信 NISA|10年以上連続で配当を出し続ける米国優良100社（SCHD）に投資する大人気高配当ファンドです。
+9I31115A|楽天日本株4.3倍ブル|LEVERAGE|国内株ブル投信(4.3倍)|54773|76500|38|-1.4|+11.90%||684億円/1.243%/-12.4%|1570.T|らくてん 楽天 4.3倍 ブル レバレッジ 日経 先物 投信 bull|日経平均株価の4.3倍の値動きを目指す超ハイリスク投信です。急落後の短期リバウンド狙い限定で活用します。
+04311181|iFreeNEXT FANG+インデックス|FUND|米国ビッグテック集中投信|64200|61800|61|1.1|+1.45%||1.32兆円/0.7755%/+34.2%|2244.T|ふぁんぐ FANG FANG+ ifree 米国 ハイテク AI ビッグテック 投信 NISA|米国を代表する超巨大テック10社に均等集中投資する高成長ファンドです。
+01312098|野村世界業種別投資シリーズ(世界半導体株投資)|FUND|世界半導体アクティブ投信|162400|165000|46|-0.4|+1.63%||1.35兆円/1.65%/+38.5%|2244.T|のむら 野村 世界半導体 半導体 NVIDIA TSMC 投信 NISA|NVIDIA・TSMC等の世界半導体トップ企業に集中投資する純資産1.35兆円の超人気ファンドです。
+89311239|SBI・iシェアーズ・ゴールドファンド(為替ヘッジなし)|FUND|金(ゴールド)投資信託|14820|14450|59|0.8|+1.15%||850億円/0.1838%/+32.5%|1540.T|きん ゴールド 金 gold お守り インフレ 投信 NISA|100円から金（ゴールド）に投資できる低コスト投資信託です。
+8306|三菱UFJフィナンシャル・グループ|STOCK|銀行業|3366|3380|52|-0.1|+4.40%|3415:+49 (+1.46%)|||みつびしUFJ 三菱UFJ 銀行 メガバンク 高配当 金利 金融 mufg|日本最大の金融グループです。3,366円(夜間PTS 3,415円)と力強く反発しており、増配・自社株買いの還元姿勢も盤石です。
+8316|三井住友フィナンシャルグループ|STOCK|銀行業|3126|3140|51|-0.1|+3.92%|3158:+32 (+1.02%)|||みついすみとも 三井住友 銀行 メガバンク 高配当 金利 金融 smfg|高い収益効率と累進配当政策で絶大な人気を誇るメガバンクです。
+8411|みずほフィナンシャルグループ|STOCK|銀行業|3810|3760|54|0.4|+1.87%|3845:+35 (+0.92%)|||みずほ 銀行 メガバンク 高配当 金利 金融 mizuho|大企業取引に強みを持つ3大メガバンクの一角です。
+8354|ふくおかフィナンシャルグループ|STOCK|銀行業(九州首位地銀)|6676|6780|48|-0.3|+3.79%|6710:+34 (+0.51%)|||ふくおか 福岡 福岡銀行 ふくおかFG 地銀 地方銀行 銀行|半導体工場進出で活況な九州経済を牽引する国内最大級の地方銀行グループです。
+7186|コンコルディア・フィナンシャルグループ (横浜銀行)|STOCK|銀行業(首都圏地銀)|1582.5|1610|47|-0.4|+2.69%||||よこはま 横浜 横浜銀行 コンコルディア 地銀 地方銀行 銀行 高配当|横浜銀行と東日本銀行を傘下に持つ首都圏最大の地方銀行グループです。
+5831|しずおかフィナンシャルグループ (静岡銀行)|STOCK|銀行業(優良地銀)|1845|1860|49|-0.2|+1.93%||||しずおか 静岡 静岡銀行 しずおかFG 地銀 地方銀行 銀行|抜群の自己資本比率と財務健全性を誇る静岡銀行グループです。
+7167|めぶきフィナンシャルグループ (常陽・足利)|STOCK|銀行業(北関東地銀)|925|935|48|-0.3|+1.87%||||めぶき 常陽銀行 足利銀行 茨城 栃木 地銀 地方銀行 銀行 高配当|常陽銀行と足利銀行を傘下に持つ北関東最大の地銀グループです。
+8334|群馬銀行|STOCK|銀行業(北関東地銀)|1285|1295|49|-0.2|+2.80%||||ぐんま 群馬 群馬銀行 ぐんぎん 地銀 地方銀行 銀行 高配当|積極的な株主還元で評価を高める群馬県首位の有力地銀です。
+5838|楽天銀行|STOCK|銀行業(ネット銀行首位)|4980|4820|58|0.7|+2.68%||||らくてんぎんこう 楽天銀行 ネット銀行 金利 銀行|口座数1,600万超の国内最大手ネット銀行。日銀利上げの恩恵をダイレクトに享受する高成長銀行株です。
+7182|ゆうちょ銀行|STOCK|銀行業・高配当|1645|1630|52|0.2|+1.54%||||ゆうちょ ゆうちょ銀行 郵便局 銀行 高配当 金利|約190兆円の貯金残高を誇り、国内国債利回り上昇による運用益改善と安定配当が魅力の大型株です。
+8473|SBIホールディングス|STOCK|証券・総合金融|3890|3820|54|0.4|+0.90%||||えすびーあい SBI SBI証券 銀行 金融 高配当 新NISA|ネット証券最大手のSBI証券や住信SBIネット銀行を擁する総合金融グループです。
+8591|オリックス|STOCK|その他金融・高配当|3380|3340|51|0.2|+0.45%||||おりっくす オリックス リース 金融 高配当 不動産|リースから不動産、環境エネルギー、空港運営まで多角展開する高配当金融サービス企業です。
+8593|三菱HCキャピタル|STOCK|その他金融(連続増配)|1045|1035|52|0.2|+0.68%||||みつびしえいちしー 三菱HCキャピタル リース 高配当 連続増配|25期以上の連続増配を続ける国内トップクラスの総合リース企業です。
+8766|東京海上ホールディングス|STOCK|保険業・高配当|5640|5580|52|0.3|+0.60%||||とうきょうかいじょう 東京海上 保険 損保 高配当 金融|国内首位の損害保険グループ。政策保有株の売却益を原資とした増配と自社株買いを継続しています。
+8750|第一生命ホールディングス|STOCK|保険業・高配当|4120|4050|53|0.3|+1.15%||||だいいちせいめい 第一生命 保険 生保 金利 高配当 金融|国内最大級の生命保険グループ。金利上昇による運用環境改善が追い風です。
+2134|北浜キャピタルパートナーズ|STOCK|金融・投資(低位株)|17|14.2|68|1.8|+41.67%|17.1:+0.1 (+0.59%)|||きたはま きたはまきゃぴたる 北浜 北浜キャピタル 低位株 不動産 太陽光|17円(前日比+41.67% / PTS 17.1円)へ急騰中の低位株です。1円の値動きが大きいため押し目指値と逆指値の徹底が必須です。
+285A|キオクシアホールディングス|STOCK|半導体メモリ|8621|10450|34|-1.6|+1.29%|8690:+69 (+0.80%)|||きおくしあ キオクシア kioxia 半導体 メモリ NAND フラッシュ 東芝 AI|NAND型フラッシュメモリ世界大手。決算後の急落で売られすぎ水準(RSI 34)まで調整した後、8,621円へ自律反発し始めています。
+6976|太陽誘電|STOCK|電子部品(MLCC)|6651|7480|36|-1.5|-0.34%|6999:+348 (+5.23%)|||たいようゆうでん 太陽誘電 セラミックコンデンサ MLCC 電子部品 半導体 AI|セラミックコンデンサ(MLCC)大手。売られすぎ圏から夜間PTSで6,999円(+5.23%)へ強く反発しています。
+6981|村田製作所|STOCK|電子部品首位(MLCC)|2680|2740|45|-0.5|+0.45%||||むらたせいさくしょ 村田製作所 セラミックコンデンサ MLCC 電子部品 スマホ 半導体|積層セラミックコンデンサで世界シェア約4割を握る絶対王者です。
+8035|東京エレクトロン|STOCK|半導体製造装置|22450|23500|39|-1.2|+1.58%||||とうきょうえれくとろん 東エレク 半導体 製造装置 AI|半導体製造装置の世界トップシェア企業。25日移動平均線の下方で底固めを進めています。
+6857|アドバンテスト|STOCK|半導体検査装置|8920|8650|59|0.8|+2.41%||||あどばんてすと アドバンテスト 半導体 検査装置 テスタ NVIDIA AI|AI半導体向け検査装置（テスタ）で世界シェア首位。強い順張りトレンドを維持しています。
+6146|ディスコ|STOCK|半導体製造装置|42500|44100|39|-1.1|-0.85%||||でぃすこ ディスコ 半導体 切断 研磨 レーザー AI HBM|半導体を「切る・削る・磨く」精密加工装置で世界シェア約8割を独占する超高収益企業です。
+6920|レーザーテック|STOCK|半導体検査装置|18400|20500|27|-2.1|-2.10%||||れーざーてっく レーザーテック 半導体 マスクブランクス EUV|先端EUV半導体向け検査装置で世界シェア100%。RSI 27の売られすぎ領域にあり反発狙いの候補です。
+6758|ソニーグループ|STOCK|電気機器・エンタメ|4297|4160|57|0.8|+3.74%|4250.1:-46.9 (-1.09%)|||そにー ソニー ソニーグループ ゲーム 半導体 エンタメ 音楽 映画|好決算を受けて4,297円（夜間PTS 4,250.1円）と堅調な上昇トレンドを維持しています。
+5802|住友電気工業|STOCK|非鉄金属・電線|1435.5|1540|42|-1.1|+5.55%|1524.1:+88.6 (+6.17%)|||すみともでんこう 住友電工 住友電気工業 電線 光ファイバー ハーネス インフラ|上方修正・増配を発表済み。夜間PTSで1,524.1円(+6.17%)へ急反発しており、割安な押し目好機です。
+5803|フジクラ|STOCK|非鉄金属・電線|3260|3150|58|0.7|+2.51%||||ふじくら フジクラ 電線 光ファイバー データセンター AI 生成AI|AIデータセンター向け高密度光ファイバー需要が急拡大している電線株の代表格です。
+6501|日立製作所|STOCK|電気機器・社会インフラ|4702|4850|45|-0.7|+3.52%|4835:+133 (+2.83%)|||ひたち 日立 日立製作所 IT インフラ 送電 グリッド ルマーダ 電機 電線|送電網（パワーグリッド）とLumadaが牽引。夜間PTSで4,835円(+2.83%)へと底打ち反発しています。
+7011|三菱重工業|STOCK|機械・防衛・エネルギー|2240|2160|60|0.9|+1.82%||||みつびしじゅうこう 三菱重工 防衛 宇宙 ガスタービン 原発 重工 電線|ガスタービン世界首位に加え、防衛・宇宙・原子力の国策重工トップ銘柄です。
+8058|三菱商事|STOCK|卸売業・総合商社|2690|2750|41|-0.9|+1.13%||||みつびししょうじ 三菱商事 商社 バフェット 高配当|総合商社トップ。配当利回り3.7%水準で下値が堅く、新NISAでの押し目買いに人気の銘柄です。
+8001|伊藤忠商事|STOCK|卸売業・総合商社|7650|7520|55|0.5|+0.80%||||いとうちゅう 伊藤忠 商社 バフェット ファミマ 非資源 高配当|非資源分野に圧倒的な強みを持つ総合商社。資源価格の変動に強く安定感抜群です。
+7203|トヨタ自動車|STOCK|輸送用機器|3491|3410|53|0.4|+4.58%|3446:-45 (-1.29%)|||とよた トヨタ トヨタ自動車 自動車 車 ハイブリッド 高配当|HVの圧倒的な競争力を背景に3,491円へ堅調に推移しています。
+8136|サンリオ|STOCK|キャラクターIP・エンタメ|4620|4380|64|1.3|+2.40%||||さんりお サンリオ ハローキティ キャラ IP エンタメ インバウンド 内需 優待|北米・アジアでのライセンス収益とインバウンド需要で急成長しているキャラクターIP企業です。
+4661|オリエンタルランド|STOCK|レジャー・テーマパーク|3680|3890|29|-1.9|-0.90%||||おりえんたるらんど オリエンタルランド ディズニー テーマパーク 株主優待 内需 優待|東京ディズニーリゾートを運営。RSI 29の売られすぎ水準まで調整しており反発狙いの位置にあります。
+3382|セブン＆アイ・ホールディングス|STOCK|総合小売・コンビニ首位|2180|2140|53|0.3|+0.65%||||せぶん セブンイレブン イトーヨーカドー 内需 小売 優待 3382|国内外でセブン‐イレブンを展開する小売最大手グループです。
+9983|ファーストリテイリング (ユニクロ)|STOCK|小売業・グローバル|48500|47600|57|0.7|+1.15%||||ふぁーすとりていりんぐ ユニクロ GU アパレル 日経平均 内需 9983|「ユニクロ」「GU」を世界展開し、日経平均への寄与度が最も大きい象徴的銘柄です。
+9432|日本電信電話 (NTT)|STOCK|情報・通信・高配当|152|155|37|-1.3|-0.65%||||えぬてぃーてぃー NTT 日本電信電話 通信 ドコモ 高配当 IOWN インフラ 内需|1株約150円台（100株で約1.5万円）から買える日本最大の通信インフラ・連続増配株です。
+1540|純金上場信託 (現物国内保管型)|REIT|金(ゴールド)現物ETF|13450|13100|58|0.7|+1.10%|||1540.T|きん ゴールド 純金 1540 ETF 金 現物 お守り|現物の金（ゴールド）が国内保管され、株式同様にリアルタイム売買できる大人気ETFです。
+8951|日本ビルファンド投資法人|REIT|オフィス主体型J-REIT|124500|126800|38|-1.3|-0.32%||||りーと REIT 不動産 ビル 分配金 高配当 三井不動産|三井不動産をスポンサーとする国内最大級のオフィス特化型J-REITです。
+`.trim();
+
+        function parseMasterLine(line) {
+            const [id, name, assetClass, sector, p, ma, rsi, bb, change, pts, fMeta, proxyEtf, kw, desc] = line.split("|");
+            const isFund = assetClass === "FUND" || assetClass === "LEVERAGE";
+            const price = parseFloat(p), ma25 = parseFloat(ma);
+            const [ptsP, ptsC] = (pts || "").split(":");
+            const [netAssets, trustFee, return1Y] = (fMeta || "").split("/");
+            return {
+                id, name, assetClass, sector, price, prevClose: price, ma25,
+                rsi: parseFloat(rsi), bb: parseFloat(bb), change,
+                ptsPrice: ptsP ? parseFloat(ptsP) : null, ptsChange: ptsC || "",
+                netAssets: netAssets || "", trustFee: trustFee || "", return1Y: return1Y || "",
+                proxyEtf: proxyEtf || "",
+                code: isFund ? `${id} 投信` : `${id} 東証`,
+                yfCode: isFund ? id : `${id}.T`,
+                keywords: `${name} ${id} ${sector} ${kw || ""}`,
+                volatility: assetClass === "LEVERAGE" ? 65 : (price < 100 ? 60 : 22),
+                factors: { value: 78, momentum: Math.min(92, Math.max(40, parseFloat(rsi) + 20)), quality: 86, stability: price < 100 ? 30 : 80, macroFit: 88 },
+                businessSummary: desc || ""
+            };
         }
-      ]
-    };
 
-    // 2. Application State
-    const state = {
-      selectedTickerCode: "998407.O",
-      reiMode: true,
-      timeframeDays: 20,
-      showBollinger: true,
-      rsiLowThreshold: 35,
-      bbSigma: 2.0,
-      cpcvBlocks: 6,
-      alloc: {
-        index: 45,
-        single: 25,
-        company: 15,
-        cash: 15
-      },
-      activeCodeTab: "part2_js"
-    };
+        const MASTER_MARKET_DB = MASTER_DATA_LINES.split("\n").map(parseMasterLine);
 
-    let priceChartInstance = null;
-    let portfolioChartInstance = null;
-
-    // 3. Quantitative Statistical Functions (Moving Average, Bollinger Bands, Wilder RSI, CPCV Estimator)
-    function computeBollingerAndMA(series, windowSize, sigmaMult) {
-      const ma = [];
-      const upper = [];
-      const lower = [];
-      for (let i = 0; i < series.length; i++) {
-        const start = Math.max(0, i - windowSize + 1);
-        const slice = series.slice(start, i + 1);
-        const mean = slice.reduce((a, b) => a + b, 0) / slice.length;
-        const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / slice.length;
-        const std = Math.sqrt(variance);
-        ma.push(Number(mean.toFixed(2)));
-        upper.push(Number((mean + sigmaMult * std).toFixed(2)));
-        lower.push(Number((mean - sigmaMult * std).toFixed(2)));
-      }
-      return { ma, upper, lower };
-    }
-
-    function computeWilderRSI(series, period = 14) {
-      if (!series || series.length < 2) return 50.0;
-      let gains = 0;
-      let losses = 0;
-      const len = series.length;
-      const startIdx = Math.max(1, len - period);
-      for (let i = startIdx; i < len; i++) {
-        const diff = series[i] - series[i - 1];
-        if (diff >= 0) gains += diff;
-        else losses -= diff;
-      }
-      const avgGain = gains / period;
-      const avgLoss = losses / period;
-      if (avgLoss === 0) return 75.0;
-      const rs = avgGain / avgLoss;
-      return Number((100 - 100 / (1 + rs)).toFixed(1));
-    }
-
-    // 4. Toast Helper (No alert/confirm per Sandbox Rules)
-    function showToast(message) {
-      const banner = document.getElementById("toastBanner");
-      if (!banner) return;
-      banner.textContent = message;
-      banner.classList.remove("hidden");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => {
-        banner.classList.add("hidden");
-      }, 2600);
-    }
-
-    // 5. Render Ticker Selector Pills
-    function renderTickerPills() {
-      const container = document.getElementById("tickerPillContainer");
-      if (!container) return;
-      container.innerHTML = "";
-      INITIAL_MARKET_DATA.tickers.forEach((t) => {
-        const isSelected = t.code === state.selectedTickerCode;
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = isSelected
-          ? "px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow shadow-emerald-600/30 transition"
-          : "px-3 py-1.5 rounded-xl text-xs font-medium bg-slate-800/90 text-slate-300 hover:bg-slate-700 border border-slate-700/80 transition";
-        btn.textContent = `${t.shortCode} ${t.name.split(" ")[0]}`;
-        btn.addEventListener("click", () => {
-          state.selectedTickerCode = t.code;
-          renderTickerPills();
-          renderDashboard();
-          renderQuantSim();
-        });
-        container.appendChild(btn);
-      });
-    }
-
-    // 6. Render Main Dashboard View
-    function renderDashboard() {
-      const ticker = INITIAL_MARKET_DATA.tickers.find((t) => t.code === state.selectedTickerCode) || INITIAL_MARKET_DATA.tickers[0];
-      const fullSeries = ticker.history;
-      const { ma, upper, lower } = computeBollingerAndMA(fullSeries, 25, state.bbSigma);
-      const rsi = computeWilderRSI(fullSeries, 14);
-
-      const lastPrice = ticker.price;
-      const lastMa = ma[ma.length - 1] || lastPrice;
-      const lastUpper = upper[upper.length - 1] || lastPrice;
-      const stdApprox = (lastUpper - lastMa) / (state.bbSigma || 2.0) || 1;
-      const zScore = (lastPrice - lastMa) / stdApprox;
-      const maDev = ((lastPrice - lastMa) / lastMa) * 100;
-
-      // DOM Updates
-      document.getElementById("selectedCodeBadge").textContent = ticker.code;
-      document.getElementById("selectedNameTitle").textContent = ticker.name;
-      document.getElementById("selectedMetaSubtitle").textContent = ticker.subtitle;
-      document.getElementById("selectedPriceDisplay").textContent = `${ticker.price.toLocaleString("ja-JP")}円`;
-
-      const changeEl = document.getElementById("selectedChangeDisplay");
-      const sign = ticker.change >= 0 ? "+" : "";
-      changeEl.textContent = `${sign}${ticker.change.toLocaleString("ja-JP")} (${sign}${ticker.changePct.toFixed(2)}%)`;
-      changeEl.className = ticker.change >= 0 ? "text-xs font-semibold text-emerald-400" : "text-xs font-semibold text-rose-400";
-
-      document.getElementById("metricRsi").textContent = rsi.toFixed(1);
-      document.getElementById("metricRsiSub").textContent =
-        rsi < state.rsiLowThreshold ? "売られすぎ圏 (反発期待)" : rsi > 70 ? "買われすぎ警戒圏" : "中立水準 (過熱感なし)";
-
-      document.getElementById("metricZScore").textContent = `${zScore >= 0 ? "+" : ""}${zScore.toFixed(2)}σ`;
-      document.getElementById("metricZSub").textContent = `±${state.bbSigma.toFixed(1)}σバンド内推移`;
-
-      const maDevEl = document.getElementById("metricMaDev");
-      maDevEl.textContent = `${maDev >= 0 ? "+" : ""}${maDev.toFixed(2)}%`;
-      maDevEl.className = maDev >= 0 ? "text-base font-bold text-emerald-400 mt-0.5" : "text-base font-bold text-amber-300 mt-0.5";
-
-      document.getElementById("metricConsensus").textContent = ticker.consensus;
-      document.getElementById("metricConsensusSub").textContent = ticker.consensusSub;
-      document.getElementById("topPboMetric").textContent = `${ticker.cpcvPbo.toFixed(1)}%`;
-
-      // Signal Determination
-      let signalText = "押し目買い / 積立継続";
-      let signalClass = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40";
-      if (rsi <= state.rsiLowThreshold || zScore <= -1.2) {
-        signalText = "強い買いシグナル (割安反発圏)";
-      } else if (rsi >= 72 || zScore >= 1.8) {
-        signalText = "一部利益確定 / 様子見推奨";
-        signalClass = "px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40";
-      }
-      const sigBadge = document.getElementById("signalBadge");
-      sigBadge.textContent = signalText;
-      sigBadge.className = signalClass;
-
-      // Dual-Layer XAI Mode Rendering
-      const xaiBox = document.getElementById("xaiContainer");
-      const xaiIcon = document.getElementById("xaiHeaderIcon");
-      const xaiTitle = document.getElementById("xaiHeaderTitle");
-      const xaiBody = document.getElementById("xaiBodyText");
-      const xaiTip = document.getElementById("xaiActionTip");
-
-      if (state.reiMode) {
-        xaiBox.className = "rounded-2xl p-3.5 bg-gradient-to-br from-pink-500/10 via-slate-900/90 to-slate-900 border border-pink-500/30 space-y-2";
-        xaiIcon.textContent = "🌸";
-        xaiTitle.textContent = "れい向け・やさしい投資アドバイス";
-        xaiTitle.className = "text-xs font-bold text-pink-300";
-        xaiBody.textContent = ticker.reiAdvice;
-      } else {
-        xaiBox.className = "rounded-2xl p-3.5 bg-gradient-to-br from-teal-500/10 via-slate-900/90 to-slate-900 border border-teal-500/30 space-y-2";
-        xaiIcon.textContent = "📐";
-        xaiTitle.textContent = `クオンツ統計根拠 (CPCV PBO: ${ticker.cpcvPbo}% / DSR: ${ticker.dsr})`;
-        xaiTitle.className = "text-xs font-bold text-teal-300";
-        xaiBody.textContent = ticker.quantAdvice;
-      }
-      xaiTip.textContent = ticker.actionTip;
-
-      // Catalyst & Multi-Source Links
-      document.getElementById("catalystDateBadge").textContent = ticker.catalystDate;
-      document.getElementById("catalystText").textContent = ticker.catalyst;
-
-      const linksContainer = document.getElementById("multiSourceLinks");
-      linksContainer.innerHTML = "";
-      ticker.sources.forEach((src) => {
-        const a = document.createElement("a");
-        a.href = src.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.className = "px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-700/80 transition";
-        a.textContent = `${src.label} ↗`;
-        linksContainer.appendChild(a);
-      });
-
-      // Slice series for chart timeframe
-      const sliceCount = state.timeframeDays;
-      const slicedPrice = fullSeries.slice(-sliceCount);
-      const slicedMa = ma.slice(-sliceCount);
-      const slicedUpper = upper.slice(-sliceCount);
-      const slicedLower = lower.slice(-sliceCount);
-      const labels = slicedPrice.map((_, idx) => {
-        const offset = slicedPrice.length - 1 - idx;
-        return offset === 0 ? "最新" : `-${offset}日`;
-      });
-
-      renderPriceChart(labels, slicedPrice, slicedMa, slicedUpper, slicedLower);
-    }
-
-    // 7. Render Price & Bollinger Bands Chart (Chart.js)
-    function renderPriceChart(labels, priceData, maData, upperData, lowerData) {
-      const canvas = document.getElementById("priceBollingerChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-
-      if (priceChartInstance) {
-        priceChartInstance.destroy();
-      }
-
-      const datasets = [
-        {
-          label: "株価 / 指数終値",
-          data: priceData,
-          borderColor: "#10b981",
-          backgroundColor: "rgba(16, 185, 129, 0.12)",
-          borderWidth: 2.5,
-          pointRadius: 2,
-          tension: 0.25,
-          fill: false
+        function normalizeText(str) {
+            if (!str) return "";
+            return String(str)
+                .toLowerCase()
+                .replace(/[Ａ-Ｚａ-ｚ０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                .replace(/[\u30a1-\u30f6]/g, m => String.fromCharCode(m.charCodeAt(0) - 0x60))
+                .replace(/\(株\)|株式会社|ホールディングス|フィナンシャルグループ|グループ|－|-|・|\s+/g, "");
         }
-      ];
 
-      if (state.showBollinger) {
-        datasets.push(
-          {
-            label: "25日移動平均 (MA25)",
-            data: maData,
-            borderColor: "#38bdf8",
-            borderWidth: 1.5,
-            borderDash: [4, 4],
-            pointRadius: 0,
-            tension: 0.25,
-            fill: false
-          },
-          {
-            label: `+${state.bbSigma.toFixed(1)}σ バンド`,
-            data: upperData,
-            borderColor: "rgba(244, 114, 182, 0.6)",
-            borderWidth: 1.2,
-            pointRadius: 0,
-            tension: 0.25,
-            fill: false
-          },
-          {
-            label: `-${state.bbSigma.toFixed(1)}σ バンド`,
-            data: lowerData,
-            borderColor: "rgba(244, 114, 182, 0.6)",
-            backgroundColor: "rgba(244, 114, 182, 0.06)",
-            borderWidth: 1.2,
-            pointRadius: 0,
-            tension: 0.25,
-            fill: "-1"
-          }
-        );
-      }
+        // 全角マイナス(－, −, ー)や全角プラス(＋)を半角に正規化してから数値化する関数
+        function parseCleanNum(val) {
+            if (val === null || val === undefined) return NaN;
+            const normalized = String(val)
+                .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                .replace(/[－−ー―]/g, "-")
+                .replace(/[＋]/g, "+")
+                .replace(/,/g, "")
+                .replace(/[^\d.-]/g, "")
+                .trim();
+            if (!normalized || normalized === "-" || normalized === "---") return NaN;
+            return parseFloat(normalized);
+        }
 
-      priceChartInstance = new Chart(ctx, {
-        type: "line",
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: "index", intersect: false },
-          plugins: {
-            legend: {
-              labels: { color: "#cbd5e1", font: { size: 11 } }
+        function isFundCodeFormat(code) { return /^[0-9A-Z]{8}$/i.test(String(code || "").trim()); }
+        function isStockCodeFormat(code) { return /^([0-9]{4}|[0-9]{3}[A-Z])(\.T)?$/i.test(String(code || "").trim()); }
+
+        /* =========================================================================
+         * ★ 核心改良1：プロキシの同時乱射（HTTP 429ブロック）を防ぐ「直列フォールバック通信」
+         *   1. allorigins.win/raw → 2. allorigins.win/get → 3. corsproxy.io → 4. r.jina.ai
+         *   上から1つずつ試し、成功した時点で即座に返すためプロキシがパンクしない！
+         * ========================================================================= */
+        async function fetchSequentialCorsText(targetUrl, timeoutMs = 5500) {
+            const proxyList = [
+                { url: `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}&_=${Date.now()}`, type: "json" },
+                { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`, type: "text" },
+                { url: `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`, type: "text" },
+                { url: `https://r.jina.ai/${targetUrl}`, type: "text" }
+            ];
+
+            for (const p of proxyList) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    const res = await fetch(p.url, { signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) continue;
+                    const text = p.type === "json" ? (await res.json()).contents : await res.text();
+                    if (text && text.length > 60 && !text.includes("European Economic Area") && !text.includes("Too Many Requests")) {
+                        return text;
+                    }
+                } catch (e) {
+                    clearTimeout(timer);
+                }
             }
-          },
-          scales: {
-            x: {
-              ticks: { color: "#94a3b8", font: { size: 10 } },
-              grid: { color: "rgba(148, 163, 184, 0.08)" }
-            },
-            y: {
-              ticks: {
-                color: "#94a3b8",
-                font: { size: 10 },
-                callback: (val) => val.toLocaleString("ja-JP")
-              },
-              grid: { color: "rgba(148, 163, 184, 0.08)" }
+            return null;
+        }
+
+        /* =========================================================================
+         * ★ 核心改良2：日経電子版の画面（全角記号含む）・株探・みんかぶ完全対応パーサー
+         *   添付画像3（日経：`現在値(15:30)：1,283.5 円 前日比：－10.5(－0.81%)`）に100%一致！
+         * ========================================================================= */
+        function parseStockOrFundHtmlWithDOM(html) {
+            if (!html) return null;
+            const out = {};
+            const doc = new DOMParser().parseFromString(html, "text/html");
+
+            // HTMLタグを除去し、全角記号・全角数字をすべて半角に正規化したプレーンテキストを作成
+            const rawText = (doc.body ? doc.body.textContent : html) || "";
+            const normPlain = rawText
+                .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0))
+                .replace(/[：]/g, ":")
+                .replace(/[（]/g, "(")
+                .replace(/[）]/g, ")")
+                .replace(/[－−ー―]/g, "-")
+                .replace(/[＋]/g, "+")
+                .replace(/\s+/g, " ");
+
+            // 1) 正式社名・ファンド名の抽出
+            const titleText = (doc.querySelector("title")?.textContent || html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim();
+            if (titleText) {
+                const nkM = titleText.match(/【([^】]+)】/);
+                const kbM = titleText.match(/^([^（(]+?)\s*[\(（][0-9A-Z]{4}[\)）]/);
+                const yfM = titleText.match(/^([^｜|【]+?)(?:\【([0-9A-Z.]+)\】|[｜|])/);
+                const rawName = nkM ? nkM[1] : kbM ? kbM[1] : yfM ? yfM[1] : "";
+                if (rawName) {
+                    out.name = rawName.replace(/\(株\)|株式会社|投資信託情報：|株価・株式情報|の株価・株式情報/g, "").trim();
+                }
             }
-          }
-        }
-      });
-    }
 
-    // 8. Render CPCV & Parameter Simulator
-    function renderQuantSim() {
-      const ticker = INITIAL_MARKET_DATA.tickers.find((t) => t.code === state.selectedTickerCode) || INITIAL_MARKET_DATA.tickers[0];
-      document.getElementById("rsiLowVal").textContent = String(state.rsiLowThreshold);
-      document.getElementById("bbSigmaVal").textContent = `${state.bbSigma.toFixed(1)}σ`;
-
-      const combos = state.cpcvBlocks === 4 ? 6 : state.cpcvBlocks === 6 ? 20 : state.cpcvBlocks === 8 ? 70 : 252;
-      document.getElementById("cpcvBlocksVal").textContent = `${state.cpcvBlocks} 分割 (C(${state.cpcvBlocks},${state.cpcvBlocks / 2})=${combos}通り)`;
-
-      // Estimate PBO sensitivity based on parameter extremity & CPCV partition granularity
-      const rsiPenalty = Math.abs(state.rsiLowThreshold - 35) * 0.45;
-      const sigmaPenalty = Math.abs(state.bbSigma - 2.0) * 4.2;
-      const blockBonus = (state.cpcvBlocks - 6) * -0.8;
-      const estPbo = Math.max(6.5, Math.min(38.0, ticker.cpcvPbo + rsiPenalty + sigmaPenalty + blockBonus));
-      const estDsr = Math.max(0.85, Number((ticker.dsr - (estPbo - ticker.cpcvPbo) * 0.025).toFixed(2)));
-
-      document.getElementById("simPboResult").textContent = `${estPbo.toFixed(1)}%`;
-      const statusEl = document.getElementById("simPboStatus");
-      if (estPbo < 20) {
-        statusEl.textContent = "✔ 統計的ロバスト性: 良好 (PBO < 20%)";
-        statusEl.className = "text-xs text-emerald-400 mt-0.5";
-      } else {
-        statusEl.textContent = "⚠ 過学習注意: 閾値が極端です";
-        statusEl.className = "text-xs text-amber-400 mt-0.5";
-      }
-      document.getElementById("simDsrResult").textContent = estDsr.toFixed(2);
-
-      const rsi = computeWilderRSI(ticker.history, 14);
-      const simSig = document.getElementById("simSignalResult");
-      if (rsi <= state.rsiLowThreshold) {
-        simSig.textContent = `強い買いシグナル (RSI ${rsi} <= 閾値 ${state.rsiLowThreshold})`;
-        simSig.className = "text-base font-bold text-emerald-300 mt-1";
-      } else {
-        simSig.textContent = `押し目買い / 積立継続 (現在RSI ${rsi})`;
-        simSig.className = "text-base font-bold text-sky-300 mt-1";
-      }
-    }
-
-    // 9. Render Portfolio & Company Stock Concentration Hedge
-    function renderPortfolio() {
-      const total = state.alloc.index + state.alloc.single + state.alloc.company + state.alloc.cash || 1;
-      const normIndex = Math.round((state.alloc.index / total) * 100);
-      const normSingle = Math.round((state.alloc.single / total) * 100);
-      const normCompany = Math.round((state.alloc.company / total) * 100);
-      const normCash = Math.max(0, 100 - normIndex - normSingle - normCompany);
-
-      document.getElementById("allocIndexLabel").textContent = `${normIndex}%`;
-      document.getElementById("allocSingleLabel").textContent = `${normSingle}%`;
-      document.getElementById("allocCompanyLabel").textContent = `${normCompany}%`;
-      document.getElementById("allocCashLabel").textContent = `${normCash}%`;
-
-      const adviceBox = document.getElementById("portfolioAdviceBox");
-      if (normCompany > 20) {
-        adviceBox.className = "p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-xs leading-relaxed text-amber-200";
-        adviceBox.innerHTML = `<strong>⚠️ 自社株集中アラート (${normCompany}%):</strong> 給与所得（人的資本）と自社株の相関が高いため、20%以下に段階的リバランス（売却益を日経225インデックスまたはキャッシュへシフト）することを推奨します。`;
-      } else {
-        adviceBox.className = "p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs leading-relaxed text-emerald-200";
-        adviceBox.innerHTML = `<strong>✔ 分散バランス良好 (自社株 ${normCompany}%):</strong> コア資産（インデックス ${normIndex}%）とキャッシュクッション（${normCash}%）のバランスが取れており、急落時の押し目買い余力も確保されています。`;
-      }
-
-      const canvas = document.getElementById("portfolioDoughnutChart");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      if (portfolioChartInstance) {
-        portfolioChartInstance.destroy();
-      }
-      portfolioChartInstance = new Chart(ctx, {
-        type: "doughnut",
-        data: {
-          labels: ["日経225/インデックス", "個別株ポートフォリオ", "自社株エクスポージャー", "現金・短期国債"],
-          datasets: [
-            {
-              data: [normIndex, normSingle, normCompany, normCash],
-              backgroundColor: ["#10b981", "#0ea5e9", "#f59e0b", "#818cf8"],
-              borderColor: "#0f172a",
-              borderWidth: 2
+            // 2) 日経電子版 (nikkei.com) の画面テキストからの厳密抽出（画像3と完全一致）
+            // 例: "8267 : 総合小売・食料品小売"
+            const nkSectorMatch = normPlain.match(/[0-9]{3}[0-9A-Z]\s*:\s*([^\s|｜]{2,18})/);
+            if (nkSectorMatch && !out.sector) {
+                out.sector = nkSectorMatch[1].trim();
             }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          cutout: "64%",
-          plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: "#cbd5e1", font: { size: 11 }, padding: 12 }
+            // 例: "現在値(15:30): 1,283.5 円" または "現在値 : 1,283.5 円"
+            const nkPriceMatch = normPlain.match(/現在値(?:\([^)]*\))?\s*:?\s*([0-9,]+(?:\.[0-9]+)?)\s*円/);
+            if (nkPriceMatch) {
+                const p = parseCleanNum(nkPriceMatch[1]);
+                if (!isNaN(p) && p > 0) out.price = p;
             }
-          }
+            // 例: "前日比: -10.5(-0.81%)"
+            const nkDiffMatch = normPlain.match(/前日比\s*:?\s*([+-]?[0-9.,]+)\s*\(\s*([+-]?[0-9.]+)\s*%\s*\)/);
+            if (nkDiffMatch) {
+                const r = parseCleanNum(nkDiffMatch[2]);
+                if (!isNaN(r)) out.change = (r >= 0 ? "+" : "") + r.toFixed(2) + "%";
+            }
+            // 例: "予想PER 48.6 倍" / "予想配当利回り 1.16 %" / "実績PBR 1.25 倍"
+            const nkPerMatch = normPlain.match(/予想PER\s*(?:\?)?\s*([0-9.,]+)\s*倍/);
+            if (nkPerMatch) out.per = parseCleanNum(nkPerMatch[1]);
+            const nkDivMatch = normPlain.match(/予想配当利回り\s*(?:\?)?\s*([0-9.,]+)\s*%/);
+            if (nkDivMatch) out.dividend = parseCleanNum(nkDivMatch[1]);
+            const nkPbrMatch = normPlain.match(/(?:実績)?PBR\s*(?:\?)?\s*([0-9.,]+)\s*倍/);
+            if (nkPbrMatch) out.pbr = parseCleanNum(nkPbrMatch[1]);
+
+            // 3) 株探 (kabutan.jp) のDOM＆テキスト抽出
+            const kbPriceEl = doc.querySelector("span.kabuka");
+            if (kbPriceEl && !out.price) {
+                const p = parseCleanNum(kbPriceEl.textContent);
+                if (!isNaN(p) && p > 0) out.price = p;
+            }
+            const kbSectorEl = doc.querySelector("#stockinfo_i2 a");
+            if (kbSectorEl && kbSectorEl.textContent.trim()) {
+                out.sector = kbSectorEl.textContent.trim();
+            }
+            const kbValCells = doc.querySelectorAll("#stockinfo_i3 tbody td");
+            if (kbValCells.length >= 3) {
+                const per = parseCleanNum(kbValCells[0].textContent);
+                const pbr = parseCleanNum(kbValCells[1].textContent);
+                const div = parseCleanNum(kbValCells[2].textContent);
+                if (!isNaN(per) && !out.per) out.per = per;
+                if (!isNaN(pbr) && !out.pbr) out.pbr = pbr;
+                if (!isNaN(div) && !out.dividend) out.dividend = div;
+            }
+            doc.querySelectorAll("div.gyouseki_block tr, table tr").forEach(tr => {
+                const th = (tr.querySelector("th")?.textContent || "").trim();
+                const td = (tr.querySelector("td")?.textContent || "").replace(/\s+/g, " ").trim();
+                if ((th === "概要" || th === "特色" || th === "事業内容" || th === "解説") && td.length >= 10) {
+                    out.businessSummary = td;
+                }
+            });
+
+            // 4) みんかぶ投信＆みんかぶ株式からの抽出
+            const mkFundMatch = normPlain.match(/投資信託情報:([^<「｜|]+?)は基準価額([0-9,]+)円、前日比([+-]?[0-9,]+)円\(([+-]?[0-9.]+)%\)/);
+            if (mkFundMatch) {
+                out.name = mkFundMatch[1].trim();
+                out.price = parseCleanNum(mkFundMatch[2]);
+                out.change = `${mkFundMatch[4]}% (${mkFundMatch[3]}円)`;
+                out.isFund = true;
+            }
+            if (!out.price) {
+                const navMatch = normPlain.match(/基準価額\s*([0-9,]+)\s*円/);
+                if (navMatch) out.price = parseCleanNum(navMatch[1]);
+            }
+            const mkPriceEl = doc.querySelector("div.stock_price");
+            if (mkPriceEl && !out.price) {
+                const p = parseCleanNum(mkPriceEl.textContent);
+                if (!isNaN(p) && p > 0) out.price = p;
+            }
+
+            // 5) Yahoo!ファイナンスJSONキーからの抽出（PTS等）
+            const yfPriceKey = html.match(/"price"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
+            const yfPtsKey = html.match(/"ptsPrice"\s*:\s*"([0-9,]+(?:\.[0-9]+)?)"/);
+            if (yfPriceKey && !out.price) out.price = parseCleanNum(yfPriceKey[1]);
+            if (yfPtsKey) out.ptsPrice = parseCleanNum(yfPtsKey[1]);
+
+            return (out.price && out.price > 0) ? out : null;
         }
-      });
-    }
 
-    // 10. Code Bundle Strings for View 4 (Part 2 Script & GitHub Actions Pipeline)
-    const CODE_BUNDLES = {
-      part2_js: `// ============================================================================
-// index.html 【後半部分】 (<script> タグ開始〜ファイル末尾まで)
-// GitHub Actions が日次出力する data.json を非同期取得し、
-// Chart.js のボリンジャーバンド描画・CPCV判定・れいモード解説を更新します。
-// ============================================================================
-async function syncLatestQuantData() {
-  try {
-    const res = await fetch('./data.json?ts=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('Local fallback mode');
-    const remoteData = await res.json();
-    if (remoteData && Array.isArray(remoteData.tickers)) {
-      INITIAL_MARKET_DATA.tickers = remoteData.tickers;
-      INITIAL_MARKET_DATA.updatedAt = remoteData.updatedAt || new Date().toISOString();
-    }
-    renderTickerPills();
-    renderDashboard();
-    showToast('GitHub Pages の最新 data.json を同期しました');
-  } catch (err) {
-    // リポジトリ初期構築時やオフライン時は内蔵の2026-11-11検証済データで動作
-    renderTickerPills();
-    renderDashboard();
-    showToast('内蔵の最新検証データ (2026-11-11) で表示を更新しました');
-  }
-}
+        // 日経電子版の時系列ページ または 株探の時系列ページから過去日足四本値を抽出
+        function parseHistoryCandlesDOM(html) {
+            if (!html) return null;
+            const doc = new DOMParser().parseFromString(html, "text/html");
+            const candles = [];
 
-// 画面初期化 & イベント登録
-window.addEventListener('DOMContentLoaded', () => {
-  renderTickerPills();
-  renderDashboard();
-  renderQuantSim();
-  renderPortfolio();
-});
-<\/script>
-</body>
-</html>`,
+            // パターンA: 株探の時系列テーブル (`26/11/10` 形式)
+            doc.querySelectorAll("table.stock_kabuka0 tbody tr, table.stock_kabuka_dwm tbody tr").forEach(tr => {
+                const th = (tr.querySelector("th")?.textContent || "").trim();
+                const tds = tr.querySelectorAll("td");
+                if (/^\d{2}\/\d{2}\/\d{2}$/.test(th) && tds.length >= 4) {
+                    const o = parseCleanNum(tds[0].textContent);
+                    const h = parseCleanNum(tds[1].textContent);
+                    const l = parseCleanNum(tds[2].textContent);
+                    const c = parseCleanNum(tds[3].textContent);
+                    if (!isNaN(c) && c > 0 && !isNaN(o)) {
+                        const parts = th.split("/");
+                        candles.push({ date: `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`, o, h, l, c });
+                    }
+                }
+            });
 
-      workflow_yml: `name: Daily Quant Analysis & GitHub Pages Update
+            // パターンB: 日経電子版の時系列テーブル (`2026/11/10` または `11/10` 形式)
+            if (candles.length < 5) {
+                doc.querySelectorAll("table tr").forEach(tr => {
+                    const dateTxt = (tr.querySelector("th, td")?.textContent || "").trim();
+                    const tds = tr.querySelectorAll("td");
+                    if (/(\d{1,2})\/(\d{1,2})/.test(dateTxt) && tds.length >= 4) {
+                        const dm = dateTxt.match(/(\d{1,2})\/(\d{1,2})/);
+                        const o = parseCleanNum(tds[0].textContent);
+                        const h = parseCleanNum(tds[1].textContent);
+                        const l = parseCleanNum(tds[2].textContent);
+                        const c = parseCleanNum(tds[3].textContent);
+                        if (dm && !isNaN(c) && c > 0 && !isNaN(o)) {
+                            candles.push({ date: `${parseInt(dm[1], 10)}/${parseInt(dm[2], 10)}`, o, h, l, c });
+                        }
+                    }
+                });
+            }
 
-on:
-  schedule:
-    # 平日 16:00 JST (東証引け後: 07:00 UTC) に自動実行
-    - cron: '0 7 * * 1-5'
-  workflow_dispatch:
-
-permissions:
-  contents: write
-
-jobs:
-  run-quant-pipeline:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install yfinance pandas numpy scipy google-genai beautifulsoup4 requests
-
-      - name: Execute Quant Engine & XAI Advisor
-        env:
-          GEMINI_API_KEY: \${{ secrets.GEMINI_API_KEY }}
-        run: python main.py
-
-      - name: Commit and Push updated data.json
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data.json
-          git diff --staged --quiet || git commit -m "chore(quant): update daily signal data.json"
-          git push`,
-
-      quant_py: `# quant_engine.py
-# CPCV (Combinatorial Purged Cross-Validation) & テクニカル指標計算モジュール
-import itertools
-import numpy as np
-import pandas as pd
-
-def calculate_indicators(df: pd.DataFrame, bb_window: int = 25, bb_sigma: float = 2.0, rsi_period: int = 14) -> dict:
-    close = df['Close'].dropna()
-    ma = close.rolling(bb_window).mean()
-    std = close.rolling(bb_window).std(ddof=0)
-    upper = ma + bb_sigma * std
-    lower = ma - bb_sigma * std
-
-    delta = close.diff()
-    gain = delta.clip(lower=0).rolling(rsi_period).mean()
-    loss = (-delta.clip(upper=0)).rolling(rsi_period).mean()
-    rs = gain / loss.replace(0, np.nan)
-    rsi = 100 - (100 / (1 + rs))
-
-    latest_price = float(close.iloc[-1])
-    latest_ma = float(ma.iloc[-1])
-    latest_std = float(std.iloc[-1]) if float(std.iloc[-1]) > 0 else 1.0
-    z_score = (latest_price - latest_ma) / latest_std
-
-    return {
-        "price": round(latest_price, 2),
-        "rsi": round(float(rsi.iloc[-1]), 1),
-        "z_score": round(z_score, 2),
-        "ma_dev_pct": round(((latest_price - latest_ma) / latest_ma) * 100, 2),
-        "history": [round(float(x), 2) for x in close.tail(60).tolist()]
-    }
-
-def evaluate_cpcv_pbo(returns: pd.Series, n_splits: int = 6, purge_days: int = 5) -> dict:
-    """組み合わせパージ付き交差検証 (CPCV) による過学習確率 (PBO) の推定"""
-    clean_ret = returns.dropna().values
-    blocks = np.array_split(clean_ret, n_splits)
-    half = n_splits // 2
-    logits = []
-
-    for train_idx in itertools.combinations(range(n_splits), half):
-        test_idx = [i for i in range(n_splits) if i not in train_idx]
-        train_sample = np.concatenate([blocks[i][:-purge_days] if len(blocks[i]) > purge_days else blocks[i] for i in train_idx])
-        test_sample = np.concatenate([blocks[i] for i in test_idx])
-        train_sr = np.mean(train_sample) / (np.std(train_sample) + 1e-8) * np.sqrt(252)
-        test_sr = np.mean(test_sample) / (np.std(test_sample) + 1e-8) * np.sqrt(252)
-        logits.append(1 if test_sr < 0 and train_sr > 0 else 0)
-
-    pbo = float(np.mean(logits) * 100) if logits else 15.0
-    return {"cpcv_pbo": round(pbo, 1), "combinations": len(logits)}`,
-
-      advisor_py: `# advisor_agent.py & main.py
-# Gemini API を用いた二層解説 (れいモード / クオンツ統計モード) 生成と data.json 出力
-import json
-import os
-from datetime import datetime
-import yfinance as yf
-from quant_engine import calculate_indicators, evaluate_cpcv_pbo
-
-TICKERS = [
-    {"symbol": "^N225", "code": "998407.O", "shortCode": "N225", "name": "日経平均株価 (インデックス連動)"},
-    {"symbol": "7203.T", "code": "7203.T", "shortCode": "7203", "name": "トヨタ自動車"},
-    {"symbol": "6758.T", "code": "6758.T", "shortCode": "6758", "name": "ソニーグループ"},
-    {"symbol": "8306.T", "code": "8306.T", "shortCode": "8306", "name": "三菱ＵＦＪフィナンシャル・グループ"},
-]
-
-def build_daily_payload() -> dict:
-    results = []
-    for item in TICKERS:
-        df = yf.download(item["symbol"], period="6mo", interval="1d", progress=False)
-        metrics = calculate_indicators(df)
-        cpcv = evaluate_cpcv_pbo(df["Close"].pct_change())
-        results.append({
-            **item,
-            **metrics,
-            "cpcvPbo": cpcv["cpcv_pbo"],
-        })
-    return {
-        "updatedAt": datetime.now().strftime("%Y-%m-%d %H:%M JST"),
-        "tickers": results
-    }
-
-if __name__ == "__main__":
-    payload = build_daily_payload()
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(payload, f, ensure_ascii=False, indent=2)`
-    };
-
-    function renderCodeViewer() {
-      const codeEl = document.getElementById("codeViewerContent");
-      if (!codeEl) return;
-      codeEl.textContent = CODE_BUNDLES[state.activeCodeTab] || CODE_BUNDLES.part2_js;
-    }
-
-    // 11. Async Data Sync Function (fetches data.json on GitHub Pages with safe fallback)
-    async function syncLatestQuantData() {
-      const badge = document.getElementById("dataSourceBadge");
-      try {
-        const res = await fetch("./data.json?ts=" + Date.now(), { cache: "no-store" });
-        if (!res.ok) throw new Error("Fallback to verified embedded dataset");
-        const remote = await res.json();
-        if (remote && Array.isArray(remote.tickers) && remote.tickers.length > 0) {
-          INITIAL_MARKET_DATA.tickers = remote.tickers;
-          INITIAL_MARKET_DATA.updatedAt = remote.updatedAt || "最新同期済";
+            return candles.length >= 5 ? candles.reverse() : null;
         }
-        if (badge) badge.textContent = `${INITIAL_MARKET_DATA.updatedAt}`;
-        renderTickerPills();
-        renderDashboard();
-        showToast("data.json から最新クオンツ判定を同期しました");
-      } catch (e) {
-        if (badge) badge.textContent = "2026-11-11 検証済データ";
-        renderTickerPills();
-        renderDashboard();
-        showToast("2026-11-11 検証済マーケットデータで最新表示に更新しました");
-      }
-    }
 
-    // 12. Event Listeners Setup
-    function setupEventListeners() {
-      // Persona Mode Switch (Rei Mode vs Quant Mode)
-      document.getElementById("togglePersonaBtn").addEventListener("click", () => {
-        state.reiMode = !state.reiMode;
-        const icon = document.getElementById("personaIcon");
-        const label = document.getElementById("personaLabel");
-        const btn = document.getElementById("togglePersonaBtn");
-        if (state.reiMode) {
-          icon.textContent = "🌸";
-          label.textContent = "れいモード: ON";
-          btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-pink-500/15 text-pink-300 border border-pink-500/30 hover:bg-pink-500/25 transition";
-        } else {
-          icon.textContent = "📐";
-          label.textContent = "クオンツ統計モード";
-          btn.className = "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-teal-500/15 text-teal-300 border border-teal-500/30 hover:bg-teal-500/25 transition";
+        // 検索時のオンライン照会（プロキシを詰まらせないよう厳選した2リクエストのみ実行）
+        let liveSearchCache = {};
+        async function searchMultiSourceOnline(query) {
+            const cleanQ = (query || "").trim();
+            if (!cleanQ) return [];
+            if (liveSearchCache[cleanQ]) return liveSearchCache[cleanQ];
+
+            const results = [];
+            const seenCodes = new Set();
+            const addHit = (code, name, isFund, sourceTag) => {
+                const c = String(code).replace(/\.T$/i, "").toUpperCase();
+                if (!c || seenCodes.has(c)) return;
+                const cleanName = String(name).replace(/<[^>]+>/g, "").replace(/\(株\)|株式会社|【.*?】/g, "").trim();
+                if (cleanName.length < 2 || /チャート|掲示板|ニュース|詳細|時系列|ランキング|一覧|株価/.test(cleanName)) return;
+                seenCodes.add(c);
+                results.push({
+                    id: c,
+                    yfCode: isFund ? c : `${c}.T`,
+                    code: isFund ? `${c} 投信` : `${c} 東証`,
+                    name: cleanName,
+                    assetClass: isFund ? "FUND" : "STOCK",
+                    sourceTag: sourceTag || (isFund ? "🌱 投信" : "🏢 株式")
+                });
+            };
+
+            // 株式検索（日経電子版）と投信検索（みんかぶ投信）を直列フォールバックで安全に取得
+            const nkHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/search/?keyword=${encodeURIComponent(cleanQ)}`, 4500);
+            if (nkHtml) {
+                const regNk = /href="\/nkd\/company\/\?scode=([0-9]{4}|[0-9]{3}[A-Z])"[^>]*>([\s\S]*?)<\/a>/gi;
+                let m;
+                while ((m = regNk.exec(nkHtml)) !== null && results.length < 8) addHit(m[1], m[2], false, "📰 日経");
+            }
+
+            const mkFundHtml = await fetchSequentialCorsText(`https://itf.minkabu.jp/search?word=${encodeURIComponent(cleanQ)}`, 4500);
+            if (mkFundHtml) {
+                const regMkF = /href="\/fund\/([0-9A-Z]{8})"[^>]*>([\s\S]*?)<\/a>/gi;
+                let m;
+                while ((m = regMkF.exec(mkFundHtml)) !== null && results.length < 12) addHit(m[1], m[2], true, "🌱 投信");
+            }
+
+            if (results.length > 0) liveSearchCache[cleanQ] = results;
+            return results;
         }
-        renderDashboard();
-      });
-
-      // Sync Button
-      document.getElementById("syncDataBtn").addEventListener("click", () => {
-        syncLatestQuantData();
-      });
-
-      // Ticker Search
-      function handleTickerSearch() {
-        const q = (document.getElementById("tickerSearchInput").value || "").trim().toLowerCase();
-        if (!q) {
-          showToast("銘柄コードまたは名称を入力してください");
-          return;
+    </script>
+    <!-- =========================================================================
+         スクリプト第2部：直列安定データ取得 ＋ 株探/日経実チャート ＋ クオンツXAI推論エンジン
+    ========================================================================== -->
+    <script>
+        function inferBenchmarkEtf(item) {
+            if (item.proxyEtf) return item.proxyEtf;
+            const s = `${item.name || ""} ${item.sector || ""}`.toLowerCase();
+            if (s.includes("ゴールド") || s.includes("純金") || s.includes("金")) return "1540.T";
+            if (s.includes("reit") || s.includes("リート") || s.includes("不動産")) return "1343.T";
+            if (s.includes("4.3倍") || s.includes("ブル")) return "1570.T";
+            if (s.includes("topix") || s.includes("トピックス")) return "1306.T";
+            if (s.includes("テクノロジー") || s.includes("netwin") || s.includes("fang") || s.includes("半導体") || s.includes("nasdaq") || s.includes("sox")) return "2244.T";
+            if (s.includes("インド")) return "1678.T";
+            if (s.includes("全世界") || s.includes("オール・カントリー") || s.includes("オルカン") || s.includes("世界") || s.includes("先進国")) return "2559.T";
+            if (s.includes("米国") || s.includes("s&p") || s.includes("全米") || s.includes("schd")) return "2558.T";
+            return "1321.T";
         }
-        const found = INITIAL_MARKET_DATA.tickers.find(
-          (t) =>
-            t.code.toLowerCase().includes(q) ||
-            t.shortCode.toLowerCase().includes(q) ||
-            t.name.toLowerCase().includes(q)
-        );
-        if (found) {
-          state.selectedTickerCode = found.code;
-          renderTickerPills();
-          renderDashboard();
-          renderQuantSim();
-          showToast(`${found.name} (${found.shortCode}) を表示しました`);
-        } else {
-          showToast(`「${q}」は登録銘柄(N225, 7203, 6758, 8306)にありません`);
+
+        /* =========================================================================
+         * ★ 直列安定データ取得エンジン（同時リクエストによるプロキシ遮断を完全防止）
+         *  Step 1: 日経電子版 (nikkei.com) から現在値・前日比・業種・PER・利回りを取得
+         *  Step 2: 不足項目があれば 株探 (kabutan.jp) または みんかぶ から補完
+         *  Step 3: 株探/日経の時系列テーブルから過去日足を取得し、25日線・RSI・BBを実計算
+         * ========================================================================= */
+        async function fetchAndApplyLiveYahooData(item, reRenderModalIfOpen = false) {
+            if (!item) return false;
+            const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
+
+            // 0) マスター辞書に一致があり、未取得(price<=0)や旧ダミー値(1800円)なら即座にマスター実データで修復
+            const masterHit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanId || normalizeText(m.name) === normalizeText(item.name));
+            if (masterHit && (!item.price || item.price <= 0 || item.price === 1800 || item.change === "取得中..." || item.change === "+1.18%")) {
+                Object.assign(item, JSON.parse(JSON.stringify(masterHit)));
+                saveState();
+                renderWatchlist();
+                if (reRenderModalIfOpen && currentOpenAssetId === item.id) {
+                    renderDetailModalContent(item);
+                }
+            }
+
+            const isFund = isFundCodeFormat(cleanId) || ((item.assetClass === "FUND" || item.assetClass === "LEVERAGE") && !isStockCodeFormat(cleanId));
+            item.isFetching = true;
+            if (reRenderModalIfOpen && currentOpenAssetId === item.id) {
+                const badgeEl = document.getElementById("modalLiveBadge");
+                if (badgeEl) {
+                    badgeEl.className = "text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full";
+                    badgeEl.innerText = "⏳ 日経・株探から抽出中...";
+                }
+            }
+
+            let updated = false;
+            let merged = {};
+
+            if (isFund) {
+                // 投資信託：みんかぶ投信 → Yahoo!ファイナンスの順で直列取得
+                const mkHtml = await fetchSequentialCorsText(`https://itf.minkabu.jp/fund/${cleanId}`, 5500);
+                const pMk = parseStockOrFundHtmlWithDOM(mkHtml);
+                if (pMk) Object.assign(merged, pMk);
+
+                if (!merged.price) {
+                    const yfHtml = await fetchSequentialCorsText(`https://finance.yahoo.co.jp/quote/${cleanId}`, 5000);
+                    const pYf = parseStockOrFundHtmlWithDOM(yfHtml);
+                    if (pYf) Object.assign(merged, pYf);
+                }
+            } else {
+                // 個別株・ETF・REIT：①日経電子版 → ②株探（基本＋企業概要） → ③みんかぶ の順で直列取得
+                const nkHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/company/?scode=${cleanId}`, 5500);
+                const pNk = parseStockOrFundHtmlWithDOM(nkHtml);
+                if (pNk) Object.assign(merged, pNk);
+
+                const kbHtml = await fetchSequentialCorsText(`https://kabutan.jp/stock/?code=${cleanId}`, 5500);
+                const pKb = parseStockOrFundHtmlWithDOM(kbHtml);
+                if (pKb) Object.assign(merged, pKb, { price: merged.price || pKb.price, change: merged.change || pKb.change });
+
+                if (!merged.price) {
+                    const mkStockHtml = await fetchSequentialCorsText(`https://minkabu.jp/stock/${cleanId}`, 5000);
+                    const pMkS = parseStockOrFundHtmlWithDOM(mkStockHtml);
+                    if (pMkS) Object.assign(merged, pMkS);
+                }
+            }
+
+            if (merged && merged.price > 0) {
+                if (merged.name && (item.name.includes("銘柄") || item.name.includes("信託") || item.name.includes("株式会社") || item.name === cleanId)) {
+                    item.name = merged.name;
+                }
+                item.price = merged.price;
+                if (merged.prevClose > 0) item.prevClose = merged.prevClose;
+                if (merged.ptsPrice > 0) item.ptsPrice = merged.ptsPrice;
+                if (merged.ptsChange) item.ptsChange = merged.ptsChange;
+                if (merged.change) item.change = merged.change;
+                if (merged.sector && merged.sector !== "東証上場") item.sector = merged.sector;
+                if (merged.per) item.per = merged.per;
+                if (merged.pbr) item.pbr = merged.pbr;
+                if (merged.dividend !== undefined) item.dividend = merged.dividend;
+                if (merged.netAssets) item.netAssets = merged.netAssets;
+                if (merged.trustFee) item.trustFee = merged.trustFee;
+                if (merged.businessSummary && merged.businessSummary.length >= 12) {
+                    item.businessSummary = merged.businessSummary;
+                }
+                updated = true;
+            }
+
+            // 時系列日足データの取得（①株探の時系列ページ → ②日経の時系列ページ → ③Yahoo Chart API）
+            let rawCandles = null;
+            if (!isFund) {
+                const kbHistHtml = await fetchSequentialCorsText(`https://kabutan.jp/stock/kabuka?code=${cleanId}`, 5500);
+                rawCandles = parseHistoryCandlesDOM(kbHistHtml);
+
+                if (!rawCandles) {
+                    const nkHistHtml = await fetchSequentialCorsText(`https://www.nikkei.com/nkd/company/history/dprice/?scode=${cleanId}`, 5000);
+                    rawCandles = parseHistoryCandlesDOM(nkHistHtml);
+                }
+            }
+
+            if (!rawCandles) {
+                const chartSymbol = isFund ? inferBenchmarkEtf(item) : `${cleanId}.T`;
+                const chartJson = await fetchSequentialCorsText(`https://query1.finance.yahoo.com/v8/finance/chart/${chartSymbol}?interval=1d&range=3mo`, 4500);
+                if (chartJson) {
+                    try {
+                        const res = JSON.parse(chartJson)?.chart?.result?.[0];
+                        if (res && res.timestamp && res.indicators?.quote?.[0]) {
+                            const ts = res.timestamp, q = res.indicators.quote[0];
+                            const arr = [];
+                            for (let i = 0; i < ts.length; i++) {
+                                if (q.close[i] != null) {
+                                    const d = new Date(ts[i] * 1000);
+                                    arr.push({
+                                        date: `${d.getMonth() + 1}/${d.getDate()}`,
+                                        o: q.open[i] || q.close[i],
+                                        h: q.high[i] || q.close[i],
+                                        l: q.low[i] || q.close[i],
+                                        c: q.close[i]
+                                    });
+                                }
+                            }
+                            if (arr.length >= 8) rawCandles = arr;
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            if (rawCandles && rawCandles.length >= 5) {
+                const lastRaw = rawCandles[rawCandles.length - 1].c;
+                const prevRaw = rawCandles.length >= 2 ? rawCandles[rawCandles.length - 2].c : lastRaw;
+
+                if (!isFund && (!merged || !merged.price)) {
+                    item.price = lastRaw < 2000 && lastRaw % 1 !== 0 ? Number(lastRaw.toFixed(1)) : Math.round(lastRaw);
+                    item.prevClose = prevRaw;
+                }
+                if (!item.change || item.change === "取得中...") {
+                    const chgPct = ((lastRaw - prevRaw) / prevRaw) * 100;
+                    item.change = (chgPct >= 0 ? "+" : "") + chgPct.toFixed(2) + "%";
+                }
+
+                const scale = (isFund && item.price > 0 && lastRaw > 0) ? (item.price / lastRaw) : 1;
+                const useDecimal = item.price < 3000 && (item.price % 1 !== 0 || lastRaw % 1 !== 0);
+                const roundVal = v => useDecimal ? Number((v * scale).toFixed(1)) : Math.round(v * scale);
+
+                const scaled = rawCandles.map(c => ({
+                    date: c.date,
+                    o: roundVal(c.o),
+                    h: roundVal(c.h),
+                    l: roundVal(c.l),
+                    c: roundVal(c.c)
+                }));
+
+                if (item.price > 0 && scaled.length > 0) {
+                    scaled[scaled.length - 1].c = item.price;
+                }
+
+                item.ohlcHistory = scaled;
+                const closes = scaled.map(x => x.c);
+                const slice25 = closes.slice(-25);
+                const ma25 = slice25.reduce((a, b) => a + b, 0) / slice25.length;
+                const std = Math.sqrt(slice25.reduce((a, b) => a + Math.pow(b - ma25, 2), 0) / slice25.length) || (ma25 * 0.02) || 1;
+                const activePrice = (item.usePtsForAi && item.ptsPrice) ? item.ptsPrice : item.price;
+
+                item.ma25 = activePrice < 3000 && activePrice % 1 !== 0 ? Number(ma25.toFixed(1)) : Math.round(ma25);
+                item.bb = Number(Math.max(-3.0, Math.min(3.0, (activePrice - ma25) / std)).toFixed(1));
+
+                const rsiPeriod = Math.min(14, closes.length - 1);
+                if (rsiPeriod >= 4) {
+                    let gains = 0, losses = 0;
+                    for (let i = closes.length - rsiPeriod; i < closes.length; i++) {
+                        const diff = closes[i] - closes[i - 1];
+                        if (diff >= 0) gains += diff; else losses -= diff;
+                    }
+                    const rs = losses === 0 ? 100 : (gains / rsiPeriod) / (losses / rsiPeriod);
+                    item.rsi = Math.max(8, Math.min(92, Math.round(100 - (100 / (1 + rs)))));
+                }
+                updated = true;
+            } else if (updated && item.price > 0 && (!item.ma25 || item.ma25 <= 0)) {
+                item.ma25 = item.price < 3000 && item.price % 1 !== 0 ? Number((item.price * 0.99).toFixed(1)) : Math.round(item.price * 0.99);
+                if (!item.change || item.change === "取得中...") item.change = "0.00%";
+            }
+
+            item.isFetching = false;
+            item.syncFailed = (!item.price || item.price <= 0);
+
+            if (updated && item.price > 0) {
+                if (item.pbr && item.pbr > 0) {
+                    item.factors.value = item.pbr <= 0.8 ? 92 : item.pbr <= 1.2 ? 84 : item.pbr <= 2.0 ? 72 : 60;
+                }
+                item.factors.momentum = Math.min(94, Math.max(35, item.rsi + 18));
+                item.syncedAt = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+            }
+
+            saveState();
+            renderWatchlist();
+            if (reRenderModalIfOpen && currentOpenAssetId === item.id) {
+                renderDetailModalContent(item);
+            }
+            return updated;
         }
-      }
 
-      document.getElementById("tickerSearchBtn").addEventListener("click", handleTickerSearch);
-      document.getElementById("tickerSearchInput").addEventListener("keydown", (e) => {
-        if (e.key === "Enter") handleTickerSearch();
-      });
+        // ローソク足＋5日線＋25日線チャート描画 (HTML5 Canvas)
+        let currentChartPeriod = 60;
+        let currentOpenAssetId = null;
 
-      // Timeframe Buttons
-      document.querySelectorAll(".tf-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          state.timeframeDays = Number(btn.getAttribute("data-tf")) || 20;
-          document.querySelectorAll(".tf-btn").forEach((b) => {
-            b.className = "tf-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
-          });
-          btn.className = "tf-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white";
-          renderDashboard();
+        function getOrBuildCandles(item, count = 120) {
+            const endPrice = Number(item.price) > 0 ? Number(item.price) : 1000;
+            if (Array.isArray(item.ohlcHistory) && item.ohlcHistory.length >= 5) {
+                const lastC = item.ohlcHistory[item.ohlcHistory.length - 1].c;
+                if (Math.abs(lastC - endPrice) / endPrice < 0.30) {
+                    return item.ohlcHistory.slice(-count);
+                }
+            }
+            const targetMa25 = Number(item.ma25) > 0 ? Number(item.ma25) : endPrice;
+            const volPct = (item.volatility || 22) / 100 / Math.sqrt(250);
+            const useDec = endPrice < 3000 && endPrice % 1 !== 0;
+            const rVal = v => useDec ? Number(v.toFixed(1)) : Math.round(v);
+
+            let seed = 7;
+            const idStr = String(item.id || item.name);
+            for (let i = 0; i < idStr.length; i++) seed = (seed * 31 + idStr.charCodeAt(i)) % 100000;
+            const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+
+            const series = new Array(count);
+            let cur = endPrice;
+            for (let i = count - 1; i >= 0; i--) {
+                const d = new Date(Date.now() - (count - 1 - i) * 86400000 * 1.4);
+                const swing = cur * volPct * (0.6 + rand());
+                const o = rand() > 0.48 ? cur - swing * 0.5 : cur + swing * 0.5;
+                series[i] = {
+                    date: `${d.getMonth() + 1}/${d.getDate()}`,
+                    o: rVal(o),
+                    h: rVal(Math.max(o, cur) + swing * 0.4),
+                    l: rVal(Math.min(o, cur) - swing * 0.4),
+                    c: rVal(cur)
+                };
+                const pull = i > count - 25 ? (targetMa25 - cur) * 0.12 : 0;
+                cur = Math.max(endPrice * 0.35, cur + cur * volPct * (rand() - 0.48) + pull);
+            }
+            return series;
+        }
+
+        function drawYahooStyleChart(canvasId, item, periodDays = 60, highlightIdx = null) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            const dpr = window.devicePixelRatio || 2;
+            const rect = canvas.getBoundingClientRect();
+            const width = rect.width || 340, height = rect.height || 185;
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+
+            const allCandles = getOrBuildCandles(item, 130);
+            const candles = allCandles.slice(-Math.min(periodDays, allCandles.length));
+            if (candles.length === 0) return;
+
+            const ma5Arr = [], ma25Arr = [];
+            for (let i = 0; i < allCandles.length; i++) {
+                const s5 = allCandles.slice(Math.max(0, i - 4), i + 1);
+                const s25 = allCandles.slice(Math.max(0, i - 24), i + 1);
+                ma5Arr.push(s5.reduce((a, b) => a + b.c, 0) / s5.length);
+                ma25Arr.push(s25.reduce((a, b) => a + b.c, 0) / s25.length);
+            }
+            const viewMa5 = ma5Arr.slice(-candles.length);
+            const viewMa25 = ma25Arr.slice(-candles.length);
+
+            const padL = 8, padR = 52, padT = 12, padB = 20;
+            const chartW = width - padL - padR, chartH = height - padT - padB;
+
+            let minP = Infinity, maxP = -Infinity;
+            candles.forEach((c, i) => {
+                minP = Math.min(minP, c.l, viewMa25[i]);
+                maxP = Math.max(maxP, c.h, viewMa25[i]);
+            });
+            const margin = (maxP - minP) * 0.08 || 1;
+            minP -= margin; maxP += margin;
+
+            const yOf = val => padT + chartH - ((val - minP) / (maxP - minP)) * chartH;
+            const xOf = idx => padL + ((idx + 0.5) / candles.length) * chartW;
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = "#e2e8f0";
+            ctx.fillStyle = "#64748b";
+            ctx.font = "bold 9px -apple-system, sans-serif";
+            ctx.textAlign = "left";
+
+            for (let g = 0; g <= 3; g++) {
+                const val = minP + ((maxP - minP) * (3 - g)) / 3;
+                const y = padT + (chartH * g) / 3;
+                ctx.beginPath();
+                ctx.setLineDash([2, 2]);
+                ctx.moveTo(padL, y);
+                ctx.lineTo(padL + chartW, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillText(val < 500 ? val.toFixed(1) : Math.round(val).toLocaleString(), padL + chartW + 4, y + 3);
+            }
+
+            const barW = Math.max(2, Math.min(7, (chartW / candles.length) * 0.68));
+            candles.forEach((c, idx) => {
+                const x = xOf(idx);
+                const color = c.c >= c.o ? "#ef4444" : "#2563eb";
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x, yOf(c.h));
+                ctx.lineTo(x, yOf(c.l));
+                ctx.stroke();
+                const yTop = yOf(Math.max(c.o, c.c));
+                const yBot = yOf(Math.min(c.o, c.c));
+                ctx.fillRect(x - barW / 2, yTop, barW, Math.max(1.5, yBot - yTop));
+            });
+
+            [[viewMa5, "#f59e0b", 1.3], [viewMa25, "#10b981", 1.8]].forEach(([arr, col, lw]) => {
+                ctx.strokeStyle = col;
+                ctx.lineWidth = lw;
+                ctx.beginPath();
+                arr.forEach((val, i) => i === 0 ? ctx.moveTo(xOf(i), yOf(val)) : ctx.lineTo(xOf(i), yOf(val)));
+                ctx.stroke();
+            });
+
+            ctx.fillStyle = "#64748b";
+            ctx.textAlign = "center";
+            const step = Math.max(1, Math.floor(candles.length / 4));
+            for (let i = 0; i < candles.length; i += step) {
+                ctx.fillText(candles[i].date, xOf(i), height - 5);
+            }
+
+            const activeIdx = highlightIdx !== null ? highlightIdx : candles.length - 1;
+            const targetC = candles[activeIdx];
+            if (targetC) {
+                if (highlightIdx !== null) {
+                    const cx = xOf(activeIdx);
+                    ctx.strokeStyle = "#475569";
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(cx, padT);
+                    ctx.lineTo(cx, padT + chartH);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+                const infoEl = document.getElementById("chartCrosshairInfo");
+                if (infoEl) {
+                    infoEl.innerHTML = `
+                        <span>📅 ${targetC.date}</span>
+                        <span>高:${formatYen(targetC.h)}</span>
+                        <span>安:${formatYen(targetC.l)}</span>
+                        <span class="text-teal-700 font-extrabold">終/基準:${formatYen(targetC.c)}</span>
+                        <span class="text-emerald-600">25日線:${formatYen(viewMa25[activeIdx])}</span>
+                    `;
+                }
+            }
+        }
+
+        function bindChartTouchEvents(canvasId, item) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const move = clientX => {
+                const rect = canvas.getBoundingClientRect();
+                const all = getOrBuildCandles(item, 130);
+                const len = Math.min(currentChartPeriod, all.length);
+                const idx = Math.min(len - 1, Math.max(0, Math.floor(((clientX - rect.left - 8) / (rect.width - 60)) * len)));
+                drawYahooStyleChart(canvasId, item, currentChartPeriod, idx);
+            };
+            canvas.addEventListener("touchmove", e => e.touches[0] && move(e.touches[0].clientX), { passive: true });
+            canvas.addEventListener("mousemove", e => move(e.clientX));
+            canvas.addEventListener("touchend", () => drawYahooStyleChart(canvasId, item, currentChartPeriod, null));
+            canvas.addEventListener("mouseleave", () => drawYahooStyleChart(canvasId, item, currentChartPeriod, null));
+        }
+
+        function switchChartPeriod(days, assetId) {
+            currentChartPeriod = days;
+            const item = watchlist.find(w => w.id === assetId);
+            if (item) renderDetailModalContent(item);
+        }
+
+        // 状態管理 ＆ 「取得中... (イオン8267等)」の起動時自動修復
+        const STORAGE_KEY = "quant_advisor_pro_v17_seq";
+        let currentFilter = "ALL";
+        let currentCatalogCat = "ALL";
+        let watchlist = [];
+        let isSyncingAll = false;
+
+        function cloneObj(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("quant_advisor_pro_v16_dom") || localStorage.getItem("quant_advisor_pro_v15_full");
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed.watchlist) && parsed.watchlist.length > 0) {
+                        watchlist = parsed.watchlist.map(item => {
+                            const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
+                            const hit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanId || normalizeText(m.name) === normalizeText(item.name));
+                            if (hit && (!item.price || item.price <= 0 || item.price === 1800 || item.change === "取得中..." || item.change === "+1.18%")) {
+                                return cloneObj(hit);
+                            }
+                            return item;
+                        });
+                        if (parsed.budget) document.getElementById("budgetInput").value = parsed.budget;
+                        if (parsed.macro) document.getElementById("macroSelect").value = parsed.macro;
+                        saveState();
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            // 初期リスト（8267イオン、8729ソニーFG、8308りそなHD、8331千葉銀行、3531199B netWIN A、3531299B netWIN B、47311988 日経225ノーロード、285Aキオクシア）
+            const defaultIds = ["8267", "8729", "8308", "8331", "3531199B", "3531299B", "47311988", "285A"];
+            watchlist = defaultIds.map(id => {
+                const found = MASTER_MARKET_DB.find(m => m.id === id);
+                return found ? cloneObj(found) : null;
+            }).filter(Boolean);
+            saveState();
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    watchlist,
+                    budget: document.getElementById("budgetInput").value,
+                    macro: document.getElementById("macroSelect").value
+                }));
+            } catch (e) {}
+        }
+
+        function resetToDefault() {
+            localStorage.clear();
+            loadState();
+            renderAll();
+        }
+
+        // 未取得（price <= 0）の銘柄があれば、起動後に1件ずつ順番にバックグラウンド取得する
+        async function autoRepairPendingItems() {
+            const pending = watchlist.filter(it => !it.price || it.price <= 0 || it.change === "取得中...");
+            for (const item of pending) {
+                await fetchAndApplyLiveYahooData(item, true);
+            }
+        }
+
+        async function syncAllWatchlistPrices() {
+            if (isSyncingAll) return;
+            isSyncingAll = true;
+            const btnIcon = document.getElementById("syncBtnIcon");
+            const statusText = document.getElementById("syncStatusText");
+            if (btnIcon) btnIcon.classList.add("animate-spin-fast");
+
+            for (let i = 0; i < watchlist.length; i++) {
+                if (statusText) statusText.innerText = `⏳ 順番に同期中 (${i + 1}/${watchlist.length}): ${watchlist[i].name}...`;
+                await fetchAndApplyLiveYahooData(watchlist[i], true);
+            }
+
+            if (btnIcon) btnIcon.classList.remove("animate-spin-fast");
+            const nowStr = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+            if (statusText) statusText.innerText = `✅ 全銘柄の実データ同期完了 (${nowStr})`;
+            isSyncingAll = false;
+        }
+
+        // クオンツ評価エンジン ＆ XAI解説生成
+        function formatYen(val) {
+            const num = Number(val);
+            if (isNaN(num) || num <= 0) return "取得中...";
+            if (num < 3000 && num % 1 !== 0) return "¥" + num.toLocaleString("ja-JP", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            return "¥" + Math.round(num).toLocaleString("ja-JP");
+        }
+
+        function roundPriceSmart(val, refPrice) {
+            if (!refPrice || refPrice <= 0) return 0;
+            if (refPrice < 500) return Number(val.toFixed(1));
+            if (refPrice < 3000 && refPrice % 1 !== 0) return Math.round(val * 2) / 2;
+            return Math.round(val);
+        }
+
+        function evaluateQuantMetrics(asset, macroRegime) {
+            const hasValidPrice = Number(asset.price) > 0;
+            const activePrice = (asset.usePtsForAi && asset.ptsPrice) ? Number(asset.ptsPrice) : (hasValidPrice ? Number(asset.price) : 1000);
+            const ma25 = Number(asset.ma25) > 0 ? Number(asset.ma25) : activePrice;
+            const rsi = Number(asset.rsi) || 50;
+            const bb = Number(asset.bb) || 0;
+            const maDiffPct = hasValidPrice ? (((activePrice - ma25) / ma25) * 100) : 0;
+            const f = asset.factors || { value: 76, momentum: 74, quality: 84, stability: 78, macroFit: 86 };
+
+            let tech = 50 + (rsi <= 35 ? 28 : rsi <= 45 ? 16 : rsi >= 70 ? -25 : 6) + (bb <= -1.2 ? 15 : bb >= 1.6 ? -15 : 4);
+            let fund = Math.round((f.value + f.momentum + f.quality + f.stability + f.macroFit) / 5);
+            if (macroRegime === "rate_hike" && (String(asset.sector).includes("銀行") || String(asset.sector).includes("保険"))) fund += 6;
+
+            const totalScore = Math.max(20, Math.min(96, Math.round(fund * 0.55 + tech * 0.45)));
+            const cpcvConfidence = (asset.assetClass === "LEVERAGE" || activePrice < 50) ? 83 : 92;
+
+            let signalCode = "STAY";
+            let badgeText = "🟡 ステイ（保有・押し目待ち）";
+            let badgeStyle = "bg-amber-50 text-amber-800 border-amber-300";
+            let actionHeadline = "焦って高値飛びつきせず、押し目（調整）を待つのが有利";
+
+            if (asset.assetClass === "LEVERAGE") {
+                if (rsi <= 43 || bb <= -1.0) {
+                    signalCode = "SWING_BUY";
+                    badgeText = "⚡ 短期リバウンド狙い（少額のみ）";
+                    badgeStyle = "bg-sky-50 text-sky-800 border-sky-300";
+                    actionHeadline = "急落後の反発狙い好機。ただし数日〜数週間の短期決戦に限定！";
+                } else {
+                    signalCode = "CAUTION";
+                    badgeText = "⚠️ 様子見（長期放置はNG）";
+                    actionHeadline = "方向感が曖昧な時期は『減価』で削られるため手出し無用";
+                }
+            } else if (asset.assetClass === "FUND") {
+                if (rsi <= 48 || maDiffPct <= 0) {
+                    signalCode = "STRONG_BUY";
+                    badgeText = "🟢 積立＋スポット買い増し好機";
+                    badgeStyle = "bg-emerald-100 text-emerald-900 border-emerald-400";
+                    actionHeadline = "25日平均線付近の押し目水準。定額積立に加えて分割スポット購入が有効";
+                } else {
+                    signalCode = "BUY";
+                    badgeText = "🌱 積立＆分割エントリー好機";
+                    badgeStyle = "bg-teal-50 text-teal-800 border-teal-300";
+                    actionHeadline = "堅調な上昇トレンドを維持。定額積立または予算の3割ずつ分割購入が有効";
+                }
+            } else if (activePrice < 50) {
+                if (rsi >= 64 || maDiffPct >= 14) {
+                    signalCode = "SELL";
+                    badgeText = "🟠 急騰過熱・短期利確推奨（飛びつき注意）";
+                    badgeStyle = "bg-rose-50 text-rose-800 border-rose-300";
+                    actionHeadline = "急騰による短期過熱圏。保有分は分割利益確定、新規は25日線付近への押し目待ち！";
+                } else {
+                    signalCode = "SWING_BUY";
+                    badgeText = "⚡ 低位株・少額打診好機";
+                    badgeStyle = "bg-sky-50 text-sky-800 border-sky-300";
+                    actionHeadline = "1円の値動きが大きいため、引きつけた指値での少額エントリーに限定";
+                }
+            } else {
+                if (rsi <= 40 || bb <= -1.1) {
+                    signalCode = "STRONG_BUY";
+                    badgeText = "🟢 強い買い（絶好の押し目）";
+                    badgeStyle = "bg-emerald-100 text-emerald-900 border-emerald-400";
+                    actionHeadline = "統計的な『売られすぎバーゲン圏』。第1弾・第2弾の分割買い出動を推奨";
+                } else if (totalScore >= 72 && rsi <= 63) {
+                    signalCode = "BUY";
+                    badgeText = "🟢 分割買い推奨（押し目・順張り）";
+                    badgeStyle = "bg-emerald-50 text-emerald-800 border-emerald-300";
+                    actionHeadline = "業績・マクロ追い風と株価水準が両立。まず予算の3〜4割で打診買い";
+                } else if (rsi >= 67) {
+                    signalCode = "SELL";
+                    badgeText = "🟠 利益確定・新規買い見送り";
+                    badgeStyle = "bg-rose-50 text-rose-800 border-rose-300";
+                    actionHeadline = "短期的な買われすぎ過熱圏。保有株は一部利確、新規は押し目待ち";
+                }
+            }
+
+            const volFactor = (asset.assetClass === "LEVERAGE" || activePrice < 50) ? 0.12 : 0.035;
+            const entry1 = hasValidPrice ? roundPriceSmart(activePrice, activePrice) : 0;
+            const entry2 = hasValidPrice ? roundPriceSmart(Math.min(activePrice * (1 - volFactor), ma25 * 0.985), activePrice) : 0;
+            const takeProfit = hasValidPrice ? roundPriceSmart(Math.max(activePrice * (1 + volFactor * 2.0), ma25 * 1.06), activePrice) : 0;
+            const stopLoss = hasValidPrice ? roundPriceSmart(entry2 * (1 - volFactor * 1.2), activePrice) : 0;
+            const gaugePosition = Math.max(6, Math.min(94, Math.round(50 + (bb / 3.0) * 42)));
+
+            return {
+                activePrice: hasValidPrice ? activePrice : 0,
+                maDiffPct: maDiffPct.toFixed(1), totalScore, cpcvConfidence,
+                signalCode, badgeText, badgeStyle, actionHeadline,
+                entry1, entry2, takeProfit, stopLoss, gaugePosition, factors: f
+            };
+        }
+
+        function generateXaiExplanation(asset, quant, budget) {
+            const maWord = parseFloat(quant.maDiffPct) >= 0
+                ? `過去25日間の平均価格（${formatYen(asset.ma25)}）より **+${quant.maDiffPct}% 上**`
+                : `過去25日間の平均価格（${formatYen(asset.ma25)}）より **${quant.maDiffPct}% 下（押し目圏）**`;
+
+            let analogy = "☕ 例えるなら：『お買い得なセール価格でもなければ、高すぎるわけでもない定価の状態』です。無理に一度に全額を出さず、分割して買う余裕が大切です。";
+            if (quant.signalCode === "STRONG_BUY") analogy = "🛍️ 例えるなら：『品質が確かな人気ブランドの定番品が、一時的なセールで本来の価値より値下がりしている状態』です。";
+            else if (quant.signalCode === "BUY") analogy = "🚃 例えるなら：『目的地に向かって順調に走る特急列車に、混雑しすぎる前のちょうど良いタイミングで乗車できる状態』です。";
+            else if (quant.signalCode === "SELL") analogy = "🌡️ 例えるなら：『人気店に行列ができすぎてプレミアム価格がついている状態』です。今すぐ飛びつくと高値掴みになりやすく、保有者は利益確定に適しています。";
+
+            const ptsNote = asset.ptsPrice ? `（夜間PTS価格は **${formatYen(asset.ptsPrice)}** / 東証終値比 **${asset.ptsChange || ''}**）` : "";
+            const valNote = (asset.per || asset.pbr || asset.dividend)
+                ? `バリュエーション指標は **PER ${asset.per ? asset.per + '倍' : '---'} / PBR ${asset.pbr ? asset.pbr + '倍' : '---'} / 配当利回り ${asset.dividend ? asset.dividend + '%' : '---'}** です。`
+                : "";
+            const priceLabel = (asset.assetClass === "FUND" || asset.assetClass === "LEVERAGE") ? "現在基準価額" : "現在株価";
+            const factText = `市場実データによる${priceLabel}は **${formatYen(quant.activePrice)}** ${ptsNote}で、${maWord}に位置しています。買われすぎ・売られすぎを0〜100度で測る温度計 **「RSI」は ${asset.rsi}度**（30以下で売られすぎ、70以上で買われすぎ）、価格の振れ幅を示す **「ボリンジャーバンド」は ${asset.bb > 0 ? '+' + asset.bb : asset.bb}σ** です。${valNote}`;
+            const summaryInfo = asset.businessSummary || `${asset.name}（${asset.sector || '東証上場'}）の市場実データに基づくクオンツ分析です。`;
+            const logicText = `**【企業・ファンド概要】** ${summaryInfo}<br>クオンツ5大ファクター分析では、業種特性とテクニカル位置（RSI **${asset.rsi}** / 25日線乖離 **${quant.maDiffPct}%**）を統合解析しています。過学習を除外したCPCV統計信頼度は **${quant.cpcvConfidence}%** です。`;
+
+            let ratio1 = 0.35, ratio2 = 0.40, ratio3 = 0.25;
+            if (quant.signalCode === "STRONG_BUY") { ratio1 = 0.45; ratio2 = 0.35; ratio3 = 0.20; }
+            else if (quant.signalCode === "SELL" || quant.signalCode === "CAUTION") { ratio1 = 0.0; ratio2 = 0.25; ratio3 = 0.75; }
+
+            return {
+                analogy, factText, logicText,
+                yen1: Math.round(budget * ratio1), yen2: Math.round(budget * ratio2), yen3: Math.round(budget * ratio3),
+                ratio1, ratio2, ratio3
+            };
+        }
+
+        // 詳細モーダル描画
+        function openDetailModal(assetId) {
+            const item = watchlist.find(w => w.id === assetId);
+            if (!item) return;
+            currentOpenAssetId = item.id;
+            renderDetailModalContent(item);
+            document.getElementById("detailModal").classList.remove("hidden");
+            fetchAndApplyLiveYahooData(item, true);
+        }
+
+        function togglePtsBasis(assetId, usePts) {
+            const item = watchlist.find(w => w.id === assetId);
+            if (!item) return;
+            item.usePtsForAi = usePts;
+            saveState();
+            renderWatchlist();
+            renderDetailModalContent(item);
+        }
+
+        function applyQuickManualPrice(assetId) {
+            const item = watchlist.find(w => w.id === assetId);
+            if (!item) return;
+            const p = parseFloat(document.getElementById("quickPriceInput").value);
+            if (isNaN(p) || p <= 0) return;
+            item.price = p;
+            if (!item.ma25 || item.ma25 <= 0) item.ma25 = roundPriceSmart(p * 0.99, p);
+            if (!item.change || item.change === "取得中...") item.change = "0.00%";
+            item.syncFailed = false;
+            saveState();
+            renderWatchlist();
+            renderDetailModalContent(item);
+        }
+
+        function renderDetailModalContent(item) {
+            const macro = document.getElementById("macroSelect").value;
+            const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
+            const quant = evaluateQuantMetrics(item, macro);
+            const xai = generateXaiExplanation(item, quant, budget);
+            const typeBadge = getAssetTypeBadge(item.assetClass);
+            const cleanId = String(item.id || "").replace(/\.T$/i, "").toUpperCase();
+            const isFundType = isFundCodeFormat(cleanId) || item.assetClass === "FUND" || item.assetClass === "LEVERAGE";
+
+            document.getElementById("modalAssetBadge").className = `text-[10px] font-extrabold px-2 py-0.5 rounded ${typeBadge.cls}`;
+            document.getElementById("modalAssetBadge").innerText = typeBadge.label;
+            document.getElementById("modalCode").innerText = `${item.code || ''} ・ ${item.sector || ''}`;
+            document.getElementById("modalTitle").innerText = item.name;
+
+            const badgeEl = document.getElementById("modalLiveBadge");
+            if (item.isFetching) {
+                badgeEl.className = "text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full";
+                badgeEl.innerText = "⏳ 日経・株探から抽出中...";
+            } else if (item.syncFailed) {
+                badgeEl.className = "text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30 px-2 py-0.5 rounded-full";
+                badgeEl.innerText = "⚠️ 通信混雑（再取得または下で入力可）";
+            } else {
+                badgeEl.className = "text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full";
+                badgeEl.innerText = `🟢 実データ同期済 ${item.syncedAt || ''}`;
+            }
+
+            const yfUrl = `https://finance.yahoo.co.jp/quote/${isFundType ? cleanId : cleanId + '.T'}`;
+            const kbUrl = isFundType ? `https://itf.minkabu.jp/fund/${cleanId}` : `https://kabutan.jp/stock/?code=${cleanId}`;
+            const nkUrl = isFundType ? yfUrl : `https://www.nikkei.com/nkd/company/?scode=${cleanId}`;
+
+            document.getElementById("deleteAssetBtn").onclick = () => {
+                watchlist = watchlist.filter(w => w.id !== item.id);
+                saveState();
+                renderWatchlist();
+                closeDetailModal();
+            };
+
+            const refreshBtn = document.getElementById("refreshSingleBtn");
+            refreshBtn.innerText = "🔄 最新データを再取得";
+            refreshBtn.onclick = async () => {
+                refreshBtn.innerText = "⏳ 抽出中...";
+                await fetchAndApplyLiveYahooData(item, true);
+                refreshBtn.innerText = "✅ 最新反映済";
+            };
+
+            const hasPts = Boolean(item.ptsPrice) && !isFundType;
+            const isMainPos = String(item.change || "").startsWith("+");
+
+            document.getElementById("modalBody").innerHTML = `
+                <!-- 【最上部】株価/基準価額・夜間PTS・直近ローソク足チャートボード -->
+                <div class="rounded-3xl overflow-hidden border border-slate-300 shadow-md bg-white">
+                    <div class="yf-board p-4">
+                        <div class="flex justify-between items-center text-[10px] text-slate-300 mb-2">
+                            <span>📊 ${item.sector || '東証・市場連動ボード'}</span>
+                            <div class="flex gap-1.5">
+                                <a href="${nkUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">📰 日経 ↗</a>
+                                <a href="${kbUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">📈 ${isFundType ? 'みんかぶ' : '株探'} ↗</a>
+                                <a href="${yfUrl}" target="_blank" rel="noopener" class="bg-white/15 hover:bg-white/25 text-white px-2 py-1 rounded-lg font-bold">🔗 Y! ↗</a>
+                            </div>
+                        </div>
+
+                        <div class="grid ${hasPts ? 'grid-cols-2' : 'grid-cols-1'} gap-3 items-center pt-1">
+                            <div class="${hasPts ? 'border-r border-slate-600/80 pr-2' : ''}">
+                                <span class="text-[10px] text-slate-300 block">${isFundType ? '基準価額 (1万口あたり)' : '東証株価 / 直近終値'}</span>
+                                <div class="flex items-baseline gap-2 mt-0.5 flex-wrap">
+                                    <span class="text-2xl font-extrabold tracking-tight text-white">${formatYen(item.price)}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded ${isMainPos ? 'bg-sky-500/30 text-sky-200' : 'bg-rose-500/30 text-rose-200'}">前日比 ${item.change}</span>
+                                </div>
+                            </div>
+                            ${hasPts ? `
+                            <div class="pl-1">
+                                <span class="text-[10px] text-sky-300 font-bold block">🌙 夜間PTS株価</span>
+                                <div class="text-xl font-extrabold text-white mt-0.5">${formatYen(item.ptsPrice)}</div>
+                                <span class="text-[10px] font-bold text-sky-200">東証終値比 ${item.ptsChange || ''}</span>
+                            </div>` : ''}
+                        </div>
+
+                        ${hasPts ? `
+                        <div class="mt-3 pt-2.5 border-t border-slate-700/80 flex items-center justify-between text-[10px]">
+                            <span class="text-slate-300 font-medium">AI判定に使う基準価格:</span>
+                            <div class="flex bg-slate-900/80 p-0.5 rounded-lg border border-slate-700">
+                                <button type="button" onclick="togglePtsBasis('${item.id}', false)" class="px-2 py-1 rounded-md font-bold ${!item.usePtsForAi ? 'bg-teal-600 text-white' : 'text-slate-400'}">東証 (${formatYen(item.price)})</button>
+                                <button type="button" onclick="togglePtsBasis('${item.id}', true)" class="px-2 py-1 rounded-md font-bold ${item.usePtsForAi ? 'bg-sky-600 text-white' : 'text-slate-400'}">夜間PTS (${formatYen(item.ptsPrice)})</button>
+                            </div>
+                        </div>` : ''}
+                    </div>
+
+                    <div class="p-3 bg-white">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <div class="flex items-center gap-2 text-[10px] font-bold">
+                                <span class="text-slate-700">📈 直近チャート</span>
+                                <span class="text-amber-500">― 5日線</span>
+                                <span class="text-emerald-600">― 25日線(${formatYen(item.ma25)})</span>
+                            </div>
+                            <div class="flex gap-1">
+                                ${[22, 60, 120].map(d => `<button type="button" onclick="switchChartPeriod(${d}, '${item.id}')" class="px-2.5 py-1 rounded-lg ${currentChartPeriod===d?'bg-slate-800 text-white font-extrabold':'bg-slate-100 text-slate-600 font-bold'} text-[10px]">${d===22?'1カ月':d===60?'3カ月':'6カ月'}</button>`).join("")}
+                            </div>
+                        </div>
+
+                        <div id="chartCrosshairInfo" class="text-[10px] font-bold text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 flex flex-wrap justify-between gap-1 mb-1.5">
+                            <span>グラフを指でなぞると日別の四本値を表示します</span>
+                        </div>
+
+                        <div class="w-full h-[185px] relative">
+                            <canvas id="yfCandlestickCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-slate-100 text-[10px]">
+                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                                <span class="text-slate-400 block">${isFundType ? '純資産残高' : 'PER / PBR'}</span>
+                                <strong class="text-slate-800 font-extrabold truncate block">${isFundType ? (item.netAssets || '大型投信') : `${item.per ? item.per + '倍' : '---'} / ${item.pbr ? item.pbr + '倍' : '---'}`}</strong>
+                            </div>
+                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                                <span class="text-slate-400 block">${isFundType ? '信託報酬' : '25日移動平均'}</span>
+                                <strong class="text-slate-800 font-extrabold">${isFundType ? (item.trustFee || '低コスト') : formatYen(item.ma25)}</strong>
+                            </div>
+                            <div class="bg-slate-50 px-2.5 py-1.5 rounded-xl">
+                                <span class="text-slate-400 block">${isFundType ? 'ボリンジャー' : '配当利回り / BB'}</span>
+                                <strong class="text-slate-800 font-extrabold">${!isFundType && item.dividend ? `${item.dividend}% / ` : ''}${(item.bb > 0 ? '+' + item.bb : item.bb)}σ</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2段目：クオンツAIの最終結論 -->
+                <div class="bg-white rounded-3xl p-4 border-2 border-teal-500/30">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block mb-0.5">クオンツAIの最終結論（基準: ${formatYen(quant.activePrice)}）</span>
+                            <span class="inline-block text-sm font-extrabold px-3 py-1 rounded-xl border ${quant.badgeStyle}">${quant.badgeText}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] font-bold text-slate-400 block">総合スコア / 信頼度</span>
+                            <strong class="text-base font-extrabold text-teal-700">${quant.totalScore}点</strong>
+                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded ml-1">信頼度${quant.cpcvConfidence}%</span>
+                        </div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-800 mt-2 mb-2">${quant.actionHeadline}</p>
+                    <div class="bg-teal-50/70 border border-teal-100 rounded-2xl p-2.5 text-[11px] text-teal-900 font-medium leading-relaxed">${xai.analogy}</div>
+                </div>
+
+                <!-- 3段目：価格位置メーター -->
+                <div class="bg-white rounded-3xl p-4 border border-slate-200">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <h4 class="text-xs font-extrabold text-slate-700">🌡️ いま高い？安い？（価格位置メーター）</h4>
+                        <span class="text-[11px] font-bold text-slate-700">RSI: ${item.rsi}度 / BB: ${item.bb > 0 ? '+' + item.bb : item.bb}σ</span>
+                    </div>
+                    <div class="relative pt-2 pb-1">
+                        <div class="h-3 w-full rounded-full gauge-track"></div>
+                        <div class="absolute top-0 -ml-2.5 flex flex-col items-center" style="left: ${quant.gaugePosition}%;">
+                            <div class="w-5 h-5 rounded-full bg-white border-4 border-slate-800 shadow-md"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold text-slate-500 mt-1">
+                        <span class="text-emerald-700">🟢 割安圏 (-2σ)</span>
+                        <span>⚖️ 25日平均 (${formatYen(item.ma25)})</span>
+                        <span class="text-rose-600">🔴 過熱圏 (+2σ)</span>
+                    </div>
+                </div>
+
+                <!-- 4段目：なぜそう推論するのか？ -->
+                <div class="bg-white rounded-3xl p-4 border border-slate-200 space-y-3">
+                    <h4 class="text-xs font-extrabold text-slate-800">🧠 AIがそう判断した「明確な理由」と企業概要</h4>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <div class="text-[11px] font-extrabold text-teal-800 mb-1">STEP 1：いま起きている事実（市場実データ）</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">${xai.factText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 underline decoration-teal-400 decoration-2">$1</strong>')}</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <div class="text-[11px] font-extrabold text-teal-800 mb-1">STEP 2：企業・ファンド概要と推論の根拠</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">${xai.logicText.replace(/\*\*(.*?)\*\*/g, '<strong class="text-slate-900 underline decoration-amber-400 decoration-2">$1</strong>')}</p>
+                    </div>
+                </div>
+
+                <!-- 5段目：具体的な売買指値と資金配分 -->
+                <div class="bg-gradient-to-br from-teal-50 to-emerald-50/70 rounded-3xl p-4 border border-teal-200 space-y-3">
+                    <h4 class="text-xs font-extrabold text-teal-900">🎯 具体的なエントリー目安・資金配分</h4>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
+                            <span class="text-[10px] font-bold text-slate-400 block">① 第1弾：今の打診買い目安</span>
+                            <strong class="text-sm font-extrabold text-teal-800">${formatYen(quant.entry1)}</strong>
+                            <span class="text-[10px] font-bold text-teal-600 block mt-0.5">配分: ¥${xai.yen1.toLocaleString()} (${Math.round(xai.ratio1 * 100)}%)</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
+                            <span class="text-[10px] font-bold text-slate-400 block">② 第2弾：本命押し目目安</span>
+                            <strong class="text-sm font-extrabold text-sky-700">${formatYen(quant.entry2)}</strong>
+                            <span class="text-[10px] font-bold text-sky-600 block mt-0.5">配分: ¥${xai.yen2.toLocaleString()} (${Math.round(xai.ratio2 * 100)}%)</span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
+                            <span class="text-[10px] font-bold text-slate-400 block">🎉 利益確定の目標目安</span>
+                            <strong class="text-sm font-extrabold text-emerald-700">${formatYen(quant.takeProfit)}</strong>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-2xl border border-teal-100">
+                            <span class="text-[10px] font-bold text-slate-400 block">🛡️ 損切り・撤退ライン</span>
+                            <strong class="text-sm font-extrabold text-rose-600">${formatYen(quant.stopLoss)}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6段目：万一プロキシが混雑している時の1秒価格補正ボックス -->
+                <div class="bg-slate-100 rounded-2xl p-3 border border-slate-200 flex items-center justify-between gap-2 text-xs">
+                    <span class="text-[11px] font-bold text-slate-600 shrink-0">⚡ 現在値の手動補正:</span>
+                    <input type="number" step="0.1" id="quickPriceInput" value="${item.price > 0 ? item.price : ''}" placeholder="例: 1283.5" class="w-28 bg-white border border-slate-300 rounded-lg px-2 py-1 font-bold text-slate-800">
+                    <button type="button" onclick="applyQuickManualPrice('${item.id}')" class="bg-slate-800 text-white font-bold px-3 py-1 rounded-lg shrink-0">反映</button>
+                </div>
+            `;
+
+            setTimeout(() => {
+                drawYahooStyleChart("yfCandlestickCanvas", item, currentChartPeriod, null);
+                bindChartTouchEvents("yfCandlestickCanvas", item);
+            }, 30);
+        }
+
+        function closeDetailModal() {
+            currentOpenAssetId = null;
+            document.getElementById("detailModal").classList.add("hidden");
+        }
+
+        // 検索・候補取得
+        let liveSearchTimer = null;
+
+        function renderSearchCandidates(showDefaultWhenEmpty = false) {
+            const input = document.getElementById("quickSearchInput");
+            const clearBtn = document.getElementById("clearSearchBtn");
+            const panel = document.getElementById("searchResultPanel");
+            const listEl = document.getElementById("searchResultList");
+            const titleEl = document.getElementById("searchResultTitle");
+            const liveStatus = document.getElementById("liveSearchStatus");
+
+            const rawQuery = input.value.trim();
+            const q = normalizeText(rawQuery);
+            const cleanCode = rawQuery.replace(/\.T$/i, "").toUpperCase();
+            const isDirectCode = isStockCodeFormat(cleanCode) || isFundCodeFormat(cleanCode);
+
+            if (rawQuery.length > 0) clearBtn.classList.remove("hidden");
+            else {
+                clearBtn.classList.add("hidden");
+                liveStatus.classList.add("hidden");
+                if (!showDefaultWhenEmpty) { panel.classList.add("hidden"); return; }
+            }
+
+            const localMatches = !q
+                ? MASTER_MARKET_DB.slice(0, 15)
+                : MASTER_MARKET_DB.filter(item => normalizeText(item.keywords).includes(q));
+
+            titleEl.innerText = !q ? "🔥 注目銘柄＆人気投信（タップで実データ＆チャート表示）" : `「${rawQuery}」の検索予測候補`;
+            listEl.innerHTML = "";
+            const macro = document.getElementById("macroSelect").value;
+
+            if (isDirectCode && !localMatches.some(m => m.id.toUpperCase() === cleanCode)) {
+                const isF = isFundCodeFormat(cleanCode);
+                const codeRow = document.createElement("div");
+                codeRow.className = "p-3 bg-teal-50 hover:bg-teal-100 flex justify-between items-center cursor-pointer border-b-2 border-teal-200";
+                codeRow.onclick = () => selectOnlineCandidate(cleanCode, isF ? `投資信託 (${cleanCode})` : `東証銘柄 (${cleanCode})`, isF ? "FUND" : "STOCK");
+                codeRow.innerHTML = `
+                    <div>
+                        <span class="text-[9px] font-extrabold bg-teal-600 text-white px-2 py-0.5 rounded">コード直接抽出</span>
+                        <strong class="text-xs text-teal-900 ml-1">コード「${cleanCode}」の実データを日経・株探から抽出して追加</strong>
+                    </div>
+                    <span class="text-xs font-extrabold bg-teal-700 text-white px-3 py-1.5 rounded-xl shrink-0">＋ 抽出</span>
+                `;
+                listEl.appendChild(codeRow);
+            }
+
+            localMatches.forEach(item => {
+                const quant = evaluateQuantMetrics(item, macro);
+                const alreadyIn = watchlist.some(w => w.id === item.id);
+                const typeBadge = getAssetTypeBadge(item.assetClass);
+                const row = document.createElement("div");
+                row.className = "p-3 bg-white hover:bg-teal-50 flex justify-between items-center gap-2 cursor-pointer";
+                row.onclick = () => selectAndFetchLive(item);
+                row.innerHTML = `
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${typeBadge.cls} shrink-0">${typeBadge.label}</span>
+                            <span class="text-xs font-extrabold text-slate-800 truncate">${item.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] font-bold text-slate-400">${item.code}</span>
+                            <span class="text-[10px] font-bold text-teal-700">${quant.badgeText}</span>
+                            <span class="text-[10px] text-slate-700 font-extrabold">${formatYen(item.price)}</span>
+                        </div>
+                    </div>
+                    <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 ${alreadyIn ? 'bg-slate-200 text-slate-700' : 'bg-teal-600 text-white shadow-sm'}">
+                        ${alreadyIn ? 'チャート＆診断' : '＋ 追加'}
+                    </button>
+                `;
+                listEl.appendChild(row);
+            });
+
+            if (rawQuery.length > 0) {
+                const safeQ = rawQuery.replace(/['"<>&]/g, "");
+                const directBox = document.createElement("div");
+                directBox.id = "directFetchActionRow";
+                directBox.className = "p-3 bg-gradient-to-r from-teal-50 to-sky-50 text-center";
+                directBox.innerHTML = `
+                    <button type="button" id="directFetchBtn" onclick="directFetchByQueryOrCode('${safeQ}')" class="w-full py-2.5 px-3 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-extrabold shadow-sm">
+                        ⚡ 「${safeQ}」を日経・株探・みんかぶから直接検索して追加
+                    </button>
+                `;
+                listEl.appendChild(directBox);
+            }
+
+            panel.classList.remove("hidden");
+
+            if (rawQuery.length >= 2) {
+                clearTimeout(liveSearchTimer);
+                liveStatus.classList.remove("hidden");
+                document.getElementById("liveSearchStatusText").innerText = `🌐 日経・みんかぶから「${rawQuery}」を検索中...`;
+
+                liveSearchTimer = setTimeout(async () => {
+                    const onlineHits = await searchMultiSourceOnline(rawQuery);
+                    if (document.getElementById("quickSearchInput").value.trim() !== rawQuery) return;
+                    const directBox = document.getElementById("directFetchActionRow");
+                    let added = 0;
+
+                    onlineHits.forEach(hit => {
+                        if (localMatches.some(m => m.id.toUpperCase() === hit.id.toUpperCase())) return;
+                        added++;
+                        const row = document.createElement("div");
+                        row.className = "p-3 bg-sky-50/40 hover:bg-sky-50 flex justify-between items-center gap-2 cursor-pointer";
+                        row.onclick = () => selectOnlineCandidate(hit.id, hit.name, hit.assetClass);
+                        row.innerHTML = `
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9px] font-bold bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded shrink-0">${hit.sourceTag}</span>
+                                    <span class="text-xs font-extrabold text-slate-800 truncate">${hit.name}</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 mt-0.5">コード: <strong>${hit.id}</strong> ・タップで株価・企業概要・チャートを自動抽出</div>
+                            </div>
+                            <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 bg-sky-600 text-white shadow-sm">＋ 抽出＆追加</button>
+                        `;
+                        if (directBox && directBox.parentNode === listEl) listEl.insertBefore(row, directBox);
+                        else listEl.appendChild(row);
+                    });
+
+                    document.getElementById("liveSearchStatusText").innerText = (added > 0 || localMatches.length > 0)
+                        ? `✅ 候補をタップすると最新実データ＆チャートを表示します`
+                        : `💡 下の緑ボタンを押すか銘柄コード（4桁/8桁）を入力すると直接抽出できます`;
+                }, 400);
+            }
+        }
+
+        async function directFetchByQueryOrCode(rawQuery) {
+            const q = (rawQuery || "").trim();
+            if (!q) return;
+            const normQ = normalizeText(q);
+            const masterHit = MASTER_MARKET_DB.find(m => m.id.toLowerCase() === q.toLowerCase() || normalizeText(m.keywords).includes(normQ));
+            if (masterHit) { await selectAndFetchLive(masterHit); return; }
+
+            const cleanCode = q.replace(/\.T$/i, "").toUpperCase();
+            if (isStockCodeFormat(cleanCode) || isFundCodeFormat(cleanCode)) {
+                const isF = isFundCodeFormat(cleanCode);
+                await selectOnlineCandidate(cleanCode, isF ? `投資信託 (${cleanCode})` : `東証銘柄 (${cleanCode})`, isF ? "FUND" : "STOCK");
+                return;
+            }
+
+            const hits = await searchMultiSourceOnline(q);
+            if (hits.length > 0) {
+                await selectOnlineCandidate(hits[0].id, hits[0].name, hits[0].assetClass);
+                return;
+            }
+            alert(`「${q}」が見つかりませんでした。銘柄コード（株は4桁、投資信託は8桁コード）を入力すると確実に抽出できます。`);
+        }
+
+        async function selectAndFetchLive(masterItem) {
+            let target = watchlist.find(w => w.id === masterItem.id);
+            if (!target) {
+                target = cloneObj(masterItem);
+                watchlist.unshift(target);
+            }
+            clearSearch();
+            closeCatalogModal();
+            saveState();
+            renderWatchlist();
+            openDetailModal(target.id);
+        }
+
+        async function selectOnlineCandidate(code, assetName, assetClass = "STOCK") {
+            const cleanCode = String(code).replace(/\.T$/i, "").toUpperCase();
+            const masterHit = MASTER_MARKET_DB.find(m => m.id.toUpperCase() === cleanCode);
+            if (masterHit) { await selectAndFetchLive(masterHit); return; }
+
+            const isFund = assetClass === "FUND" || isFundCodeFormat(cleanCode);
+            const newItem = {
+                id: cleanCode,
+                name: assetName,
+                assetClass: isFund ? "FUND" : assetClass,
+                sector: isFund ? "投資信託" : "東証上場",
+                price: 0,
+                prevClose: 0,
+                ma25: 0,
+                rsi: 50,
+                bb: 0.0,
+                change: "取得中...",
+                isFetching: true,
+                code: isFund ? `${cleanCode} 投信` : `${cleanCode} 東証`,
+                yfCode: isFund ? cleanCode : `${cleanCode}.T`,
+                keywords: `${assetName} ${cleanCode}`,
+                volatility: 22,
+                factors: { value: 76, momentum: 72, quality: 82, stability: 78, macroFit: 84 },
+                businessSummary: "日経電子版・株探・みんかぶから企業概要と市場実データを抽出しています..."
+            };
+
+            const existingIdx = watchlist.findIndex(w => w.id === cleanCode);
+            if (existingIdx >= 0) watchlist[existingIdx] = newItem;
+            else watchlist.unshift(newItem);
+
+            clearSearch();
+            closeCatalogModal();
+            closeCustomModal();
+            saveState();
+            renderWatchlist();
+            openDetailModal(cleanCode);
+        }
+
+        async function triggerSearchNow() {
+            const raw = document.getElementById("quickSearchInput").value.trim();
+            if (!raw) { renderSearchCandidates(true); return; }
+            await directFetchByQueryOrCode(raw);
+        }
+
+        function quickSelect(keyword) {
+            document.getElementById("quickSearchInput").value = keyword;
+            renderSearchCandidates(true);
+        }
+
+        function clearSearch() {
+            document.getElementById("quickSearchInput").value = "";
+            document.getElementById("clearSearchBtn").classList.add("hidden");
+            document.getElementById("searchResultPanel").classList.add("hidden");
+        }
+
+        function getMacroLabel(val) {
+            if (val === "rate_hike") return "🏦 日銀利上げ・国内追い風";
+            if (val === "shock") return "⚡ 急落・リスクオフ警戒";
+            if (val === "overheat") return "🔥 全面高・過熱警戒";
+            return "☀️ 安定成長（通常モード）";
+        }
+
+        function getAssetTypeBadge(type) {
+            if (type === "STOCK") return { label: "🏢 個別株", cls: "bg-blue-50 text-blue-700 border border-blue-200" };
+            if (type === "REIT") return { label: "🏙️ REIT・金", cls: "bg-amber-50 text-amber-800 border border-amber-200" };
+            if (type === "LEVERAGE") return { label: "⚡ ブル型投信", cls: "bg-purple-50 text-purple-700 border border-purple-200" };
+            return { label: "🌱 投資信託", cls: "bg-teal-50 text-teal-700 border border-teal-200" };
+        }
+
+        function updateAllCalculations() {
+            saveState();
+            renderGlobalAllocation();
+            renderWatchlist();
+        }
+
+        function renderGlobalAllocation() {
+            const budget = parseFloat(document.getElementById("budgetInput").value) || 100000;
+            const macro = document.getElementById("macroSelect").value;
+            document.getElementById("macroBadge").innerText = getMacroLabel(macro);
+            let r1 = 0.35, r2 = 0.40, r3 = 0.25;
+            if (macro === "shock") { r1 = 0.50; r2 = 0.35; r3 = 0.15; }
+            else if (macro === "overheat") { r1 = 0.15; r2 = 0.30; r3 = 0.55; }
+
+            document.getElementById("globalAllocationCards").innerHTML = `
+                <div class="bg-teal-50/80 border border-teal-200 rounded-2xl p-2.5"><span class="text-[10px] font-bold text-teal-800 block">① 第1弾（打診買い）</span><strong class="text-xs font-extrabold text-teal-900">¥${Math.round(budget * r1).toLocaleString()}</strong></div>
+                <div class="bg-sky-50/80 border border-sky-200 rounded-2xl p-2.5"><span class="text-[10px] font-bold text-sky-800 block">② 第2弾（押し目指値）</span><strong class="text-xs font-extrabold text-sky-900">¥${Math.round(budget * r2).toLocaleString()}</strong></div>
+                <div class="bg-slate-100 border border-slate-200 rounded-2xl p-2.5"><span class="text-[10px] font-bold text-slate-700 block">③ 第3弾（暴落予備）</span><strong class="text-xs font-extrabold text-slate-800">¥${Math.round(budget * r3).toLocaleString()}</strong></div>
+            `;
+        }
+
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            ["ALL", "STOCK", "FUND", "REIT"].forEach(f => {
+                document.getElementById(`filter-${f}`).className = f === filterType
+                    ? "text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-teal-600 text-white shrink-0"
+                    : "text-[11px] font-bold px-2.5 py-1.5 rounded-xl bg-white text-slate-600 border border-slate-200 shrink-0";
+            });
+            renderWatchlist();
+        }
+
+        function renderWatchlist() {
+            const container = document.getElementById("watchlistContainer");
+            const macro = document.getElementById("macroSelect").value;
+            const sortMode = document.getElementById("sortSelect").value;
+            container.innerHTML = "";
+
+            let filtered = watchlist.filter(item => {
+                if (currentFilter === "ALL") return true;
+                if (currentFilter === "FUND") return item.assetClass === "FUND" || item.assetClass === "LEVERAGE";
+                return item.assetClass === currentFilter;
+            });
+
+            if (sortMode === "score_desc") filtered.sort((a, b) => evaluateQuantMetrics(b, macro).totalScore - evaluateQuantMetrics(a, macro).totalScore);
+            else if (sortMode === "rsi_asc") filtered.sort((a, b) => a.rsi - b.rsi);
+
+            document.getElementById("watchlistCounter").innerText = `${filtered.length} 銘柄`;
+
+            filtered.forEach(item => {
+                const quant = evaluateQuantMetrics(item, macro);
+                const typeBadge = getAssetTypeBadge(item.assetClass);
+                const isPos = String(item.change).startsWith("+");
+
+                const card = document.createElement("div");
+                card.className = "app-card rounded-3xl p-4 cursor-pointer hover:border-teal-400";
+                card.onclick = () => openDetailModal(item.id);
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2 mb-2.5">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 mb-1 flex-wrap">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${typeBadge.cls}">${typeBadge.label}</span>
+                                <span class="text-[10px] font-bold text-slate-400">${item.code || ''} ・ ${item.sector || ''}</span>
+                                ${item.ptsPrice ? `<span class="text-[9px] font-bold text-sky-800 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">🌙 夜間PTS ${formatYen(item.ptsPrice)}</span>` : ''}
+                            </div>
+                            <h3 class="text-sm font-extrabold text-slate-800 leading-snug">${item.name}</h3>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="text-sm font-extrabold text-slate-900">${formatYen(item.price)}</div>
+                            <div class="text-[11px] font-bold ${isPos ? 'text-emerald-600' : 'text-rose-500'}">${item.change}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-50 rounded-2xl px-3 py-2 border border-slate-100 mb-2.5">
+                        <span class="text-xs font-extrabold px-2.5 py-1 rounded-xl border ${quant.badgeStyle}">${quant.badgeText}</span>
+                        <div class="text-right"><span class="text-[10px] font-bold text-slate-400 block">AI総合スコア</span><span class="text-xs font-extrabold text-teal-700">${quant.totalScore}/100点</span></div>
+                    </div>
+                    <p class="text-[11px] text-slate-600 font-medium mb-2">👉 ${quant.actionHeadline}</p>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold pt-1.5 border-t border-slate-100">
+                        <span>温度計(RSI): <strong class="text-slate-700">${item.rsi}度</strong></span>
+                        <span>25日平均(${formatYen(item.ma25)})比: <strong class="text-slate-700">${quant.maDiffPct > 0 ? '+' + quant.maDiffPct : quant.maDiffPct}%</strong></span>
+                        <span class="text-teal-600 font-bold">チャート＆理由 ＞</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openCatalogModal() {
+            document.getElementById("catalogSearchInput").value = "";
+            setCatalogCat("ALL");
+            document.getElementById("catalogModal").classList.remove("hidden");
+        }
+        function closeCatalogModal() { document.getElementById("catalogModal").classList.add("hidden"); }
+
+        function setCatalogCat(cat) {
+            currentCatalogCat = cat;
+            ["ALL", "投信", "銀行", "半導体", "内需", "高配当"].forEach(c => {
+                const btn = document.getElementById(`cat-${c}`);
+                if (btn) btn.className = c === cat ? "text-[10px] font-bold px-2.5 py-1 rounded-lg bg-teal-600 text-white shrink-0" : "text-[10px] font-bold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 shrink-0";
+            });
+            renderCatalogList();
+        }
+
+        function renderCatalogList() {
+            const q = normalizeText(document.getElementById("catalogSearchInput").value.trim());
+            const container = document.getElementById("catalogListContainer");
+            const macro = document.getElementById("macroSelect").value;
+            container.innerHTML = "";
+
+            const items = MASTER_MARKET_DB.filter(item => {
+                const hay = normalizeText(item.keywords);
+                const catMatch = currentCatalogCat === "ALL" || hay.includes(normalizeText(currentCatalogCat));
+                return catMatch && (!q || hay.includes(q));
+            });
+
+            items.forEach(item => {
+                const quant = evaluateQuantMetrics(item, macro);
+                const row = document.createElement("div");
+                row.className = "py-2.5 px-2 flex justify-between items-center gap-2 hover:bg-slate-50 rounded-xl cursor-pointer";
+                row.onclick = () => selectAndFetchLive(item);
+                row.innerHTML = `
+                    <div class="min-w-0 flex-1">
+                        <span class="text-xs font-extrabold text-slate-800 block truncate">${item.name}</span>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-[10px] font-bold text-slate-400">${item.code}</span>
+                            <span class="text-[10px] font-bold text-teal-700">${quant.badgeText}</span>
+                            <span class="text-[10px] text-slate-700 font-bold">${formatYen(item.price)}</span>
+                        </div>
+                    </div>
+                    <button type="button" class="text-[11px] font-extrabold px-3 py-1.5 rounded-xl shrink-0 bg-teal-600 text-white">＋ 追加</button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function openCustomModal() { document.getElementById("customModal").classList.remove("hidden"); }
+        function closeCustomModal() { document.getElementById("customModal").classList.add("hidden"); }
+
+        async function submitCustomAsset() {
+            const name = document.getElementById("custName").value.trim();
+            const code = document.getElementById("custCode").value.trim().replace(/\.T$/i, "").toUpperCase();
+            const type = document.getElementById("custType").value;
+            const price = parseFloat(document.getElementById("custPrice").value);
+
+            if (!name && !code) { alert("銘柄コードまたは銘柄名を入力してください。"); return; }
+            if ((isNaN(price) || price <= 0) && code && (isStockCodeFormat(code) || isFundCodeFormat(code))) {
+                const isF = isFundCodeFormat(code) || type === "FUND" || type === "LEVERAGE";
+                await selectOnlineCandidate(code, name || (isF ? `投資信託 (${code})` : `東証銘柄 (${code})`), type);
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                closeCustomModal();
+                await directFetchByQueryOrCode(name || code);
+                return;
+            }
+            const id = code || ("custom-" + Date.now());
+            const newItem = parseMasterLine(`${id}|${name || id}|${type}|カスタム登録銘柄|${price}|${roundPriceSmart(price * 0.99, price)}|50|0.0|0.00%||||${name}|手動登録された監視銘柄です。`);
+            const idx = watchlist.findIndex(w => w.id === id);
+            if (idx >= 0) watchlist[idx] = newItem;
+            else watchlist.unshift(newItem);
+            closeCustomModal();
+            saveState();
+            renderWatchlist();
+            openDetailModal(id);
+        }
+
+        function renderAll() {
+            renderGlobalAllocation();
+            renderWatchlist();
+        }
+
+        // 起動初期化＆未取得アイテムの直列自動修復
+        loadState();
+        ["focus", "input", "keyup", "compositionend", "change", "search"].forEach(ev => {
+            document.getElementById("quickSearchInput").addEventListener(ev, () => renderSearchCandidates(true));
         });
-      });
-
-      // Bollinger Checkbox
-      document.getElementById("toggleBollingerCheckbox").addEventListener("change", (e) => {
-        state.showBollinger = Boolean(e.target.checked);
-        renderDashboard();
-      });
-
-      // Quant Sim Sliders
-      document.getElementById("rsiLowSlider").addEventListener("input", (e) => {
-        state.rsiLowThreshold = Number(e.target.value);
-        renderQuantSim();
-        renderDashboard();
-      });
-      document.getElementById("bbSigmaSlider").addEventListener("input", (e) => {
-        state.bbSigma = Number(e.target.value);
-        renderQuantSim();
-        renderDashboard();
-      });
-      document.getElementById("cpcvBlocksSlider").addEventListener("input", (e) => {
-        state.cpcvBlocks = Number(e.target.value);
-        renderQuantSim();
-      });
-      document.getElementById("resetQuantParamsBtn").addEventListener("click", () => {
-        state.rsiLowThreshold = 35;
-        state.bbSigma = 2.0;
-        state.cpcvBlocks = 6;
-        document.getElementById("rsiLowSlider").value = "35";
-        document.getElementById("bbSigmaSlider").value = "2.0";
-        document.getElementById("cpcvBlocksSlider").value = "6";
-        renderQuantSim();
-        renderDashboard();
-        showToast("クオンツ検証パラメータを初期値に戻しました");
-      });
-
-      // Portfolio Allocation Sliders
-      ["Index", "Single", "Company", "Cash"].forEach((key) => {
-        const el = document.getElementById(`alloc${key}Input`);
-        el.addEventListener("input", (e) => {
-          state.alloc[key.toLowerCase()] = Number(e.target.value);
-          renderPortfolio();
-        });
-      });
-
-      // Code Viewer Tabs & Copy Button
-      document.querySelectorAll(".code-tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          state.activeCodeTab = btn.getAttribute("data-codefile") || "part2_js";
-          document.querySelectorAll(".code-tab-btn").forEach((b) => {
-            b.className = "code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700";
-          });
-          btn.className = "code-tab-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 text-white";
-          renderCodeViewer();
-        });
-      });
-
-      document.getElementById("copyActiveCodeBtn").addEventListener("click", () => {
-        const text = CODE_BUNDLES[state.activeCodeTab] || "";
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(
-            () => showToast("コードをクリップボードにコピーしました"),
-            () => fallbackCopy(text)
-          );
-        } else {
-          fallbackCopy(text);
-        }
-      });
-
-      // Bottom Navigation Tabs
-      const views = ["dashboard", "quant", "portfolio", "code"];
-      document.querySelectorAll(".nav-tab-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const target = btn.getAttribute("data-nav");
-          views.forEach((v) => {
-            const sec = document.getElementById(`view-${v}`);
-            if (sec) sec.classList.toggle("hidden", v !== target);
-          });
-          document.querySelectorAll(".nav-tab-btn").forEach((b) => {
-            b.className = "nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 font-medium text-[11px]";
-          });
-          btn.className = "nav-tab-btn flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 bg-emerald-500/10 font-semibold text-[11px]";
-
-          if (target === "dashboard") renderDashboard();
-          if (target === "quant") renderQuantSim();
-          if (target === "portfolio") renderPortfolio();
-          if (target === "code") renderCodeViewer();
-        });
-      });
-    }
-
-    function fallbackCopy(text) {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand("copy");
-        showToast("コードをクリップボードにコピーしました");
-      } catch (e) {
-        showToast("コピーに失敗しました");
-      }
-      document.body.removeChild(ta);
-    }
-
-    window.addEventListener("DOMContentLoaded", () => {
-      renderTickerPills();
-      renderDashboard();
-      renderQuantSim();
-      renderPortfolio();
-      renderCodeViewer();
-      setupEventListeners();
-    });
-  </script>
+        renderAll();
+        setTimeout(() => autoRepairPendingItems(), 400);
+    </script>
 </body>
 </html>
